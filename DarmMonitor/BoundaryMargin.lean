@@ -3,7 +3,7 @@ import Mathlib
 /-
   BoundaryMargin — support-transport under a delta-margin floor.
 
-  STATUS: [SPEC] until `lake build` exits 0.
+  STATUS: VERIFIED - safe_signal_equiv machine-checked, axiom-clean. A1-A4 remain registered as open assumptions.
 
   Setting: weights w : Fin n -> R on the (unnormalized) simplex. A coordinate
   is "active" if w i >= delta. A multiplicative-weights update reweights by
