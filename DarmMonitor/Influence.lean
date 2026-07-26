@@ -238,3 +238,12 @@ theorem core_integrity_does_not_imply_noninterference :
   O3. Everything about real human ratifiers. Out of scope by construction. -/
 
 end DARM.A4
+
+#print axioms DARM.A4.agentStep_preserves_core
+#print axioms DARM.A4.agent_trace_preserves_core
+#print axioms DARM.A4.core_unchanged_under_agent_events
+#print axioms DARM.A4.not_noninterfering_all
+#print axioms DARM.A4.not_noninterfering_from_neutral
+#print axioms DARM.A4.noninterferingAll_iff_constant_on_image
+#print axioms DARM.A4.noninterferingFrom_iff_constant_on_reachable_image
+#print axioms DARM.A4.core_integrity_does_not_imply_noninterference
