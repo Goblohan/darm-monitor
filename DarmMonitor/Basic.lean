@@ -210,3 +210,11 @@ theorem policy_monotone_absorbing
       exact h_rest.trans h_step
 
 end Lemmas
+
+#print axioms step_preserves_capInvariant
+#print axioms step_agent_policy_monotone
+#print axioms unauthorized_execution_is_blocked
+#print axioms authorized_execution_records
+#print axioms suspension_is_irreversible_under_agent_events
+#print axioms suspended_absorbing
+#print axioms policy_monotone_absorbing
