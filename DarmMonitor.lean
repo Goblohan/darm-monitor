@@ -2,3 +2,6 @@ import DarmMonitor.Basic
 import DarmMonitor.Influence
 import DarmMonitor.BoundaryMargin
 import DarmMonitor.StrictExpansion
+import DarmMonitor.SemanticQuotient
+import DarmMonitor.SemanticExpansion
+import DarmMonitor.NontrivialExpansion
