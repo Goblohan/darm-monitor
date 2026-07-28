@@ -5,3 +5,4 @@ import DarmMonitor.StrictExpansion
 import DarmMonitor.SemanticQuotient
 import DarmMonitor.SemanticExpansion
 import DarmMonitor.NontrivialExpansion
+import DarmMonitor.Reachability
