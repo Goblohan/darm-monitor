@@ -22,11 +22,26 @@ import DarmMonitor.Influence
 
   STATUS OF THE FOUR:
 
-    A2  FORMALIZED HERE, with necessity proved.
-        Not the boundedness condition the Atlas proposes — that hypothesis
-        appears nowhere in the kernel. The condition that is actually
-        load-bearing, and already present ad hoc in six modules as `hZ`/`hw`,
-        is non-negativity with positive total mass.
+  NUMBERING — CORRECTED. An earlier version of this module labelled the
+  weight condition "A2". That collided: `Basic.lean` has registered A1–A4
+  since the first commit, and its A2 is the EXTERNAL CAPABILITY BOUND, not a
+  condition on weights. `Basic.lean`'s registry is canonical here; the
+  Dependency Atlas renumbers A1 and A2 and is the document that must be
+  amended. The weight condition is therefore A5 — a fifth assumption that
+  appeared in no registry, though six modules already carry it inline as
+  `hZ`/`hw`.
+
+    A1  FORMALIZED HERE (section 3). Token unforgeability, per `Basic.lean`.
+        Not the Atlas's `DecidableEq CapId`, which is vacuous: `Classical.dec`
+        supplies it for every type, so no drop-countermodel can exist.
+
+    A2  NOT IN THIS MODULE. The external capability bound is now behaviourally
+        real via the gating in `Basic.lean`; its content is Lemma 7,
+        `execution_confined_by_cap_bound`.
+
+    A5  FORMALIZED HERE (section 1), with necessity proved. Non-negativity
+        with positive total mass — the precondition the continuous stratum
+        actually runs on.
 
     A4  FORMALIZED HERE, as a condition rather than a property.
         The Atlas states A4 as "causal isolation holds", but Influence.lean
@@ -37,10 +52,6 @@ import DarmMonitor.Influence
         useful property. Dropped: the Atlas's probabilistic phrasing
         P(S' | Obs, Latent) = P(S' | Obs). Nothing in this development is
         probabilistic; the noninterference here is deterministic constancy.
-
-    A1  PROVISIONAL — see section 3. `DecidableEq CapId` is vacuous, since
-        `Classical.dec` supplies it for every type, so no drop-countermodel
-        can exist and no A1 necessity cell is provable as stated.
 
     A3  NOT AN ASSUMPTION. `step : State → Event → State` being a function
         already encodes determinism and serialization. There is nothing to
@@ -54,39 +65,39 @@ namespace Assumptions
 
 open DARM.Boundary
 
-/-! ## 1. A2 — Well-formed weight vectors
+/-! ## 1. A5 — Well-formed weight vectors
 
   The measure-theoretic precondition for the continuous stratum: mass is
   non-negative and the total is strictly positive. -/
 
-/-- **A2.** Weights are non-negative and carry positive total mass. -/
+/-- **A5.** Weights are non-negative and carry positive total mass. -/
 structure WellFormedWeights {n : ℕ} (w : Fin n → ℝ) : Prop where
   nonneg : ∀ i, 0 ≤ w i
   massPos : 0 < Z w
 
-/-- A2 is satisfiable. -/
-theorem A2_satisfiable : ∃ w : Fin 1 → ℝ, WellFormedWeights w := by
+/-- A5 is satisfiable. -/
+theorem A5_satisfiable : ∃ w : Fin 1 → ℝ, WellFormedWeights w := by
   refine ⟨fun _ => 1, ⟨fun i => by norm_num, ?_⟩⟩
   simp [Z]
 
-/-- The capacity bound of `Reachability`, restated as a consequence of A2.
+/-- The capacity bound of `Reachability`, restated as a consequence of A5.
     This is the re-parameterization pattern: the assumption is now an object
     the theorem depends on, not a remark. -/
-theorem capacity_bound_of_A2
+theorem capacity_bound_of_A5
     {n : ℕ} (δ : ℝ) (v : Fin n → ℝ) (h : WellFormedWeights v) :
     ((active δ (DARM.Boundary.normalize v (Z v))).card : ℝ) * δ ≤ 1 :=
   DARM.Reachability.active_card_mul_delta_le_one δ v h.nonneg h.massPos
 
-/-- **A2 necessity — the non-negativity half is load-bearing.**
+/-- **A5 necessity — the non-negativity half is load-bearing.**
 
     Dropping `nonneg` while keeping `massPos` breaks the capacity bound.
     Witness: `v = (10, 10, 10, -29)` has total mass exactly 1, so the negative
     coordinate cancels the surplus and three coordinates sit far above the
     margin floor `δ = 1/2`. The bound would require `3 * (1/2) ≤ 1`.
 
-    This is what makes A2 a real assumption rather than bookkeeping: there is
+    This is what makes A5 a real assumption rather than bookkeeping: there is
     a model where it fails and the theorem fails with it. -/
-theorem A2_nonneg_necessary :
+theorem A5_nonneg_necessary :
     ∃ (δ : ℝ) (v : Fin 4 → ℝ),
       0 < Z v ∧
       1 < ((active δ (DARM.Boundary.normalize v (Z v))).card : ℝ) * δ := by
@@ -145,38 +156,68 @@ theorem A4_fails_for_modelled_channel :
     ¬ CausallyIsolated .neutral DARM.A4.obs DARM.A4.ratify :=
   DARM.A4.not_noninterfering_from_neutral
 
-/-! ## 3. A1 — provisional
+/-! ## 3. A1 — Token unforgeability
 
-  `DecidableEq CapId` cannot serve as an assumption in a minimality calculus:
-  `Classical.dec` provides it for every type, so it holds in every model and
-  no drop-countermodel exists.
+  `Basic.lean`'s A1: `validToken` is opaque, and nothing in the kernel shows
+  the agent cannot produce a token satisfying it. Formalized as the existence
+  of at least one invalid token — the minimal condition under which
+  "authentication" distinguishes anything. -/
 
-  Two honest replacements, neither yet formalized:
+/-- **A1.** Not every token is accepted. -/
+def TokenUnforgeable {Token : Type} (validToken : Token → Prop) : Prop :=
+  ∃ t, ¬ validToken t
 
-    (a) TOKEN NON-TRIVIALITY: `∃ t, ¬ validToken t`. Non-vacuous and
-        droppable. The drop-countermodel already exists in the kernel —
-        `Ratification.ratification_breaks_coherence` uses `fun _ => True`,
-        i.e. a token predicate satisfying nothing. Cheap, but thin as a
-        formalization of "unforgeability".
+/-- A1 is satisfiable. -/
+theorem A1_satisfiable : TokenUnforgeable (fun b : Bool => b = true) :=
+  ⟨false, by simp⟩
 
-    (b) CAPABILITY GATING: make `cap` causally live by having
-        `allowedActions` intersect with capability-derived actions. This is
-        the substantive version, and it would simultaneously fix a known
-        defect: `cap` is currently written by `step` and read by nothing, so
-        `step_preserves_capInvariant` constrains state that has no effect on
-        behaviour. Requires editing `Basic.lean` and re-earning its seven
-        axiom traces.
+/-- A1 fails for the trivial predicate `fun _ => True`, which is exactly the
+    one `Ratification.ratification_breaks_coherence` uses. -/
+theorem A1_fails_for_trivial_predicate :
+    ¬ TokenUnforgeable (fun _ : Unit => True) := by
+  rintro ⟨t, ht⟩
+  exact ht trivial
 
-  Open decision. Until it is made, no A1 column of the matrix is meaningful.
--/
+/-- **A1 is INDEPENDENT of coherence preservation — an "I" cell, proved.**
+
+    One might expect the ratification counterexample to be an artifact of the
+    degenerate token predicate. It is not. Here tokens are unforgeable (A1
+    holds, `false` is rejected) and the ratifier presents a genuinely valid
+    token — and coherence still breaks.
+
+    So the defect is in policy semantics, not authentication. No strengthening
+    of A1 repairs it; only the guard of
+    `Ratification.guarded_ratification_preserves_coherence` does. -/
+theorem A1_insufficient_for_coherence :
+    ∃ (s : State Unit (Fin 1)) (δ : ℝ) (w : Fin 1 → ℝ)
+      (t : Bool) (p : Finset (Fin 1)),
+      TokenUnforgeable (fun b : Bool => b = true) ∧
+      (t = true) ∧
+      DARM.Composition.IsCoherent s δ w ∧
+      ¬ DARM.Composition.IsCoherent
+          (step (fun _ : Fin 1 => ()) (∅ : Finset Unit)
+            (fun b : Bool => b = true) s
+            (Event.authenticatedRatification t p)) δ w := by
+  refine ⟨{ cap := ∅, policy := ∅, opState := OpState.active, lastExecuted := none },
+          1, (fun _ => 0), true, {0}, A1_satisfiable, rfl, ?_, ?_⟩
+  · exact Finset.empty_subset _
+  · intro h
+    have hmem : (0 : Fin 1) ∈ active (1 : ℝ) (fun _ : Fin 1 => (0 : ℝ)) := by
+      apply h
+      simp [step]
+    simp only [active, Finset.mem_filter, Finset.mem_univ, true_and] at hmem
+    linarith
 
 /-! ## Registered status
 
-  DONE:    A2 formalized, satisfiable, and proved necessary for the capacity
-           bound. A4 formalized as a condition, shown satisfiable and shown
-           to fail for the modelled channel.
+  DONE:    A1 formalized, satisfiable, and proved INDEPENDENT of coherence
+           preservation. A2 discharged in `Basic.lean` via capability gating
+           (Lemma 7). A4 formalized as a condition, shown satisfiable and
+           shown to fail for the modelled channel. A5 formalized, satisfiable,
+           and proved necessary for the capacity bound.
+           A3 is not an assumption; see the header.
 
-  NEXT:    Re-parameterize the existing kernel theorems on A2 where they
+  NEXT:    Re-parameterize the existing kernel theorems on A5 where they
            currently carry `hZ`/`hw` inline — StratumComposition, all three
            Ratification results, both expansion witnesses. Mechanical, and it
            makes the A2 column of the matrix real.
@@ -190,8 +231,11 @@ theorem A4_fails_for_modelled_channel :
 end Assumptions
 end DARM
 
-#print axioms DARM.Assumptions.A2_satisfiable
-#print axioms DARM.Assumptions.capacity_bound_of_A2
-#print axioms DARM.Assumptions.A2_nonneg_necessary
+#print axioms DARM.Assumptions.A5_satisfiable
+#print axioms DARM.Assumptions.capacity_bound_of_A5
+#print axioms DARM.Assumptions.A5_nonneg_necessary
 #print axioms DARM.Assumptions.A4_satisfiable
 #print axioms DARM.Assumptions.A4_fails_for_modelled_channel
+#print axioms DARM.Assumptions.A1_satisfiable
+#print axioms DARM.Assumptions.A1_fails_for_trivial_predicate
+#print axioms DARM.Assumptions.A1_insufficient_for_coherence
