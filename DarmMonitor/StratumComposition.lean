@@ -61,6 +61,7 @@ def IsCoherent (s : State CapId (Fin n)) (δ : ℝ) (w : Fin n → ℝ) : Prop :
     active(t+1) is recovered. The claim is one-directional: the continuous
     layer drops nothing the discrete layer permitted. -/
 theorem coherence_preserved_under_agent_event
+    (requires : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId (Fin n)) (e : Event CapId (Fin n) Token)
@@ -69,11 +70,11 @@ theorem coherence_preserved_under_agent_event
     (hZ : 0 < Z (reweight η loss w))
     (hsafe : is_safe_signal_Z δ η loss w)
     (hcoh : IsCoherent s δ w) :
-    IsCoherent (step allowedCapLimit validToken s e) δ
+    IsCoherent (step requires allowedCapLimit validToken s e) δ
       (normalize (reweight η loss w) (Z (reweight η loss w))) := by
   unfold IsCoherent at hcoh ⊢
-  have h_shrink : (step allowedCapLimit validToken s e).policy ⊆ s.policy :=
-    step_agent_policy_monotone allowedCapLimit validToken s e hAgent
+  have h_shrink : (step requires allowedCapLimit validToken s e).policy ⊆ s.policy :=
+    step_agent_policy_monotone requires allowedCapLimit validToken s e hAgent
   have h_transport : active δ w
       ⊆ active δ (normalize (reweight η loss w) (Z (reweight η loss w))) :=
     transportSupp δ η loss w hZ hsafe
@@ -83,13 +84,14 @@ theorem coherence_preserved_under_agent_event
     Stated separately because `externalSuspend` is not an agent event and so
     is not covered by the theorem above. -/
 theorem coherence_preserved_under_suspend
+    (requires : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId (Fin n))
     (δ η : ℝ) (loss w : Fin n → ℝ)
     (hZ : 0 < Z (reweight η loss w))
     (hsafe : is_safe_signal_Z δ η loss w) :
-    IsCoherent (step allowedCapLimit validToken s Event.externalSuspend) δ
+    IsCoherent (step requires allowedCapLimit validToken s Event.externalSuspend) δ
       (normalize (reweight η loss w) (Z (reweight η loss w))) := by
   unfold IsCoherent
   simp only [step]

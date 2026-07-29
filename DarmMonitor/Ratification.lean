@@ -47,7 +47,7 @@ theorem ratification_breaks_coherence :
       (t : Unit) (p : Finset (Fin 1)),
       IsCoherent s δ w ∧
       ¬ IsCoherent
-          (step (∅ : Finset Unit) (fun _ : Unit => True) s
+          (step (fun _ : Fin 1 => ()) (∅ : Finset Unit) (fun _ : Unit => True) s
             (Event.authenticatedRatification t p)) δ w := by
   refine ⟨{ cap := ∅, policy := ∅, opState := OpState.active, lastExecuted := none },
           1, (fun _ => 0), (), {0}, ?_, ?_⟩
@@ -73,6 +73,7 @@ def GuardedRatification (δ : ℝ) {n : ℕ} (w : Fin n → ℝ) (p : Finset (Fi
     reduces to this single predicate holding at each ratification event. -/
 theorem guarded_ratification_preserves_coherence
     {n : ℕ} {CapId Token : Type} [DecidableEq CapId] [DecidableEq Token]
+    (requires : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId (Fin n)) (t : Token) (p : Finset (Fin n))
@@ -80,7 +81,7 @@ theorem guarded_ratification_preserves_coherence
     (hcoh : IsCoherent s δ w)
     (hguard : GuardedRatification δ w p) :
     IsCoherent
-      (step allowedCapLimit validToken s (Event.authenticatedRatification t p)) δ w := by
+      (step requires allowedCapLimit validToken s (Event.authenticatedRatification t p)) δ w := by
   unfold IsCoherent at hcoh ⊢
   simp only [step]
   split
