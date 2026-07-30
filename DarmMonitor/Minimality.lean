@@ -33,6 +33,8 @@ import DarmMonitor.Assumptions
          -- this module
     N  actor e = Actor.agent for coherence preservation
          -- this module
+    NOT-N  massPos (A5, second half) for the capacity bound
+         -- this module; the hypothesis is droppable
 -/
 
 namespace DARM
@@ -152,13 +154,58 @@ theorem agent_hypothesis_necessary_for_coherence :
     rw [Z2, DARM.StrictExpansion.reweight_zero_eta] at hmem
     norm_num at hmem
 
-/-! ## Next cells, in order of expected cost
 
-  C3. Is `massPos` (the second half of A5) necessary for the capacity bound?
-      UNCLEAR, and possibly NO. If `Z = 0` then Lean's division gives
-      `normalize v 0 i = 0`, so for `δ > 0` the active set is empty and the
-      bound holds vacuously. If so this is a "not necessary" result, which is
-      worth recording precisely because it contradicts the natural guess.
+/-! ## C3 — the positive-mass hypothesis is NOT necessary -/
+
+/-- **Negative cell: `massPos` can be dropped from the capacity bound.**
+
+    `Reachability.active_card_mul_delta_le_one` assumes `0 < Z v`. It does not
+    need to. Given non-negativity, `Z v ≥ 0`, so the only case the hypothesis
+    excludes is `Z v = 0`, and there the bound holds anyway:
+
+      * `δ > 0`  — `normalize v 0 i = v i / 0 = 0`, so nothing clears the
+                   floor and the active set is empty;
+      * `δ ≤ 0`  — the product of a non-negative cardinality and a
+                   non-positive `δ` is at most 0.
+
+    So A5 splits: its non-negativity half is necessary
+    (`Assumptions.A5_nonneg_necessary`), its positive-mass half is not.
+
+    CAVEAT — READ BEFORE CITING. This depends on Lean's total division, where
+    `x / 0 = 0`. In ordinary mathematics `normalize v 0` is undefined and the
+    question does not arise. The honest reading is that `massPos` is not
+    needed *for this formalization*, not that positive mass is mathematically
+    irrelevant to normalization. Recorded as a cell because a minimality
+    matrix that silently carries an unnecessary hypothesis is overstating what
+    the theorem requires — but the reason it is unnecessary is a convention,
+    not a discovery. -/
+theorem massPos_not_necessary_for_capacity
+    {n : ℕ} (δ : ℝ) (v : Fin n → ℝ) (hv : ∀ i, 0 ≤ v i) :
+    ((active δ (DARM.Boundary.normalize v (Z v))).card : ℝ) * δ ≤ 1 := by
+  have hZnn : 0 ≤ Z v := by
+    simp only [Z]
+    exact Finset.sum_nonneg (fun i _ => hv i)
+  rcases hZnn.eq_or_lt with h | h
+  · -- degenerate case: total mass is zero
+    rw [← h]
+    by_cases hd : δ ≤ 0
+    · have hc : (0 : ℝ) ≤ ((active δ (DARM.Boundary.normalize v 0)).card : ℝ) :=
+        Nat.cast_nonneg _
+      nlinarith
+    · have hd' : 0 < δ := not_le.mp hd
+      have hempty : active δ (DARM.Boundary.normalize v 0) = ∅ := by
+        ext i
+        simp only [active, Finset.mem_filter, Finset.mem_univ, true_and,
+                   Finset.notMem_empty, iff_false]
+        unfold DARM.Boundary.normalize
+        rw [div_zero]
+        exact not_le.mpr hd'
+      rw [hempty]
+      simp
+  · -- the hypothesis actually held
+    exact DARM.Reachability.active_card_mul_delta_le_one δ v hv h
+
+/-! ## Next cells, in order of expected cost
 
   C4. A4 versus capability confinement. Blocked: `Influence.lean` and
       `Basic.lean` share no types, so there is no single model in which both
@@ -171,3 +218,4 @@ end DARM
 
 #print axioms DARM.Minimality.safety_necessary_for_transport
 #print axioms DARM.Minimality.agent_hypothesis_necessary_for_coherence
+#print axioms DARM.Minimality.massPos_not_necessary_for_capacity
