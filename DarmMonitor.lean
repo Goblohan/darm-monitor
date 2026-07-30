@@ -7,3 +7,4 @@ import DarmMonitor.StrictExpansion
 import DarmMonitor.NontrivialExpansion
 import DarmMonitor.Reachability
 import DarmMonitor.Assumptions
+import DarmMonitor.Minimality
