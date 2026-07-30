@@ -7,7 +7,11 @@ import Mathlib.Data.Set.Basic
 
   STATUS: [SPEC] until `lake build` exits 0.
 
-  This module addresses registered assumption A4 from DarmMonitor/Basic.lean:
+  A4 IS DISCHARGED IN DarmMonitor/Interference.lean. This module shares no
+types with Basic.lean; the earlier claim to address A4 was an analogy, not
+a reduction. Retained as a minimal example of the observation channel.
+Original claim followed: it addresses registered assumption A4 from
+DarmMonitor/Basic.lean:
   that nothing in the capability model bounds the agent's causal influence over
   whoever holds the ratification authority.
 
