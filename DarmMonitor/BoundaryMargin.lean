@@ -26,40 +26,48 @@ import Mathlib
     - equivalence carries a nonemptiness proof of the active set; the empty
       case is trivially safe and handled inside transportSupp.
 
-  SCOPE: finite-dimensional, no measure theory. Real-analysis over Fin n -> R.
+  SCOPE: finite-dimensional, no measure theory. Real analysis over an arbitrary
+  finite index type.
+
+  GENERALIZATION. The index type is an arbitrary `Fintype`, not `Fin n`. No proof
+  in this module used `Fin`-specific reasoning: every step is `le_div_iff₀`,
+  `linarith`, `Finset.le_inf'`, `inf'_le`, `mem_filter`, or a sum over `univ`.
+  So the O(n) -> O(1) collapse and support transport hold for any finite index
+  type, at any cardinality. Call sites at `Fin n` are unaffected — the instances
+  resolve automatically.
 -/
 
 namespace DARM.Boundary
 
 open Finset BigOperators
 
-variable {n : ℕ}
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- Unnormalized multiplicative-weights update. -/
-noncomputable def reweight (η : ℝ) (loss w : Fin n → ℝ) : Fin n → ℝ :=
+noncomputable def reweight (η : ℝ) (loss w : ι → ℝ) : ι → ℝ :=
   fun i => w i * Real.exp (-η * loss i)
 
 /-- Partition function: total reweighted mass. -/
-def Z (w' : Fin n → ℝ) : ℝ := ∑ j, w' j
+def Z (w' : ι → ℝ) : ℝ := ∑ j, w' j
 
 /-- Normalization by a supplied positive scalar. -/
-noncomputable def normalize (w' : Fin n → ℝ) (Zv : ℝ) : Fin n → ℝ :=
+noncomputable def normalize (w' : ι → ℝ) (Zv : ℝ) : ι → ℝ :=
   fun i => w' i / Zv
 
 /-- Active set: coordinates at or above the critical margin δ. -/
-noncomputable def active (δ : ℝ) (w : Fin n → ℝ) : Finset (Fin n) :=
+noncomputable def active (δ : ℝ) (w : ι → ℝ) : Finset ι :=
   univ.filter (fun i => δ ≤ w i)
 
 /-- The computable certificate the monitor evaluates: a single scalar bound.
     `δ * Z ≤ w'ᵢ` for every currently-active `i`, where `w' = reweight …`.
     (Stated in the cleared-denominator form `δ * Z ≤ w'ᵢ` to avoid division
     inside the predicate; equivalent to `Z ≤ w'ᵢ / δ` under `0 < δ`.) -/
-def is_safe_signal_Z (δ η : ℝ) (loss w : Fin n → ℝ) : Prop :=
+def is_safe_signal_Z (δ η : ℝ) (loss w : ι → ℝ) : Prop :=
   ∀ i ∈ active δ w, δ * Z (reweight η loss w) ≤ reweight η loss w i
 
 /-- The geometric floor invariant: after normalization, every previously-active
     coordinate is still ≥ δ. -/
-def is_safe_signal_post (δ η : ℝ) (loss w : Fin n → ℝ) : Prop :=
+def is_safe_signal_post (δ η : ℝ) (loss w : ι → ℝ) : Prop :=
   ∀ i ∈ active δ w,
     δ ≤ normalize (reweight η loss w) (Z (reweight η loss w)) i
 
@@ -67,7 +75,7 @@ def is_safe_signal_post (δ η : ℝ) (loss w : Fin n → ℝ) : Prop :=
     per-coordinate post-normalization floor. This is the O(n) → O(1) collapse:
     one inequality on `Z` captures the entire family of active-coordinate
     constraints. Requires `0 < Z` for the div/mul rearrangement. -/
-theorem safe_signal_equiv (δ η : ℝ) (loss w : Fin n → ℝ)
+theorem safe_signal_equiv (δ η : ℝ) (loss w : ι → ℝ)
     (hZ : 0 < Z (reweight η loss w)) :
     is_safe_signal_Z δ η loss w ↔ is_safe_signal_post δ η loss w := by
   unfold is_safe_signal_Z is_safe_signal_post normalize
@@ -88,7 +96,7 @@ theorem safe_signal_equiv (δ η : ℝ) (loss w : Fin n → ℝ)
     the monitor computes `Z` and one minimum, not `n` independent bounds.
     Holds when the active set is nonempty (otherwise the min is undefined and
     the constraint is vacuous — see `transportSupp`). -/
-theorem is_safe_signal_Z_iff_Z_le_min (δ η : ℝ) (loss w : Fin n → ℝ)
+theorem is_safe_signal_Z_iff_Z_le_min (δ η : ℝ) (loss w : ι → ℝ)
     (hδ : 0 < δ) (hne : (active δ w).Nonempty) :
     is_safe_signal_Z δ η loss w ↔
       Z (reweight η loss w)
@@ -111,7 +119,7 @@ theorem is_safe_signal_Z_iff_Z_le_min (δ η : ℝ) (loss w : Fin n → ℝ)
     every coordinate active before the step is active after. Not equality —
     a previously-inactive coordinate may cross above δ (resurrection allowed).
     The empty active set is trivially preserved. -/
-theorem transportSupp (δ η : ℝ) (loss w : Fin n → ℝ)
+theorem transportSupp (δ η : ℝ) (loss w : ι → ℝ)
     (hZ : 0 < Z (reweight η loss w))
     (hsafe : is_safe_signal_Z δ η loss w) :
     active δ w ⊆ active δ (normalize (reweight η loss w) (Z (reweight η loss w))) := by
@@ -123,7 +131,7 @@ theorem transportSupp (δ η : ℝ) (loss w : Fin n → ℝ)
 
 /-- The whole result in one statement: the computable Z-certificate implies
     active-support preservation, with no axioms beyond the classical core. -/
-theorem certificate_preserves_support (δ η : ℝ) (loss w : Fin n → ℝ)
+theorem certificate_preserves_support (δ η : ℝ) (loss w : ι → ℝ)
     (hZ : 0 < Z (reweight η loss w))
     (hsafe : is_safe_signal_Z δ η loss w) :
     ∀ i ∈ active δ w,
@@ -134,5 +142,8 @@ theorem certificate_preserves_support (δ η : ℝ) (loss w : Fin n → ℝ)
   simpa [active, mem_filter] using hmem
 
 end DARM.Boundary
- 
-#print axioms DARM.Boundary.safe_signal_equiv 
+
+#print axioms DARM.Boundary.safe_signal_equiv
+#print axioms DARM.Boundary.is_safe_signal_Z_iff_Z_le_min
+#print axioms DARM.Boundary.transportSupp
+#print axioms DARM.Boundary.certificate_preserves_support
