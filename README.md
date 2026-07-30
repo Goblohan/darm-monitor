@@ -91,6 +91,30 @@ repository are instances.
 Instantiated on the reference monitor itself, noninterference **fails**: two agent
 events produce states an observer of the policy can distinguish.
 
+### Instantiations (`LLMToolCall.lean`, `CIRunner.lean`)
+
+Two independent instantiations of the discrete stratum. An LLM tool-caller granted
+filesystem-read and network access provably cannot execute shell or email; a CI
+pull-request runner provably cannot deploy or roll back. The inherited theorems
+apply with no new proof content — that is what makes them evidence the abstraction
+is reusable rather than retrofitted.
+
+`CIRunner`'s permission map is deliberately many-to-one, which shows gating does not
+depend on injectivity, and surfaces an expressiveness limit.
+`deploy_rollback_inseparable` proves that actions sharing a permission are
+capability-indistinguishable, so a posture like "allow rollback but not deploy"
+cannot be expressed through capabilities at all. It can only be expressed through the
+policy channel — which agent events may shrink but only ratification may widen, and
+ratification is the sole coherence-breaking transition.
+
+**Both instantiations reject the continuous stratum.** Neither domain has a
+conserved, multiplicatively-updated authority measure, so the margin floor, the
+O(n) to O(1) collapse, and the capacity bound have no interpretation for either.
+Candidate weight semantics and why each fails are recorded in `LLMToolCall.lean`.
+The discrete stratum is a general-purpose reference monitor; the continuous stratum
+is domain-specific. A claim that DARM as a whole applies to LLM tool-calling would be
+false.
+
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
 | | Assumption | Status |
@@ -159,6 +183,17 @@ whose holder A4 says the agent can influence without bound.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
+- Product composition. The product of two monitors is **not** a monitor: `cap` and
+  `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
+  that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
+  `opState` combining by a meet, is well-defined but unbuilt.
+- Whether a `ReferenceMonitor` typeclass earns its place. The two instantiations
+  share exactly three things — `requires`, `allowedCapLimit`, and a decidable
+  validity predicate on approval artifacts — all already explicit parameters of
+  `step`. A class is worth extracting only if some theorem becomes statable that is
+  not statable without it. Not yet established. Note that any class containing
+  noninterference would be uninhabited, since noninterference is false in the base
+  model.
 
 ## Layout
 
@@ -178,6 +213,8 @@ DarmMonitor/
   SemanticExpansion.lean    semantic image expansion
   Assumptions.lean          A1-A5 as predicates, with witnesses and countermodels
   Minimality.lean           necessity and independence cells
+  LLMToolCall.lean          instantiation: LLM tool-calling
+  CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
 
 The root imports every module, so a green build covers all of them. This was not
