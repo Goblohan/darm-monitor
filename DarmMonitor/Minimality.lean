@@ -30,7 +30,9 @@ import DarmMonitor.Assumptions
          expect the ratification counterexample to depend on the degenerate
          token predicate. It does not.
     N  is_safe_signal_Z for support transport
-         -- this module, below
+         -- this module
+    N  actor e = Actor.agent for coherence preservation
+         -- this module
 -/
 
 namespace DARM
@@ -87,13 +89,70 @@ theorem safety_necessary_for_transport :
     rw [Z_eval, DARM.StrictExpansion.reweight_zero_eta] at h
     norm_num at h
 
-/-! ## Next cells, in order of expected cost
 
-  C2. Is `hAgent : actor e = Actor.agent` necessary for
-      `coherence_preserved_under_agent_event`? Expected YES, and the
-      countermodel already exists: `ratification_breaks_coherence` is a
-      non-agent event that breaks coherence. The work is restating it as a
-      necessity cell against the coherence theorem specifically.
+/-! ## C2 — the agent hypothesis -/
+
+private lemma Z2 : Z (reweight (0 : ℝ) ![0, 0] (![1, 0] : Fin 2 → ℝ)) = 1 := by
+  rw [DARM.StrictExpansion.reweight_zero_eta]
+  norm_num [Z, Fin.sum_univ_two]
+
+/-- **Necessity cell: `actor e = Actor.agent` cannot be dropped from
+    `coherence_preserved_under_agent_event`.**
+
+    Witness: `δ = 1`, `w = (1, 0)`, `η = 0`. The active set is `{0}`; the
+    state starts with empty policy, so it is coherent; total mass is 1 and
+    the safety certificate holds. A human then ratifies `{1}` — a coordinate
+    sitting at weight zero, far below the floor. Coherence fails.
+
+    `actor (authenticatedRatification _ _) = .human`, so this is precisely an
+    event outside the theorem's hypothesis.
+
+    NOTE ON CONFOUNDING. Tokens here are `Bool` with `validToken = (· = true)`,
+    so A1 (token unforgeability) HOLDS in this model and the ratifier presents
+    a valid token. The failure is attributable to the actor hypothesis alone,
+    not to weak authentication. Compare
+    `Assumptions.A1_insufficient_for_coherence`, which makes the dual point. -/
+theorem agent_hypothesis_necessary_for_coherence :
+    ∃ (s : State Unit (Fin 2)) (e : Event Unit (Fin 2) Bool)
+      (δ η : ℝ) (loss w : Fin 2 → ℝ),
+      actor e ≠ Actor.agent ∧
+      0 < Z (reweight η loss w) ∧
+      is_safe_signal_Z δ η loss w ∧
+      DARM.Composition.IsCoherent s δ w ∧
+      ¬ DARM.Composition.IsCoherent
+          (step (fun _ : Fin 2 => ()) (∅ : Finset Unit)
+            (fun b : Bool => b = true) s e) δ
+          (DARM.Boundary.normalize (reweight η loss w) (Z (reweight η loss w))) := by
+  refine ⟨{ cap := ∅, policy := ∅, opState := OpState.active, lastExecuted := none },
+          Event.authenticatedRatification true {1},
+          1, 0, ![0, 0], ![1, 0], ?_, ?_, ?_, ?_, ?_⟩
+  · -- ratification is a human event
+    simp [actor]
+  · -- total mass is 1
+    rw [Z2]; norm_num
+  · -- safety: the only active coordinate is 0, and 1 * 1 ≤ 1
+    intro i hi
+    simp only [active, Finset.mem_filter, Finset.mem_univ, true_and] at hi
+    rw [Z2, DARM.StrictExpansion.reweight_zero_eta]
+    linarith
+  · -- the starting state has empty policy
+    exact Finset.empty_subset _
+  · -- but the ratified policy {1} is not backed: w 1 = 0 < 1
+    intro h
+    unfold DARM.Composition.IsCoherent at h
+    have h1 : (1 : Fin 2) ∈
+        (step (fun _ : Fin 2 => ()) (∅ : Finset Unit) (fun b : Bool => b = true)
+          { cap := ∅, policy := ∅, opState := OpState.active,
+            lastExecuted := none }
+          (Event.authenticatedRatification true {1})).policy := by
+      simp [step]
+    have hmem := h h1
+    simp only [active, Finset.mem_filter, Finset.mem_univ, true_and] at hmem
+    unfold DARM.Boundary.normalize at hmem
+    rw [Z2, DARM.StrictExpansion.reweight_zero_eta] at hmem
+    norm_num at hmem
+
+/-! ## Next cells, in order of expected cost
 
   C3. Is `massPos` (the second half of A5) necessary for the capacity bound?
       UNCLEAR, and possibly NO. If `Z = 0` then Lean's division gives
@@ -111,3 +170,4 @@ end Minimality
 end DARM
 
 #print axioms DARM.Minimality.safety_necessary_for_transport
+#print axioms DARM.Minimality.agent_hypothesis_necessary_for_coherence
