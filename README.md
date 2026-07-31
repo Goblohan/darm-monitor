@@ -194,6 +194,10 @@ whose holder A4 says the agent can influence without bound.
   not statable without it. Not yet established. Note that any class containing
   noninterference would be uninhabited, since noninterference is false in the base
   model.
+- `execution_confined_by_cap_bound` carries an unused `[DecidableEq ActionId]`
+  inherited from the shared `variable` block. Harmless, but it means capability
+  confinement is stated with a stronger hypothesis than it needs: actions need
+  not be distinguishable, only capabilities.
 
 ## Layout
 
