@@ -35,6 +35,12 @@ import DarmMonitor.NontrivialExpansion
   reachable sets are characterized by δ|B| < 1, against a proven bound of
   δ|B| ≤ 1 — the two differ only at the boundary. The construction requires
   `Real.log` to invert `exp` and is NOT formalized here; see R1b below.
+
+  GENERALIZATION. The index type is an arbitrary `Fintype`. The proof sums over
+  the active set and bounds by total mass; nothing is `Fin`-specific. So the cap
+  is cardinality-independent by construction rather than by parameter: for ANY
+  finite action space, at most `1/δ` coordinates can clear the margin floor
+  after normalization.
 -/
 
 namespace DARM
@@ -50,7 +56,7 @@ open DARM.Boundary
     set and bounding by the total mass gives `|S| * δ * Z ≤ Z`; divide by
     `Z > 0`. -/
 theorem active_card_mul_delta_le_one
-    {n : ℕ} (δ : ℝ) (v : Fin n → ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (δ : ℝ) (v : ι → ℝ)
     (hv : ∀ i, 0 ≤ v i) (hZ : 0 < Z v) :
     ((active δ (DARM.Boundary.normalize v (Z v))).card : ℝ) * δ ≤ 1 := by
   set S := active δ (DARM.Boundary.normalize v (Z v)) with hSdef
@@ -83,7 +89,7 @@ theorem active_card_mul_delta_le_one
     This is the negative answer to R1: whatever signal is synthesised, the
     post-update active set has at most `1/δ` elements. -/
 theorem reweight_active_card_bounded
-    {n : ℕ} (δ η : ℝ) (loss w : Fin n → ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (δ η : ℝ) (loss w : ι → ℝ)
     (hw : ∀ i, 0 ≤ w i)
     (hZ : 0 < Z (reweight η loss w)) :
     ((active δ (DARM.Boundary.normalize (reweight η loss w)
