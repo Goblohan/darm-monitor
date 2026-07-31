@@ -56,7 +56,7 @@ open DARM.Boundary
     set and bounding by the total mass gives `|S| * δ * Z ≤ Z`; divide by
     `Z > 0`. -/
 theorem active_card_mul_delta_le_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι] (δ : ℝ) (v : ι → ℝ)
+    {ι : Type*} [Fintype ι] (δ : ℝ) (v : ι → ℝ)
     (hv : ∀ i, 0 ≤ v i) (hZ : 0 < Z v) :
     ((active δ (DARM.Boundary.normalize v (Z v))).card : ℝ) * δ ≤ 1 := by
   set S := active δ (DARM.Boundary.normalize v (Z v)) with hSdef
@@ -89,7 +89,7 @@ theorem active_card_mul_delta_le_one
     This is the negative answer to R1: whatever signal is synthesised, the
     post-update active set has at most `1/δ` elements. -/
 theorem reweight_active_card_bounded
-    {ι : Type*} [Fintype ι] [DecidableEq ι] (δ η : ℝ) (loss w : ι → ℝ)
+    {ι : Type*} [Fintype ι] (δ η : ℝ) (loss w : ι → ℝ)
     (hw : ∀ i, 0 ≤ w i)
     (hZ : 0 < Z (reweight η loss w)) :
     ((active δ (DARM.Boundary.normalize (reweight η loss w)

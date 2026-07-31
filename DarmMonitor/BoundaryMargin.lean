@@ -41,7 +41,7 @@ namespace DARM.Boundary
 
 open Finset BigOperators
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {ι : Type*} [Fintype ι]
 
 /-- Unnormalized multiplicative-weights update. -/
 noncomputable def reweight (η : ℝ) (loss w : ι → ℝ) : ι → ℝ :=
