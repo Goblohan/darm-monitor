@@ -80,6 +80,12 @@ outright. The results form a complete qualitative picture of that channel.
   (`η = 0`) and under genuine multiplicative reweighting (`η = 1`).
 - Growth is **capped**: at most `1/δ` coordinates can be active after
   normalization, whatever signal is synthesized. Expansion is possible but bounded.
+- The reweighting channel is **surjective** onto positive vectors — any positive
+  target is hit exactly by some `loss`, with no finiteness hypothesis. So the cap is
+  not a limitation of the update rule; it is a property of the margin floor under
+  normalization, and no choice of signal evades it.
+- The cap is **strict** for proper subsets: `δ * |B| = 1` is unreachable unless `B`
+  is the whole index space.
 
 ### Influence and noninterference (`Interference.lean`, `Influence.lean`)
 
@@ -114,6 +120,23 @@ Candidate weight semantics and why each fails are recorded in `LLMToolCall.lean`
 The discrete stratum is a general-purpose reference monitor; the continuous stratum
 is domain-specific. A claim that DARM as a whole applies to LLM tool-calling would be
 false.
+
+### Reuse without abstraction (`Deployment.lean`)
+
+Both instantiations hand-wrote the same unreachability argument — four proofs
+differing only in constants. `never_executable_of_ungranted` replaces all four: an
+action whose permission was never granted can never execute in any
+capability-confined state, whatever the policy says. A third instantiation would
+need no bespoke proofs.
+
+**This settles the typeclass question, negatively.** A `ReferenceMonitor` class
+keyed on `(CapId, ActionId, Token)` admits one instance per type triple, so it
+cannot quantify over two deployments sharing an action space.
+`unreachable_antitone` does exactly that — tightening a grant can only enlarge what
+is permanently unreachable — and would become unstatable. The abstraction would
+remove expressiveness rather than add it. A class field carrying noninterference or
+the Z-bound would be worse still: the first is false in the base model, the second
+is rejected by both instantiations, so the class would be uninhabited.
 
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
@@ -173,9 +196,14 @@ whose holder A4 says the agent can influence without bound.
 
 ## Open problems
 
-- **R1b** — the exact reachability characterization. Conjectured: a target active
-  set `B` is reachable by a Z-safe update iff `δ|B| < 1`. The upper bound is
-  proved; the converse needs the ε-construction and `Real.log`.
+- **R1b** — sufficiency, unconditionally. Necessity is closed sharply
+  (`ReachabilityExact.lean`) and a witness construction exists given two margin
+  obligations (`ReachabilitySufficiency.lean`), the first of which the `ε` choice
+  always discharges. The second, `ε < δ * Z`, is **not** implied by `δ * |B| < 1`.
+  The conjecture may in fact be false at the small-`δ|B|` end: with `B` a singleton
+  and `δ` near `1/n`, the off-target coordinates can clear the floor and the active
+  set overshoots `B`. Closing this needs either a sharper `ε` depending on `δ|B|`
+  rather than on `n`, or the counterexample that withdraws the conjecture.
 - Trace-level composition. Coherence is proved for a single step, not for
   `List`-folded execution traces.
 - A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
@@ -187,13 +215,10 @@ whose holder A4 says the agent can influence without bound.
   `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
   that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
   `opState` combining by a meet, is well-defined but unbuilt.
-- Whether a `ReferenceMonitor` typeclass earns its place. The two instantiations
-  share exactly three things — `requires`, `allowedCapLimit`, and a decidable
-  validity predicate on approval artifacts — all already explicit parameters of
-  `step`. A class is worth extracting only if some theorem becomes statable that is
-  not statable without it. Not yet established. Note that any class containing
-  noninterference would be uninhabited, since noninterference is false in the base
-  model.
+- Whether a bundling **structure** (not class) would cut instantiation boilerplate
+  enough to be worth it. Structures allow many values per type triple, so they do
+  not break `unreachable_antitone`. This is an ergonomics question, settled by
+  writing a third instantiation and counting lines rather than by argument. - `execution_confined_by_cap_bound` carries an unused `[DecidableEq ActionId]`
 - `execution_confined_by_cap_bound` carries an unused `[DecidableEq ActionId]`
   inherited from the shared `variable` block. Harmless, but it means capability
   confinement is stated with a stronger hypothesis than it needs: actions need
@@ -217,6 +242,9 @@ DarmMonitor/
   SemanticExpansion.lean    semantic image expansion
   Assumptions.lean          A1-A5 as predicates, with witnesses and countermodels
   Minimality.lean           necessity and independence cells
+  ReachabilityExact.lean    R1b: channel surjectivity, sharp capacity bound
+  ReachabilitySufficiency.lean  R1b: witness construction
+  Deployment.lean           general unreachability, deployment comparison
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
