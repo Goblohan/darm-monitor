@@ -138,6 +138,58 @@ remove expressiveness rather than add it. A class field carrying noninterference
 the Z-bound would be worse still: the first is false in the base model, the second
 is rejected by both instantiations, so the class would be uninhabited.
 
+### Execution (`Runtime.lean`, `FixedPoint.lean`, `ActiveSurrogate.lean`)
+
+The discrete monitor **runs**. `Basic.step` is total and computable, and both
+instantiations are finite enumerations, so Lean emits C for the whole fragment.
+`canRun_iff_canExecute` ties the emitted `Bool` to the proved `Prop`, which is what
+makes `bash_canRun_false` a statement about the running program rather than about a
+separate mathematical object. The demo prints:
+
+```
+grant: fsRead, network
+readFile: ALLOWED
+writeFile: BLOCKED
+bashExec: BLOCKED
+httpGet: ALLOWED
+sendEmail: BLOCKED
+```
+
+The continuous stratum **does not extract**. `reweight`, `normalize`, `active`, and
+`Ratifiable` are all `noncomputable`, because `Real` in Lean is a quotient of Cauchy
+sequences with no code generation. Re-implementing the certificate in C would put
+unverified arithmetic between the proofs and the binary.
+
+The resolution is not to extract ℝ but to refine it. `FixedPoint.lean` defines a
+computable fixed-point model with an embedding `γ` into the reals, and
+`refinement_coord` proves the computable check **fail-closed**: passing it implies
+the real inequality `δ * Z ≤ w'`. Rounding can make the check reject a state that is
+safe in ℝ — a false negative — but cannot make it accept a state that is unsafe.
+`ActiveSurrogate.refinement_quantified` lifts this to the quantified certificate via
+a computable over-approximation of the active set.
+
+Three findings from building it, each against the initial design:
+
+- **Truncation error is eliminated, not bounded.** The fixed-point product lands on
+  the *requirement* side of `δ * Z ≤ w'`, so rounding it up means truncation can
+  never help an unsafe state pass. A first draft used floor division, reintroducing
+  the fail-open error one level below where it had just been corrected.
+- **Summation contributes no arithmetic error.** `Fixed.add` is exact, so the `|ι|`
+  factor in a sum over the index type lives entirely in the input representations —
+  not, as floating-point intuition suggests, in the accumulation.
+- **Every real quantity needs two fixed-point bounds, not one.** `δ` must be rounded
+  *down* for active-set membership and *up* for the requirement; the post-update
+  weights must be rounded *up* for `Z` and *down* for the coordinate check. The
+  architecture is therefore interval arithmetic over integers, arrived at as a
+  consequence of the inequality directions rather than chosen.
+
+**What this does not yet do.** `refinement_quantified` takes conservative bounds on
+the post-update weights as *hypotheses*. Producing them means bounding
+`w i * Real.exp (-η * loss i)` in both directions with proved error, and that
+evaluator does not exist here. The refinement architecture is proved sound end to
+end; one component of it is missing, and until it exists there is no running
+boundary monitor. The discrete monitor, by contrast, runs today.
+
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
 | | Assumption | Status |
@@ -187,7 +239,13 @@ whose holder A4 says the agent can influence without bound.
 
 ## Deliberate non-claims
 
-- Not a runtime binary. No drivers, no hardware abstraction layer.
+- Not a runtime binary for the *continuous* stratum. The discrete monitor compiles
+  and runs; the boundary certificate does not, pending computable `exp` bounds.
+- Not a zero-TCB extraction. Lean's emitted C uses its own runtime, boxing and
+  reference counting, so any host program needs marshalling glue that is
+  hand-written and unverified. The honest TCB is: Lean kernel + Lean C emitter +
+  C compiler + that glue. Smaller than a hand-written monitor; not zero.
+- No drivers, no hardware abstraction layer.
 - Not a cryptographic implementation. Token validity is an opaque predicate.
 - Not a claim about real ratifiers. A4 concerns the modelled observation channel
   only, and says nothing about human cognition or persuadability.
@@ -211,6 +269,14 @@ whose holder A4 says the agent can influence without bound.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
+- Computable `exp` bounds. The missing component above: rational bounds on
+  `Real.exp` in both directions, with proved error, assembled into a fixed-point
+  interval evaluator. Mathlib has series bounds (`Real.exp_bound`,
+  `Real.add_one_le_exp`); turning them into a monitor is a project of its own.
+- The `Int64` port. `Int` is arbitrary-precision, which keeps the refinement algebra
+  clean but boxes into `lean_object*`. Porting to `Int64` is what makes `@[export]`
+  emit primitive C types and keeps the FFI layer thin — at the cost of threading
+  no-overflow hypotheses through every lemma, including sums over the index type.
 - Product composition. The product of two monitors is **not** a monitor: `cap` and
   `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
   that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
@@ -218,7 +284,7 @@ whose holder A4 says the agent can influence without bound.
 - Whether a bundling **structure** (not class) would cut instantiation boilerplate
   enough to be worth it. Structures allow many values per type triple, so they do
   not break `unreachable_antitone`. This is an ergonomics question, settled by
-  writing a third instantiation and counting lines rather than by argument. - `execution_confined_by_cap_bound` carries an unused `[DecidableEq ActionId]`
+  writing a third instantiation and counting lines rather than by argument.
 - `execution_confined_by_cap_bound` carries an unused `[DecidableEq ActionId]`
   inherited from the shared `variable` block. Harmless, but it means capability
   confinement is stated with a stronger hypothesis than it needs: actions need
@@ -245,6 +311,9 @@ DarmMonitor/
   ReachabilityExact.lean    R1b: channel surjectivity, sharp capacity bound
   ReachabilitySufficiency.lean  R1b: witness construction
   Deployment.lean           general unreachability, deployment comparison
+  Runtime.lean              executable discrete monitor, Bool/Prop bridge
+  FixedPoint.lean           fixed-point model, fail-closed refinement
+  ActiveSurrogate.lean      computable active set, quantified refinement
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
