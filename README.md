@@ -201,8 +201,11 @@ is either such a bracket or a domain condition that can be checked.
 **Two limits bound that claim.** The upper bound requires `η * loss i > -1` for
 every coordinate; outside that domain the monitor must refuse to certify rather
 than compute. And the bracket is loose — about ±14% at `a = 0.5` — so a monitor
-using it will reject states comfortably inside the real margin. Soundness is not
-at stake; usefulness is.
+using it will reject states comfortably inside the real margin.Soundness is not at stake; usefulness is — and `BracketTightening.lean` resolves it.
+Since `exp (-2b) = exp (-b)^2`, a bracket squares into a bracket at twice the
+argument, so bracketing `a / 2^n` and squaring back up costs `2n` multiplications
+and roughly halves the width each time. Soundness holds for every `n`, making it a
+precision dial rather than a correctness parameter.
 
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
@@ -285,14 +288,12 @@ whose holder A4 says the agent can influence without bound.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
-- Widening the evaluator's domain. `ExpEvaluator` is sound where
-  `η * loss i > -1`; outside that region it certifies nothing. Series truncation
-  with a proved remainder would widen it, at the cost of the factorial arithmetic
-  the current construction avoids.
-- Tightening the bracket. `[1-a, 1/(1+a)]` spans `[0.500, 0.666]` around a true
-  `exp(-0.5) = 0.6065` — roughly ±14%. A monitor using it rejects states well
-  inside the real margin. This is a numerical-analysis problem, not a soundness
-  one, but it decides whether the monitor is useful rather than merely correct.
+- Packaging the doubling tower into `evaluator_sound`. `BracketTightening` makes
+  the bracket arbitrarily sharp — measured 166 → 78 → 38 thousandths at `a = 0.5`
+  for `n = 0, 1, 2` — and widens the domain from `a > -1` to `a > -2^n`, since the
+  base condition is applied to `a / 2^n`. Both effects are proved, but
+  `evaluator_sound` still takes the single-step brackets, so a caller must apply
+  `bracketIter` and pass the result. Mechanical; not done.
 - The `Int64` port. `Int` is arbitrary-precision, which keeps the refinement algebra
   clean but boxes into `lean_object*`. Porting to `Int64` is what makes `@[export]`
   emit primitive C types and keeps the FFI layer thin — at the cost of threading
@@ -335,6 +336,7 @@ DarmMonitor/
   FixedPoint.lean           fixed-point model, fail-closed refinement
   ActiveSurrogate.lean      computable active set, quantified refinement
   ExpEvaluator.lean         computable exp brackets, end-to-end soundness
+  BracketTightening.lean    argument doubling; arbitrarily sharp brackets
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
