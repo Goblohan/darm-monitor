@@ -183,12 +183,26 @@ Three findings from building it, each against the initial design:
   architecture is therefore interval arithmetic over integers, arrived at as a
   consequence of the inequality directions rather than chosen.
 
-**What this does not yet do.** `refinement_quantified` takes conservative bounds on
-the post-update weights as *hypotheses*. Producing them means bounding
-`w i * Real.exp (-η * loss i)` in both directions with proved error, and that
-evaluator does not exist here. The refinement architecture is proved sound end to
-end; one component of it is missing, and until it exists there is no running
-boundary monitor. The discrete monitor, by contrast, runs today.
+**`ExpEvaluator.lean` closes the loop.** `refinement_quantified` takes conservative
+bounds on the post-update weights as hypotheses; the evaluator supplies them.
+Both brackets come from a single Mathlib fact, `Real.add_one_le_exp`:
+
+```
+1 - a ≤ exp (-a)                    for all a
+exp (-a) ≤ 1 / (1 + a)              for a > -1
+```
+
+The upper bound needs no series expansion and no case split on the sign of `a`:
+`exp (-a) * (1 + a) ≤ exp (-a) * exp a = exp 0 = 1`, then divide. So
+`evaluator_sound` reduces `is_safe_signal_Z` — a statement over ℝ — to a
+computable check plus brackets the caller can compute. Every remaining hypothesis
+is either such a bracket or a domain condition that can be checked.
+
+**Two limits bound that claim.** The upper bound requires `η * loss i > -1` for
+every coordinate; outside that domain the monitor must refuse to certify rather
+than compute. And the bracket is loose — about ±14% at `a = 0.5` — so a monitor
+using it will reject states comfortably inside the real margin. Soundness is not
+at stake; usefulness is.
 
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
@@ -239,8 +253,10 @@ whose holder A4 says the agent can influence without bound.
 
 ## Deliberate non-claims
 
-- Not a runtime binary for the *continuous* stratum. The discrete monitor compiles
-  and runs; the boundary certificate does not, pending computable `exp` bounds.
+- Not a deployed system. The discrete monitor compiles and runs; the boundary
+  certificate now has a computable, proved-sound path via `ExpEvaluator`, but it
+  has not been benchmarked, and its bracket is loose enough that its practical
+  rejection rate is unmeasured.
 - Not a zero-TCB extraction. Lean's emitted C uses its own runtime, boxing and
   reference counting, so any host program needs marshalling glue that is
   hand-written and unverified. The honest TCB is: Lean kernel + Lean C emitter +
@@ -269,10 +285,14 @@ whose holder A4 says the agent can influence without bound.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
-- Computable `exp` bounds. The missing component above: rational bounds on
-  `Real.exp` in both directions, with proved error, assembled into a fixed-point
-  interval evaluator. Mathlib has series bounds (`Real.exp_bound`,
-  `Real.add_one_le_exp`); turning them into a monitor is a project of its own.
+- Widening the evaluator's domain. `ExpEvaluator` is sound where
+  `η * loss i > -1`; outside that region it certifies nothing. Series truncation
+  with a proved remainder would widen it, at the cost of the factorial arithmetic
+  the current construction avoids.
+- Tightening the bracket. `[1-a, 1/(1+a)]` spans `[0.500, 0.666]` around a true
+  `exp(-0.5) = 0.6065` — roughly ±14%. A monitor using it rejects states well
+  inside the real margin. This is a numerical-analysis problem, not a soundness
+  one, but it decides whether the monitor is useful rather than merely correct.
 - The `Int64` port. `Int` is arbitrary-precision, which keeps the refinement algebra
   clean but boxes into `lean_object*`. Porting to `Int64` is what makes `@[export]`
   emit primitive C types and keeps the FFI layer thin — at the cost of threading
@@ -314,6 +334,7 @@ DarmMonitor/
   Runtime.lean              executable discrete monitor, Bool/Prop bridge
   FixedPoint.lean           fixed-point model, fail-closed refinement
   ActiveSurrogate.lean      computable active set, quantified refinement
+  ExpEvaluator.lean         computable exp brackets, end-to-end soundness
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
