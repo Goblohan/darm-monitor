@@ -218,6 +218,14 @@ it a precision dial rather than a correctness parameter.
 ordinary argument, so a caller supplies brackets on the halved exponent and gets the
 real certificate back. `n = 0` recovers `evaluator_sound` exactly.
 
+**The cost of soundness is measured.** `Benchmark.lean` runs the pipeline against
+`Float` ground truth on genuinely-safe states and counts rejections: 17.8% at
+`n = 0`, 9.3% at `n = 1`, 3.1% at `n = 2`, and none at `n = 3` over 129 samples.
+Three squarings — six extra multiplications per coordinate — bought a monitor that
+rejected nothing safe while remaining provably fail-closed. This is one point in
+parameter space with `Float` standing in for ℝ, and is not a general claim; the
+module says so and the open-problems list keeps the sweep outstanding.
+
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
 | | Assumption | Status |
@@ -268,9 +276,9 @@ whose holder A4 says the agent can influence without bound.
 ## Deliberate non-claims
 
 - Not a deployed system. The discrete monitor compiles and runs; the boundary
-  certificate now has a computable, proved-sound path via `ExpEvaluator` and
-  `EvaluatorTower`, but it has not been benchmarked, so its practical rejection
-  rate at any given `n` is unmeasured.
+  certificate has a computable, proved-sound path via `ExpEvaluator` and
+  `EvaluatorTower`, and its rejection rate is measured at one parameter point.
+  Nothing has run against a real workload, and no binary has been produced.
 - Not a zero-TCB extraction. Lean's emitted C uses its own runtime, boxing and
   reference counting, so any host program needs marshalling glue that is
   hand-written and unverified. The honest TCB is: Lean kernel + Lean C emitter +
@@ -292,10 +300,11 @@ whose holder A4 says the agent can influence without bound.
   and `δ` near `1/n`, the off-target coordinates can clear the floor and the active
   set overshoots `B`. Closing this needs either a sharper `ε` depending on `δ|B|`
   rather than on `n`, or the counterexample that withdraws the conjecture.
-- Benchmarking. Nothing has been run against a workload. The arithmetic is proved
-  and the brackets measured, but no monitor has processed a realistic weight vector,
-  so the false-rejection rate at any given `n` is unknown. That number, not any
-  theorem, decides whether the continuous stratum is deployable.
+- Broader benchmarking. `Benchmark.lean` measures the false-rejection rate at a
+  single point — `δ = 0.05`, `η = 0.5`, `dim = 8`, uniform losses, 129 genuinely-safe
+  samples — finding 17.8% at `n = 0` and 0% at `n = 3`. Ground truth is `Float`, not
+  ℝ. A sweep over `δ`, `η`, dimension, and realistic loss distributions would say
+  whether that generalizes; a single point should not be extrapolated.
 - Trace-level composition. Coherence is proved for a single step, not for
   `List`-folded execution traces.
 - A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
@@ -347,6 +356,7 @@ DarmMonitor/
   ExpEvaluator.lean         computable exp brackets, end-to-end soundness
   BracketTightening.lean    argument doubling; arbitrarily sharp brackets
   EvaluatorTower.lean       tower packaged; n as a precision parameter
+  Benchmark.lean            false-rejection measurement (no theorems)
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
