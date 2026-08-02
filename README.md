@@ -14,20 +14,28 @@ Every principal result carries a permanent `#print axioms` declaration in the
 source. That is deliberate: `lake build` exits 0 on a file full of `sorry`, so a
 green build alone is not evidence. The axiom trace is.
 
+Three tiers, in increasing strength:
+
 ```
+# 1. placeholder search — necessary, not sufficient
+findstr /s /n /c:"sorry" /c:"admit" DarmMonitor\*.lean
+
+# 2. axiom audit — this is the actual evidence
+lake build 2>&1 | findstr /c:"depends on axioms"
+
+# 3. build audit — reproducibility on a clean machine, every commit via CI
 lake build
 ```
 
-Census the evidence yourself:
-
-```
-findstr /s /n /c:"sorry" DarmMonitor\*.lean          # should return nothing
-lake build 2>&1 | findstr /i "axioms sorryAx"        # every trace, in one place
+Tier 1 catches typed placeholders in this repository's own source. Tier 2 catches
+anything reaching a theorem *through its dependencies*, which a text search
+structurally cannot. Tier 2 is the claim worth making.
 ```
 
 Traced results depend only on `propext`, `Classical.choice`, and `Quot.sound`.
-Several depend on strictly fewer; a few depend on nothing at all. There are no
-custom axioms and no `sorryAx` anywhere.
+Several depend on strictly fewer; a few depend on nothing at all. No traced result
+depends on `sorryAx`, and none introduces a custom axiom. Occurrences of the string
+`sorryAx` in the source are module-header discipline notes, not proof obligations.
 
 **A note on why this discipline exists.** During development, `lake build`
 reported success on 604 jobs while never compiling the module everyone believed was
