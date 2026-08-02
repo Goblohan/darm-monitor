@@ -222,9 +222,20 @@ real certificate back. `n = 0` recovers `evaluator_sound` exactly.
 `Float` ground truth on genuinely-safe states and counts rejections: 17.8% at
 `n = 0`, 9.3% at `n = 1`, 3.1% at `n = 2`, and none at `n = 3` over 129 samples.
 Three squarings — six extra multiplications per coordinate — bought a monitor that
-rejected nothing safe while remaining provably fail-closed. This is one point in
-parameter space with `Float` standing in for ℝ, and is not a general claim; the
-module says so and the open-problems list keeps the sweep outstanding.
+rejected nothing safe while remaining provably fail-closed.
+
+**The sweep found two things the proofs could not.** First, `n` must scale with `η`:
+the bracket is taken at `η * loss / 2^n`, so at `η = 2` the baseline `n = 3` rejects
+47% of safe states and needs `n = 6` to recover. Second, and more consequentially,
+`active_card_mul_delta_le_one` proves `|active| * δ ≤ 1` — and at `dim * δ = 1`, the
+proved limit, *no safe state exists at all*. Safe states thin out around `0.6` and
+have vanished by `0.8`. The bound is obtained by summing, so it is tight only when
+every coordinate sits exactly at `δ * Z`; with any weight spread the smallest
+coordinate binds first. The theorem is correct, and would mislead anyone reading it
+as an operating envelope.
+
+Ground truth throughout is `Float` standing in for ℝ, over small samples at a few
+parameter points. These numbers locate boundaries; they do not characterize them.
 
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
@@ -300,11 +311,14 @@ whose holder A4 says the agent can influence without bound.
   and `δ` near `1/n`, the off-target coordinates can clear the floor and the active
   set overshoots `B`. Closing this needs either a sharper `ε` depending on `δ|B|`
   rather than on `n`, or the counterexample that withdraws the conjecture.
-- Broader benchmarking. `Benchmark.lean` measures the false-rejection rate at a
-  single point — `δ = 0.05`, `η = 0.5`, `dim = 8`, uniform losses, 129 genuinely-safe
-  samples — finding 17.8% at `n = 0` and 0% at `n = 3`. Ground truth is `Float`, not
-  ℝ. A sweep over `δ`, `η`, dimension, and realistic loss distributions would say
-  whether that generalizes; a single point should not be extrapolated.
+- Characterizing the feasibility boundary. The sweep locates it — safe states thin
+  out near `dim * δ ≈ 0.6` and vanish by `0.8`, well inside the proved `≤ 1` — but
+  does not explain it. A bound in terms of the spread between the smallest and mean
+  coordinate would be the useful statement, and is not proved. Until it is, the
+  operating envelope has to be found empirically for each weight distribution.
+- Realistic loss distributions. The sweep uses uniform losses, `Float` ground truth,
+  and small samples at a few parameter points. Enough to locate boundaries, not
+  enough to characterize them.
 - Trace-level composition. Coherence is proved for a single step, not for
   `List`-folded execution traces.
 - A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
