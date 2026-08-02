@@ -237,6 +237,69 @@ as an operating envelope.
 Ground truth throughout is `Float` standing in for ℝ, over small samples at a few
 parameter points. These numbers locate boundaries; they do not characterize them.
 
+### The update rule is a parameter (`BoundaryCore.lean`, `RationalInstance.lean`)
+
+None of the four boundary theorems unfolds `reweight`. `safe_signal_equiv` is
+`δ * Z ≤ w'ᵢ ↔ δ ≤ w'ᵢ / Z` — algebra over a positive scalar. `transportSupp`
+cites it. The update appears only as an opaque term.
+
+`BoundaryCore.lean` states them accordingly, over a pre-update vector `w` fixing
+the active set and a post-update vector `w'` that must clear the floor, with no
+relation assumed between them. The originals are recovered as instances:
+`safe_signal_equiv_from_core` has no proof body, so it is definitionally the
+general theorem with `w' := reweight η loss w`. The exponential was never
+load-bearing.
+
+`RationalInstance.lean` exercises a second update, `w / (1 + η * loss)`. The
+boundary results apply with **zero new proof content**, and the fixed-point
+evaluation is exact — two directed divisions, no bracket, no tower, no `n`. At
+`a = 0.5` the bounds are `666` and `666` in thousandths, one quantum apart.
+
+**But this is a different update, not a better approximation.** `1/(1+a) = 0.667`
+where `exp(-a) = 0.6065`. Choosing between the instances is choosing a rule, and
+what the rational one costs is proved rather than argued:
+
+- **It does not compose.** `exp_semigroup` proves `exp(-a) · exp(-b) = exp(-(a+b))`,
+  so a loss stream may be batched or streamed to the same state.
+  `rational_not_semigroup` proves the surrogate fails this — `1/4 ≠ 1/3` at
+  `a = b = 1`. Under it, a monitor's boundary would depend on how telemetry
+  happened to be chunked across clock cycles.
+- **It is not globally positive.** `ratUpdate_neg_below` proves it goes negative
+  past `-1`, breaking the non-negativity every capacity bound needs.
+
+Over ℝ this trade is forced, not an engineering gap: `exp` is the unique
+continuous solution of `f(a) · f(b) = f(a + b)`, so no exactly-computable update
+composes. `exp` remains primary; the surrogate is admissible where losses are
+bounded below and history independence is not required.
+
+A third objection sometimes raised — that changing the update degrades the
+`O(√(T ln N))` regret bound of multiplicative weights — does not apply. This
+development contains no regret, no comparator, no loss sequence and no horizon.
+`reweight` is a single-step function. That is precisely why the abstraction goes
+through.
+
+### Feasibility (`Feasibility.lean`)
+
+`Reachability.active_card_mul_delta_le_one` proves `|active| * δ ≤ 1`, which
+invites reading `δ = 1/dim` as admissible. The benchmark sweep found no safe
+state at all at `dim * δ = 1`, and they were already scarce by `0.6`.
+
+The explanation is that safety requires `δ * Z ≤ v i` for every active `i` —
+that is, `δ * Z ≤ inf` — and the proved bound is obtained by *summing* that
+family, replacing the infimum with something mean-like. So
+
+```
+|S| * δ  ≤  |S| * (inf over S) / Z  ≤  1
+```
+
+The middle term is the sharp ceiling. `uniform_attains` shows the coarse bound is
+reached only when the weights are flat, and `spread_loses` gives a case:
+weights `(1,4,4,4)` cap `δ` at `4/13`, not `1`.
+
+**Practical reading:** compute the envelope as `inf / Z` from the weights in
+hand, which is checkable at runtime. Do not compute it as `1/δ` coordinates —
+that is a correct bound no real distribution approaches.
+
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
 | | Assumption | Status |
@@ -284,6 +347,13 @@ the signal to depend on the source state dissolves the obstruction — so this b
 **NR3 — ratification is the sole coherence-breaking transition**, and it is the one
 whose holder A4 says the agent can influence without bound.
 
+**NR4 — no exactly-computable update composes.** `exp` is the unique continuous
+solution of `f(a) * f(b) = f(a + b)`, so any update that evaluates exactly in
+fixed point loses path-independence. `rational_not_semigroup` exhibits the
+failure concretely. This bounds what "extracting the continuous stratum" could
+ever mean: the bracket is not an implementation shortfall but the price of a
+property no computable rule has.
+
 ## Deliberate non-claims
 
 - Not a deployed system. The discrete monitor compiles and runs; the boundary
@@ -311,6 +381,13 @@ whose holder A4 says the agent can influence without bound.
   and `δ` near `1/n`, the off-target coordinates can clear the floor and the active
   set overshoots `B`. Closing this needs either a sharper `ε` depending on `δ|B|`
   rather than on `n`, or the counterexample that withdraws the conjecture.
+- Migrating `BoundaryMargin.lean` onto `BoundaryCore`. The general theorems exist
+  and the originals are proved to be instances, but `BoundaryMargin` still carries
+  its own copies. Deleting them is mechanical and cascades through every
+  downstream module, re-earning their axiom traces. Deferred, not blocked.
+- The end-to-end `refinement_quantified` instantiation for the rational update.
+  `RationalInstance` supplies the coordinate bounds; assembling them mirrors
+  `evaluator_sound` and is mechanical. Left until a caller wants that instance.
 - Characterizing the feasibility boundary. The sweep locates it — safe states thin
   out near `dim * δ ≈ 0.6` and vanish by `0.8`, well inside the proved `≤ 1` — but
   does not explain it. A bound in terms of the spread between the smallest and mean
@@ -371,6 +448,9 @@ DarmMonitor/
   BracketTightening.lean    argument doubling; arbitrarily sharp brackets
   EvaluatorTower.lean       tower packaged; n as a precision parameter
   Benchmark.lean            false-rejection measurement (no theorems)
+  Feasibility.lean          sharp capacity bound; why the coarse one misleads
+  BoundaryCore.lean         boundary theorems over an arbitrary update
+  RationalInstance.lean     second instance; exact, but does not compose
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
