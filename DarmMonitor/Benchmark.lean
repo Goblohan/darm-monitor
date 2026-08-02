@@ -58,29 +58,33 @@ def fThou (t : Int) : Float := Float.ofInt t / 1000.0
   δ = 0.05. The δ is small deliberately: a large margin floor makes the active
   set empty and the test vacuous. -/
 
-def dim : Nat := 8
-def etaThou : Int := 500
-def deltaThou : Int := 50
+/-- A configuration: dimension, learning rate and margin floor in thousandths. -/
+structure Config where
+  dim : Nat
+  etaThou : Int
+  deltaThou : Int
+
+def baseline : Config := ⟨8, 500, 50⟩
 
 structure Trial where
   wThou : List Int
   lossThou : List Int
 
-def mkTrial (seed : Nat) : Trial :=
-  let ws := (List.range dim).map (fun i =>
+def mkTrial (c : Config) (seed : Nat) : Trial :=
+  let ws := (List.range c.dim).map (fun i =>
     (randThou (Nat.repeat lcg (2 * i + 1) seed) 200 1000 : Int))
-  let ls := (List.range dim).map (fun i =>
+  let ls := (List.range c.dim).map (fun i =>
     (randThou (Nat.repeat lcg (2 * i + 2) seed) 0 1300 : Int) - 400)
   ⟨ws, ls⟩
 
 /-- True safety, computed in `Float`. -/
-def trulySafe (t : Trial) : Bool :=
-  let eta := fThou etaThou
-  let delta := fThou deltaThou
+def trulySafe (c : Config) (t : Trial) : Bool :=
+  let eta := fThou c.etaThou
+  let delta := fThou c.deltaThou
   let wp := (t.wThou.zip t.lossThou).map (fun p =>
     fThou p.1 * Float.exp (-(eta * fThou p.2)))
   let Z := wp.foldl (· + ·) 0.0
-  let idx := List.range dim
+  let idx := List.range c.dim
   idx.all (fun i =>
     let wi := fThou (t.wThou.getD i 0)
     if delta ≤ wi then
@@ -88,21 +92,21 @@ def trulySafe (t : Trial) : Bool :=
     else true)
 
 /-- The computable check, using the real `EvaluatorTower` pipeline. -/
-def fxAccepts (t : Trial) (n : Nat) : Bool :=
-  let bs := (List.range dim).map (fun i =>
+def fxAccepts (c : Config) (t : Trial) (n : Nat) : Bool :=
+  let bs := (List.range c.dim).map (fun i =>
     -- exponent a = eta * loss, halved n times, in thousandths
-    let a := etaThou * (t.lossThou.getD i 0) / 1000
+    let a := c.etaThou * (t.lossThou.getD i 0) / 1000
     ofThouI (a / (2 ^ n : Nat)))
-  let brs := (List.range dim).map (fun i =>
+  let brs := (List.range c.dim).map (fun i =>
     expBracket n (bs.getD i ⟨0⟩) (bs.getD i ⟨0⟩))
-  let wfx := (List.range dim).map (fun i => ofThouI (t.wThou.getD i 0))
-  let wpLo := (List.range dim).map (fun i =>
+  let wfx := (List.range c.dim).map (fun i => ofThouI (t.wThou.getD i 0))
+  let wpLo := (List.range c.dim).map (fun i =>
     ExpEvaluator.Fixed.mulDown (wfx.getD i ⟨0⟩) (brs.getD i (⟨0⟩, ⟨0⟩)).1)
-  let wpHi := (List.range dim).map (fun i =>
+  let wpHi := (List.range c.dim).map (fun i =>
     FixedPoint.Fixed.mulUp (wfx.getD i ⟨0⟩) (brs.getD i (⟨0⟩, ⟨0⟩)).2)
   let Zhi : Fixed := ⟨wpHi.foldl (fun acc x => acc + x.raw) 0⟩
-  let dfx := ofThouI deltaThou
-  (List.range dim).all (fun i =>
+  let dfx := ofThouI c.deltaThou
+  (List.range c.dim).all (fun i =>
     let wi := ofThouI (t.wThou.getD i 0)
     if dfx.raw ≤ wi.raw then
       FixedPoint.checkSafeCoord dfx Zhi (wpLo.getD i ⟨0⟩) ⟨0⟩
@@ -114,21 +118,54 @@ def trials : Nat := 200
 
 /-- Of the genuinely-safe states, how many does the check accept at level `n`?
     Returns `(safe states tested, accepted)`. -/
-def measure (n : Nat) : Nat × Nat :=
+def measure (c : Config) (n : Nat) : Nat × Nat :=
   (List.range trials).foldl
     (fun acc s =>
-      let t := mkTrial (s * 7919 + 13)
-      if trulySafe t then
-        (acc.1 + 1, acc.2 + (if fxAccepts t n then 1 else 0))
+      let t := mkTrial c (s * 7919 + 13)
+      if trulySafe c t then
+        (acc.1 + 1, acc.2 + (if fxAccepts c t n then 1 else 0))
       else acc)
     (0, 0)
 
--- (safe states tested, accepted by the fixed-point check)
-#eval measure 0
-#eval measure 1
-#eval measure 2
-#eval measure 3
-#eval measure 4
+/-! ### Precision sweep at the baseline configuration
+
+  `(safe states tested, accepted)`. Each doubling roughly halves the rejections. -/
+
+#eval measure baseline 0
+#eval measure baseline 1
+#eval measure baseline 2
+#eval measure baseline 3
+#eval measure baseline 4
+
+/-! ### Learning rate
+
+  `n` must scale with `η`. The bracket quality depends on `η * loss / 2^n`, so
+  keeping it sharp as `η` grows needs `2^n` to grow with it. At `η = 2` the
+  baseline `n = 3` is no longer enough. -/
+
+#eval measure ⟨8, 250, 50⟩ 3
+#eval measure ⟨8, 500, 50⟩ 3
+#eval measure ⟨8, 1000, 50⟩ 3
+#eval measure ⟨8, 2000, 50⟩ 3
+#eval measure ⟨8, 2000, 50⟩ 6
+
+/-! ### Margin floor and dimension — the feasibility boundary
+
+  `Reachability.active_card_mul_delta_le_one` proves `|active| * δ ≤ 1`. These
+  rows show that bound is NECESSARY BUT FAR FROM SUFFICIENT: the first component
+  (safe states found) collapses to zero well before `dim * δ` reaches 1.
+
+  The reason is that the bound comes from summing, so it is tight only when every
+  coordinate sits exactly at `δ * Z`. With any spread in the weights the binding
+  constraint is the SMALLEST coordinate, which fails much earlier. The usable
+  region is roughly half the proved one. -/
+
+#eval measure ⟨8, 500, 20⟩ 3     -- dim*δ = 0.16
+#eval measure ⟨8, 500, 50⟩ 3     -- dim*δ = 0.40
+#eval measure ⟨8, 500, 80⟩ 3     -- dim*δ = 0.64
+#eval measure ⟨8, 500, 125⟩ 3    -- dim*δ = 1.00, the proved limit
+#eval measure ⟨4, 500, 50⟩ 3     -- dim*δ = 0.20
+#eval measure ⟨16, 500, 50⟩ 3    -- dim*δ = 0.80
 
 /-! ## Reading the result
 
@@ -139,10 +176,24 @@ def measure (n : Nat) : Nat × Nat :=
   that is proved (`refinement_coord`) and does not need testing. A benchmark
   cannot establish soundness; it can only establish that soundness is affordable.
 
-  WHAT WOULD MAKE IT BETTER. Realistic loss distributions rather than uniform;
-  larger `dim`; sweeping `δ` and `η` rather than fixing them. The current
-  parameters are a single point in that space, chosen so the active set is
-  usually non-empty. Numbers from one point should not be generalized.
+  TWO THINGS THE SWEEP FOUND.
+
+  1. `n` MUST SCALE WITH `η`. The bracket is taken at `η * loss / 2^n`, so
+     holding it sharp as `η` grows requires `2^n` to grow with it. The baseline
+     `n = 3` is adequate at `η = 0.5` and not at `η = 2`.
+
+  2. THE CAPACITY BOUND IS NECESSARY BUT FAR FROM SUFFICIENT.
+     `Reachability.active_card_mul_delta_le_one` proves `|active| * δ ≤ 1`. The
+     rows above show safe states becoming scarce well before `dim * δ` reaches
+     1. The bound is obtained by summing, so it is tight only when every
+     coordinate sits exactly at `δ * Z`; with any spread the binding constraint
+     is the smallest coordinate, which fails earlier. A deployment should not
+     read `|active| ≤ 1/δ` as an operating envelope — the usable region is
+     smaller, and by an amount that depends on the weight distribution.
+
+  STILL NOT DONE. Loss distributions are uniform, which is unlikely to be
+  realistic. Sample counts are small. Ground truth is `Float`. These numbers
+  locate a boundary; they do not characterize it.
 -/
 
 end Benchmark
