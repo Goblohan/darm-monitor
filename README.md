@@ -30,7 +30,6 @@ lake build
 Tier 1 catches typed placeholders in this repository's own source. Tier 2 catches
 anything reaching a theorem *through its dependencies*, which a text search
 structurally cannot. Tier 2 is the claim worth making.
-```
 
 Traced results depend only on `propext`, `Classical.choice`, and `Quot.sound`.
 Several depend on strictly fewer; a few depend on nothing at all. No traced result
@@ -206,14 +205,18 @@ The upper bound needs no series expansion and no case split on the sign of `a`:
 computable check plus brackets the caller can compute. Every remaining hypothesis
 is either such a bracket or a domain condition that can be checked.
 
-**Two limits bound that claim.** The upper bound requires `η * loss i > -1` for
-every coordinate; outside that domain the monitor must refuse to certify rather
-than compute. And the bracket is loose — about ±14% at `a = 0.5` — so a monitor
-using it will reject states comfortably inside the real margin.Soundness is not at stake; usefulness is — and `BracketTightening.lean` resolves it.
-Since `exp (-2b) = exp (-b)^2`, a bracket squares into a bracket at twice the
-argument, so bracketing `a / 2^n` and squaring back up costs `2n` multiplications
-and roughly halves the width each time. Soundness holds for every `n`, making it a
-precision dial rather than a correctness parameter.
+**Two limits bounded that claim, and both are now dials.** The upper bound requires
+`η * loss i > -1` for every coordinate, and the bracket is loose — about ±14% at
+`a = 0.5`. `BracketTightening.lean` resolves both. Since `exp (-2b) = exp (-b)^2`, a
+bracket squares into a bracket at twice the argument, so bracketing `a / 2^n` and
+squaring back up costs `2n` multiplications, roughly halves the width each time
+(measured 166 → 78 → 38 thousandths at `a = 0.5` for `n = 0, 1, 2`), and moves the
+domain condition from `a > -1` to `a > -2^n`. Soundness holds for every `n`, making
+it a precision dial rather than a correctness parameter.
+
+`EvaluatorTower.lean` packages this: `evaluator_sound_tower` takes `n` as an
+ordinary argument, so a caller supplies brackets on the halved exponent and gets the
+real certificate back. `n = 0` recovers `evaluator_sound` exactly.
 
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
@@ -265,9 +268,9 @@ whose holder A4 says the agent can influence without bound.
 ## Deliberate non-claims
 
 - Not a deployed system. The discrete monitor compiles and runs; the boundary
-  certificate now has a computable, proved-sound path via `ExpEvaluator`, but it
-  has not been benchmarked, and its bracket is loose enough that its practical
-  rejection rate is unmeasured.
+  certificate now has a computable, proved-sound path via `ExpEvaluator` and
+  `EvaluatorTower`, but it has not been benchmarked, so its practical rejection
+  rate at any given `n` is unmeasured.
 - Not a zero-TCB extraction. Lean's emitted C uses its own runtime, boxing and
   reference counting, so any host program needs marshalling glue that is
   hand-written and unverified. The honest TCB is: Lean kernel + Lean C emitter +
@@ -289,6 +292,10 @@ whose holder A4 says the agent can influence without bound.
   and `δ` near `1/n`, the off-target coordinates can clear the floor and the active
   set overshoots `B`. Closing this needs either a sharper `ε` depending on `δ|B|`
   rather than on `n`, or the counterexample that withdraws the conjecture.
+- Benchmarking. Nothing has been run against a workload. The arithmetic is proved
+  and the brackets measured, but no monitor has processed a realistic weight vector,
+  so the false-rejection rate at any given `n` is unknown. That number, not any
+  theorem, decides whether the continuous stratum is deployable.
 - Trace-level composition. Coherence is proved for a single step, not for
   `List`-folded execution traces.
 - A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
@@ -296,12 +303,6 @@ whose holder A4 says the agent can influence without bound.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
-- Packaging the doubling tower into `evaluator_sound`. `BracketTightening` makes
-  the bracket arbitrarily sharp — measured 166 → 78 → 38 thousandths at `a = 0.5`
-  for `n = 0, 1, 2` — and widens the domain from `a > -1` to `a > -2^n`, since the
-  base condition is applied to `a / 2^n`. Both effects are proved, but
-  `evaluator_sound` still takes the single-step brackets, so a caller must apply
-  `bracketIter` and pass the result. Mechanical; not done.
 - The `Int64` port. `Int` is arbitrary-precision, which keeps the refinement algebra
   clean but boxes into `lean_object*`. Porting to `Int64` is what makes `@[export]`
   emit primitive C types and keeps the FFI layer thin — at the cost of threading
@@ -331,20 +332,21 @@ DarmMonitor/
   StrictExpansion.lean      non-vacuity witness, eta = 0
   NontrivialExpansion.lean  non-vacuity witness, eta =/= 0
   Reachability.lean         capacity bound on the active set
+  ReachabilityExact.lean    R1b: channel surjectivity, sharp capacity bound
+  ReachabilitySufficiency.lean  R1b: witness construction
   Influence.lean            minimal observation-channel example
   Interference.lean         general noninterference; A4 on the monitor itself
   SemanticQuotient.lean     semantic equivalence relation
   SemanticExpansion.lean    semantic image expansion
   Assumptions.lean          A1-A5 as predicates, with witnesses and countermodels
   Minimality.lean           necessity and independence cells
-  ReachabilityExact.lean    R1b: channel surjectivity, sharp capacity bound
-  ReachabilitySufficiency.lean  R1b: witness construction
   Deployment.lean           general unreachability, deployment comparison
   Runtime.lean              executable discrete monitor, Bool/Prop bridge
   FixedPoint.lean           fixed-point model, fail-closed refinement
   ActiveSurrogate.lean      computable active set, quantified refinement
   ExpEvaluator.lean         computable exp brackets, end-to-end soundness
   BracketTightening.lean    argument doubling; arbitrarily sharp brackets
+  EvaluatorTower.lean       tower packaged; n as a precision parameter
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
 ```
