@@ -20,3 +20,4 @@ import DarmMonitor.ActiveSurrogate
 import DarmMonitor.ExpEvaluator
 import DarmMonitor.BracketTightening
 import DarmMonitor.EvaluatorTower
+import DarmMonitor.Benchmark
