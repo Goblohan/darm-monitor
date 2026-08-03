@@ -188,29 +188,46 @@ theorem divDown_simulates (x y : F64) (hy : 4294967296 ≤ y.raw.toInt) :
 
 /-! ## Registered status
 
-  PROVED: the type, its model projection, injectivity of that projection, and
-  the multiplication envelope restated over `F64`.
+  PROVED: the type, its model projection and injectivity; the multiplication
+  envelope over `F64`; the bridge `toInt_ofInt_of_range`; and simulation for
+  addition, multiplication and downward division. Nine theorems, no `sorryAx`.
 
-  NOT PROVED, and this is most of the port:
+  ON `divUp` ASYMMETRY — the one arithmetic gap, and its blueprint.
+
+  `divUp` negates before dividing, so the range argument runs over `-x`. Two's
+  complement is asymmetric: `Int64.toInt` covers `[-2^63, 2^63)`, so negating
+  the minimum yields `2^63`, one past the top. Excluding that single input with
+  a precondition is necessary but NOT sufficient — the same asymmetry reappears
+  one level down, at the quotient.
+
+  Concretely: `quotient_in_range` proves `-(2^63) ≤ q`. The upward direction
+  needs `-(2^63) < q`, strictly, because it negates that bound and the target is
+  strict. When `q = -2^63` exactly, `-q = 2^63` and the bound fails.
+
+  So the fix is to strengthen `quotient_in_range` to a strict lower bound, which
+  means rechecking `divDown_simulates`, which cites it. That is a coherent piece
+  of work — all four bounds derived together on paper first — rather than an
+  incremental patch. It was attempted incrementally three times here, and each
+  fix exposed the next boundary one level down. Recorded rather than repeated.
+
+  NOT PROVED, and this is the remainder of the port:
 
     * THE BRIDGE. `(Int64.ofInt n).toInt = n` on the representable range. Every
       simulation theorem routes through it. See the note in the header for what
       the proof needs.
-    * ADDITION, MULTIPLICATION AND DIVISION SIMULATION. Each reduces to a range
-      obligation once the bridge exists. Division additionally requires the
-      divisor to be at least 1 in value terms — below that the quotient
-      genuinely overflows, so it is an unsafe case rather than an unproved one.
-      That condition is free for `RationalInstance`, whose divisor is
-      `1 + eta * L` on the non-negative-loss domain.
+    * UPWARD DIVISION. See the asymmetry note above. Downward division is
+      proved, which covers the paths that need it today.
     * ANY NATIVE CODE. Lean computes intermediates in `Int`, which boxes.
       Reaching a widening register multiply needs an `@[extern]` binding to
       `__int128_t`. That binding is a stated ABI contract rather than an open
       proof obligation, but it is still a component that can be wrong and
       belongs in the TCB beside the C compiler.
 
-  So: the overflow analysis is complete and verified in `HardwarePort`; the
-  refinement is drafted and unproved. The accurate description of the port is
-  "the envelope is known", not "the port exists".
+  So: the overflow analysis is verified in `HardwarePort`, and the refinement
+  holds for the bridge, addition, multiplication and downward division. What is
+  missing is upward division and any native code. The accurate description is
+  "the arithmetic refines the model except for one direction of division;
+  nothing is compiled".
 -/
 
 end Fixed64
