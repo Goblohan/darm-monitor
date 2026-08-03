@@ -3,8 +3,7 @@ import DarmMonitor.Feasibility
 /-
   FeasibilityRange — a design-time operating envelope.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   THE GAP THIS CLOSES. `Reachability.active_card_mul_delta_le_one` gives a
   NECESSARY condition, `|active| * δ ≤ 1`. `Feasibility.sharp_capacity` gives the

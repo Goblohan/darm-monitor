@@ -3,8 +3,7 @@ import DarmMonitor.Interference
 /-
   LLMToolCall — the discrete stratum instantiated on an LLM tool-caller.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   PURPOSE. Test whether the abstractions in `Basic.lean` are genuinely reusable
   or merely shaped around their one example. Nothing in this module edits

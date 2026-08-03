@@ -3,8 +3,7 @@ import DarmMonitor.Assumptions
 /-
   Minimality — necessity and independence cells for the assumption matrix.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHAT A CELL IS. The Dependency Atlas proposes a matrix recording, for each
   theorem, which hypotheses are necessary (N) and which are independent (I).

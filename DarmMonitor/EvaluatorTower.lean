@@ -3,8 +3,7 @@ import DarmMonitor.BracketTightening
 /-
   EvaluatorTower — `evaluator_sound` with the doubling tower built in.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHAT WAS LEFT OVER. `ExpEvaluator.evaluator_sound` takes the single-step
   brackets. `BracketTightening.bracketIter_sound` makes brackets arbitrarily

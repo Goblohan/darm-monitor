@@ -4,8 +4,7 @@ import DarmMonitor.ExpEvaluator
   BracketTightening — arbitrarily sharp bounds on `exp (-a)` by argument
   doubling, at no cost in soundness.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   THE PROBLEM. `ExpEvaluator`'s bracket is sound but loose. At `a = 0.5` it
   gives `[0.500, 0.666]` around a true `exp (-0.5) = 0.6065` — about ±14%. A

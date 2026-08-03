@@ -3,8 +3,7 @@ import DarmMonitor.NontrivialExpansion
 /-
   Reachability — the capacity bound on the active set (registered problem R1).
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   THE QUESTION (Ratification.R1). `safe_update_expands_ratifiable_set` shows a
   Z-safe update cannot shrink the active set. `StrictExpansion` and

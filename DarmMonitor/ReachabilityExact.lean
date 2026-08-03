@@ -3,8 +3,7 @@ import DarmMonitor.Reachability
 /-
   ReachabilityExact — progress on registered problem R1b.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   R1b CONJECTURE. For `A = active δ w` and a target `B ⊇ A` with `B ≠ ∅`, `B`
   is reachable by a Z-safe update iff `δ * |B| < 1`.

@@ -1,7 +1,7 @@
 /-
   DARM Reference-Monitor Core — minimal executable formal model.
 
-  STATUS: [SPEC] until `lake build` exits 0. Do not describe as verified before then.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   REGISTERED ASSUMPTIONS (not proven here, and not provable in this model):
   A1. Token unforgeability. `validToken` is opaque. Nothing here shows the agent

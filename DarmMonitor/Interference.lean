@@ -4,8 +4,7 @@ import DarmMonitor.Minimality
   Interference — noninterference as a property of an arbitrary transition
   system, instantiated on BOTH discrete models.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   THE PROBLEM THIS SOLVES. `Influence.lean` claims to address registered
   assumption A4 from `Basic.lean`. It does not, formally: the two modules

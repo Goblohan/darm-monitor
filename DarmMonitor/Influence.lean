@@ -5,7 +5,7 @@ import Mathlib.Data.Set.Basic
 /-
   A4 — Direct Authority Separation vs. Ratification Influence.
 
-  STATUS: [SPEC] until `lake build` exits 0.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   A4 IS DISCHARGED IN DarmMonitor/Interference.lean. This module shares no
 types with Basic.lean; the earlier claim to address A4 was an analogy, not

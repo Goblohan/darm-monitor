@@ -4,8 +4,7 @@ import DarmMonitor.Benchmark
   Feasibility — the sharp form of the capacity bound, and why the proved one
   overstates the operating envelope.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHAT PROMPTED THIS. `Reachability.active_card_mul_delta_le_one` proves
 

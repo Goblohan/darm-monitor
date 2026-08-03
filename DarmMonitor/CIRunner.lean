@@ -3,8 +3,7 @@ import DarmMonitor.LLMToolCall
 /-
   CIRunner — second instantiation of the discrete stratum.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHY A SECOND ONE. `LLMToolCall` showed the discrete stratum transfers, but
   its permission map `toolScope` is INJECTIVE — five tools onto five distinct

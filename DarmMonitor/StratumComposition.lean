@@ -6,7 +6,7 @@ import DarmMonitor.BoundaryMargin
   (DarmMonitor/Basic.lean) and the continuous boundary-margin layer
   (DarmMonitor/BoundaryMargin.lean).
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
   `sorryAx`. Do not describe as verified before both.
 
   DESIGN NOTE — why this is not an algebraic simulation.

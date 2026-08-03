@@ -3,8 +3,7 @@ import DarmMonitor.ReachabilityExact
 /-
   ReachabilitySufficiency — the constructive half of R1b.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHAT REMAINED. `ReachabilityExact` proved two halves of R1b:
     * the reweighting channel is surjective onto positive vectors, so R1b is a

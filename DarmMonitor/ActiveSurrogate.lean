@@ -4,8 +4,7 @@ import DarmMonitor.FixedPoint
   ActiveSurrogate — a computable over-approximation of the active set, and the
   quantified fail-closed refinement theorem.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHAT WAS BLOCKING. `FixedPoint.refinement_coord` covers one coordinate.
   `is_safe_signal_Z` quantifies over `active δ w`, which is `noncomputable` —

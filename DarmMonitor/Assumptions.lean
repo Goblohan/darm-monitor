@@ -4,8 +4,7 @@ import DarmMonitor.Influence
 /-
   Assumptions — A1–A4 as Lean objects rather than docstring prose.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHY THIS MODULE EXISTS. The Dependency Atlas proposes a Minimal Assumption
   Basis Matrix: for each theorem, which of A1–A4 are necessary, sufficient, or

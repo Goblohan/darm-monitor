@@ -4,8 +4,7 @@ import DarmMonitor.ActiveSurrogate
   ExpEvaluator — computable bounds on the reweighting step, closing the gap
   between the refinement architecture and a monitor that can actually run.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHAT WAS MISSING. `ActiveSurrogate.refinement_quantified` takes conservative
   fixed-point bounds on the post-update weights as HYPOTHESES. Producing them

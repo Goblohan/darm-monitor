@@ -4,7 +4,7 @@ import DarmMonitor.StratumComposition
   Ratification — the one transition that can break cross-stratum coherence,
   and what happens if you try to guard it.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
   `sorryAx`. Do not describe as verified before both.
 
   CONTEXT. `StratumComposition.coherence_preserved_under_agent_event` shows

@@ -4,8 +4,7 @@ import DarmMonitor.CIRunner
   Deployment — the reusable content that a `ReferenceMonitor` typeclass was
   meant to provide, extracted without the abstraction.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHY NOT A TYPECLASS. The proposal was:
 

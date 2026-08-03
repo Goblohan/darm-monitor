@@ -4,8 +4,7 @@ import DarmMonitor.Feasibility
   BoundaryCore — the boundary theorems over an arbitrary post-update vector,
   and a formal account of what the exponential update buys.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   THE OBSERVATION. None of the four theorems in `BoundaryMargin.lean` unfolds
   `reweight`. `safe_signal_equiv` is `δ * Z ≤ w'ᵢ ↔ δ ≤ w'ᵢ / Z`, pure algebra

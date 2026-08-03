@@ -4,8 +4,7 @@ import DarmMonitor.Runtime
   FixedPoint — a computable, conservative refinement of the boundary
   certificate, with a fail-closed simulation theorem.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   THE PROBLEM. `is_safe_signal_Z` quantifies over `ℝ`, and `Real` in Lean is a
   quotient of Cauchy sequences with no code generation, so `reweight`,

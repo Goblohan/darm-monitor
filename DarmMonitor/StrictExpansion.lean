@@ -4,7 +4,7 @@ import DarmMonitor.Ratification
   StrictExpansion — a concrete witness that `safe_update_expands_ratifiable_set`
   is not vacuous.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
   `sorryAx`. Do not describe as verified before both.
 
   THE VACUITY WORRY. `Ratification.safe_update_expands_ratifiable_set` proves

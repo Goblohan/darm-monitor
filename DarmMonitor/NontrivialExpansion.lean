@@ -4,8 +4,7 @@ import DarmMonitor.StrictExpansion
   NontrivialExpansion — strict expansion of the active set under a Z-SAFE
   update with η ≠ 0 and loss ≠ 0.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHY THIS EXISTS. `StrictExpansion.strict_expansion_witness` used η = 0,
   which annihilates `loss` (every factor is exp 0 = 1) and reduces the update

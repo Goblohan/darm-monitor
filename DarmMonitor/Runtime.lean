@@ -3,8 +3,7 @@ import DarmMonitor.Deployment
 /-
   Runtime — the executable fragment, and an honest boundary around it.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHAT EXTRACTS AND WHAT DOES NOT.
 

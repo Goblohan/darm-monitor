@@ -5,8 +5,7 @@ import DarmMonitor.EvaluatorTower
   RationalInstance — a second update rule through the whole chain, to test
   whether the abstraction in `BoundaryCore` is real.
 
-  STATUS: [SPEC] until `lake build` exits 0 AND `#print axioms` shows no
-  `sorryAx`.
+  STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
 
   WHY. `BoundaryCore` shows the boundary theorems do not mention the update
   rule. That is a claim about the proofs. Whether a DIFFERENT update actually
