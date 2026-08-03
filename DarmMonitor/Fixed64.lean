@@ -186,6 +186,53 @@ theorem divDown_simulates (x y : F64) (hy : 4294967296 ≤ y.raw.toInt) :
     (Int64.le_toInt x.raw) (Int64.toInt_lt x.raw)
   exact toInt_ofInt_of_range _ hlo hhi
 
+/-! ## 7. Upward division
+
+  Needs a STRICT lower bound on the quotient, because it negates the result and
+  the target bound is strict. `quotient_in_range` gives only `-(2^63) ≤ q`.
+
+  The strict version is available once the input excludes `-2^63`. With
+  `-2^63 < x < 2^63` we have `|x| ≤ 2^63 - 1`, so `|x * 2^32| ≤ 2^95 - 2^32` —
+  symmetric, with a full `2^32` of slack below `2^95`. The quotient by `d ≥ 2^32`
+  is then bounded by `2^63 - 1` at both ends.
+
+  Excluding `-2^63` is not a restriction in practice: it is the extreme negative
+  representable raw value, not a weight any deployment produces. -/
+
+/-- **Strict quotient bound**, available when the input excludes the two's
+    complement minimum. -/
+theorem quotient_in_range_strict (a d : ℤ) (hd : 4294967296 ≤ d)
+    (hlo : -(2 ^ 63) < a) (hhi : a < 2 ^ 63) :
+    -(2 ^ 63) < (a * 4294967296) / d ∧ (a * 4294967296) / d < 2 ^ 63 := by
+  have hdpos : (0 : ℤ) < d := by omega
+  have hq := Int.mul_ediv_add_emod (a * 4294967296) d
+  have hm := Int.emod_nonneg (a * 4294967296) (by omega : d ≠ 0)
+  have hml := Int.emod_lt_of_pos (a * 4294967296) hdpos
+  constructor <;> nlinarith [hq, hm, hml, hd, hlo, hhi, hdpos]
+
+/-- 64-bit fixed-point division rounding UP. -/
+def F64.divUp (x y : F64) : F64 :=
+  ⟨Int64.ofInt (-((-(x.raw.toInt * 2 ^ k)) / y.raw.toInt))⟩
+
+/-- **Upward division simulates**, given a divisor of at least one and an input
+    above the two's complement minimum. -/
+theorem divUp_simulates (x y : F64) (hy : 4294967296 ≤ y.raw.toInt)
+    (hx : -(2 ^ 63) < x.raw.toInt) :
+    (F64.divUp x y).toFixed = ExpEvaluator.Fixed.divUp x.toFixed y.toFixed := by
+  unfold F64.divUp F64.toFixed ExpEvaluator.Fixed.divUp
+  congr 1
+  have hk : (2 : ℤ) ^ k = 4294967296 := by norm_num [FixedPoint.k]
+  rw [hk]
+  have h1 : -(2 ^ 63) < -(x.raw.toInt) := by
+    have := Int64.toInt_lt x.raw; omega
+  have h2 : -(x.raw.toInt) < 2 ^ 63 := by omega
+  obtain ⟨hlo, hhi⟩ := quotient_in_range_strict (-(x.raw.toInt)) y.raw.toInt hy h1 h2
+  have hswap : (-(x.raw.toInt) * 4294967296) = -(x.raw.toInt * 4294967296) := by ring
+  rw [hswap] at hlo hhi
+  refine toInt_ofInt_of_range (-((-(x.raw.toInt * 4294967296)) / y.raw.toInt)) ?_ ?_
+  · omega
+  · omega
+
 /-! ## Registered status
 
   PROVED: the type, its model projection and injectivity; the multiplication
@@ -242,3 +289,5 @@ end DARM
 #print axioms DARM.Fixed64.mul_simulates
 #print axioms DARM.Fixed64.quotient_in_range
 #print axioms DARM.Fixed64.divDown_simulates
+#print axioms DARM.Fixed64.quotient_in_range_strict
+#print axioms DARM.Fixed64.divUp_simulates
