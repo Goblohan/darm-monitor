@@ -239,7 +239,7 @@ theorem divUp_simulates (x y : F64) (hy : 4294967296 ≤ y.raw.toInt)
   envelope over `F64`; the bridge `toInt_ofInt_of_range`; and simulation for
   addition, multiplication and downward division. Nine theorems, no `sorryAx`.
 
-  ON `divUp` ASYMMETRY — the one arithmetic gap, and its blueprint.
+  ON `divUp` ASYMMETRY — RESOLVED. Three incremental attempts failed; deriving the bound first settled it. With -2^63 < x < 2^63 the product bound is symmetric with 2^32 of slack, giving a strict quotient at both ends. See quotient_in_range_strict.
 
   `divUp` negates before dividing, so the range argument runs over `-x`. Two's
   complement is asymmetric: `Int64.toInt` covers `[-2^63, 2^63)`, so negating
