@@ -5,16 +5,56 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# docgen was removed 2026-08-02 (it was ~98% of build time and unpublished -
+# Pages was never enabled). pages/id-token permissions are dropped with it.
 permissions:
-  contents: read # Read access to repository contents
-  pages: write # Write access to GitHub Pages
-  id-token: write # Write access to ID tokens
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
+
+      # Tier 1: placeholder search. Excludes comment lines so header text
+      # like "no `sorry`" does not self-trigger. Matches the tactic forms
+      # `sorry` and `admit`, not the substring inside other identifiers.
+      - name: Placeholder search (tier 1)
+        run: |
+          if grep -rnE '^\s*(sorry|admit)\b' DarmMonitor/*.lean; then
+            echo "::error::literal sorry/admit found outside comments"
+            exit 1
+          fi
+          echo "No literal sorry/admit in source."
+
       - uses: leanprover/lean-action@v1
+
+      # Tier 2: axiom audit. This is the guard that actually matters - it
+      # catches sorryAx arriving through an import, which tier 1 cannot see.
+      # Re-runs the build (fast: everything is cached from lean-action above)
+      # and inspects the trace output directly, so this checks what was
+      # actually built rather than re-deriving it separately.
+      - name: Axiom audit (tier 2)
+        run: |
+          lake build 2>&1 | tee /tmp/build.log
+          if grep -q 'sorryAx' /tmp/build.log; then
+            echo "::error::sorryAx present in an axiom trace"
+            grep 'sorryAx' -B1 /tmp/build.log
+            exit 1
+          fi
+          echo "No sorryAx in any axiom trace."
+
+      # Guards against the failure this project actually had twice: a green
+      # build that quietly stopped checking something. Not a correctness
+      # proof - a floor. If the trace count drops, a module fell out of the
+      # root import graph or a theorem lost its #print axioms line, and
+      # either is worth a human looking rather than silently passing.
+      - name: Trace count floor
+        run: |
+          count=$(grep -c 'depends on axioms\|does not depend on any axioms' /tmp/build.log || true)
+          echo "Axiom traces this run: $count"
+          if [ "$count" -lt 90 ]; then
+            echo "::error::only $count axiom traces found, expected at least 90"
+            echo "::error::a module may have left the root import graph, or a #print axioms line was removed"
+            exit 1
+          fi
