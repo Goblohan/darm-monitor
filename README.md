@@ -300,6 +300,24 @@ weights `(1,4,4,4)` cap `δ` at `4/13`, not `1`.
 hand, which is checkable at runtime. Do not compute it as `1/δ` coordinates —
 that is a correct bound no real distribution approaches.
 
+`FeasibilityRange.lean` adds the third statement, the one a deployment actually
+needs. If every weight lies in `[lo, hi]` then `dim * δ ≤ lo / hi` is
+**sufficient** — evaluable before any weights exist. The correction factor against
+`dim * δ ≤ 1` is exactly the dynamic range of the weights, and
+`not_sufficient_witness` proves the coarse bound really is not a design rule:
+`dim = 2`, `δ = 1/2`, weights `(1,3)` meets it at its exact limit and is unsafe.
+
+Three statements, three questions:
+
+| Form | Answers |
+|---|---|
+| `\|S\| * δ ≤ 1`, necessary | what cannot happen |
+| `inf / Z`, exact | is *this* state feasible, at runtime |
+| `dim * δ ≤ lo / hi`, sufficient | what `δ` to choose, at design time |
+
+Only the first existed before the benchmark; the third exists because the sweep
+showed the first was being read as it.
+
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
 | | Assumption | Status |
@@ -449,6 +467,7 @@ DarmMonitor/
   EvaluatorTower.lean       tower packaged; n as a precision parameter
   Benchmark.lean            false-rejection measurement (no theorems)
   Feasibility.lean          sharp capacity bound; why the coarse one misleads
+  FeasibilityRange.lean     design-time envelope from weight dynamic range
   BoundaryCore.lean         boundary theorems over an arbitrary update
   RationalInstance.lean     second instance; exact, but does not compose
   LLMToolCall.lean          instantiation: LLM tool-calling
