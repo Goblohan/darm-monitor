@@ -456,11 +456,14 @@ property no computable rule has.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
-- The `Int64` port's remaining pieces. `HardwarePort.lean`, `Fixed64.lean` and
-  `Fixed64Refinement.lean` prove the envelope, the arithmetic refinement, and
-  single-coordinate connection to the certificate. Still open: a sum bound
-  against `Int64` wraparound (needed for the quantified evaluator), connecting
-  `RationalInstance` the same way, and any `@[extern]` binding.
+- The `Int64` port's remaining pieces. `HardwarePort.lean`, `Fixed64.lean`,
+  `Fixed64Refinement.lean` and `RationalF64.lean` prove the envelope, the
+  arithmetic refinement, and single-coordinate connection to the certificate for
+  both instances of the boundary abstraction — `checkSafeCoord64` and
+  `refinement_coord64` needed no change to serve the rational update, confirming
+  they were generic rather than exp-specific. Still open: a sum bound against
+  `Int64` wraparound, needed for the quantified evaluator over either instance,
+  and any `@[extern]` binding.
 - Product composition. The product of two monitors is **not** a monitor: `cap` and
   `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
   that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
