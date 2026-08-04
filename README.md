@@ -318,6 +318,41 @@ Three statements, three questions:
 Only the first existed before the benchmark; the third exists because the sweep
 showed the first was being read as it.
 
+**The 64-bit port is underway** (`HardwarePort.lean`, `Fixed64.lean`,
+`Fixed64Refinement.lean`). `FixedPoint.Fixed` wraps `Int`, which is
+arbitrary-precision and boxes into `lean_object*`. A callable library wants
+`int64_t`. `HardwarePort.lean` proves the overflow envelope: on 64-bit
+hardware, fixed-point multiplication computes through a widening 128-bit
+intermediate before shifting back down, so the binding constraint is the
+*output* fitting in `Int64`, not the intermediate. At `k = 32` that permits raw
+magnitude `2^47` — value 32768 — comfortably above any weight.
+
+`Fixed64.lean` builds the type and proves it refines `FixedPoint.Fixed` for
+every operation: the bridge (`Int64.ofInt` round-trips exactly inside
+`[-2^63, 2^63)`, via balanced modulus), addition, multiplication, and **both**
+directed divisions. Eleven theorems, no `sorryAx`. Getting `divUp` right took
+four attempts — the first three each patched the previous boundary failure and
+exposed the next one, because two's complement is asymmetric: negating the
+minimum representable value overflows the top by one. What worked was deriving
+the bound before writing any Lean: excluding that one input makes the
+*product* bound symmetric with `2^32` of slack, which makes the quotient
+strict at both ends.
+
+**`Fixed64Refinement.lean` connects the type to the certificate.** An external
+review (2026-08-04) made a sharper point than the port's own notes had:
+proving `F64` refines `Fixed` is not the same as proving anything in this
+repository *uses* `F64` — every evaluator ran on `Int`. `checkSafeCoord64` runs
+the safety check on genuine `Int64` values via the proven native multiply, and
+`refinement_coord64` proves it agrees with the `Int`-based evaluator inside the
+envelope, for one coordinate.
+
+**What is not yet done, honestly.** The quantified sum: native `Int64`
+addition wraps, and nothing here yet bounds a sum of `F64` values against that
+— it is new content, not a restatement of what `HardwarePort` proves over
+`Int`. Division is unconnected: `divDown_simulates` and `divUp_simulates` are
+proved but nothing calls them, so `RationalInstance` has no 64-bit path yet.
+And no `@[extern]` binding exists, so nothing has been compiled or profiled.
+
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
 | | Assumption | Status |
@@ -421,10 +456,11 @@ property no computable rule has.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
-- The `Int64` port. `Int` is arbitrary-precision, which keeps the refinement algebra
-  clean but boxes into `lean_object*`. Porting to `Int64` is what makes `@[export]`
-  emit primitive C types and keeps the FFI layer thin — at the cost of threading
-  no-overflow hypotheses through every lemma, including sums over the index type.
+- The `Int64` port's remaining pieces. `HardwarePort.lean`, `Fixed64.lean` and
+  `Fixed64Refinement.lean` prove the envelope, the arithmetic refinement, and
+  single-coordinate connection to the certificate. Still open: a sum bound
+  against `Int64` wraparound (needed for the quantified evaluator), connecting
+  `RationalInstance` the same way, and any `@[extern]` binding.
 - Product composition. The product of two monitors is **not** a monitor: `cap` and
   `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
   that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
@@ -466,6 +502,9 @@ DarmMonitor/
   BracketTightening.lean    argument doubling; arbitrarily sharp brackets
   EvaluatorTower.lean       tower packaged; n as a precision parameter
   Benchmark.lean            false-rejection measurement (no theorems)
+  HardwarePort.lean         64-bit overflow envelope
+  Fixed64.lean              type refining Fixed; bridge, add, mul, both div
+  Fixed64Refinement.lean    F64 connected to the certificate (one coordinate)
   Feasibility.lean          sharp capacity bound; why the coarse one misleads
   FeasibilityRange.lean     design-time envelope from weight dynamic range
   BoundaryCore.lean         boundary theorems over an arbitrary update
