@@ -32,3 +32,4 @@ import DarmMonitor.RationalF64
 import DarmMonitor.Fixed64Sum
 import DarmMonitor.Fixed64SumOver
 import DarmMonitor.Fixed64MulDown
+import DarmMonitor.Fixed64Tower
