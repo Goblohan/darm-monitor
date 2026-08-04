@@ -27,3 +27,4 @@ import DarmMonitor.RationalInstance
 import DarmMonitor.FeasibilityRange
 import DarmMonitor.HardwarePort
 import DarmMonitor.Fixed64
+import DarmMonitor.Fixed64Refinement
