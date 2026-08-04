@@ -29,3 +29,4 @@ import DarmMonitor.HardwarePort
 import DarmMonitor.Fixed64
 import DarmMonitor.Fixed64Refinement
 import DarmMonitor.RationalF64
+import DarmMonitor.Fixed64Sum
