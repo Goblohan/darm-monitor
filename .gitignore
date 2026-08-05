@@ -1,2 +1,4 @@
 /.lake
 JOURNAL.md 
+c/*.o 
+c/*.a 
