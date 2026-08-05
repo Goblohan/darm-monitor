@@ -85,12 +85,12 @@ def testPairs : List (F64 × F64) :=
 
 -- Number of test pairs on which the native and verified versions agree.
 -- Both should equal `testPairs.length`, printed third.
-#eval (testPairs.filter (fun p => agreeUp p.1 p.2)).length
-#eval (testPairs.filter (fun p => agreeDown p.1 p.2)).length
-#eval testPairs.length
+-- #eval (testPairs.filter (fun p => agreeUp p.1 p.2)).length
+-- #eval (testPairs.filter (fun p => agreeDown p.1 p.2)).length
+-- #eval testPairs.length
 
 -- and the specific case the truncation bug got wrong
-#eval agreeUp (fx 3) (fx 3)
+-- #eval agreeUp (fx 3) (fx 3)
 
 /-! ## Registered status
 

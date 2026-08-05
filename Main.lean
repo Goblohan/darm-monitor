@@ -1,4 +1,5 @@
 import DarmMonitor
+import DarmMonitor.Fixed64Native
 
 /-
   Main — the demo executable.
@@ -30,9 +31,9 @@ def main : IO Unit := do
   IO.println ""
 
   IO.println "-- native multiply, differential tests --"
-  let pairs := Fixed64Native.testPairs
-  let okUp := (pairs.filter (fun p => Fixed64Native.agreeUp p.1 p.2)).length
-  let okDown := (pairs.filter (fun p => Fixed64Native.agreeDown p.1 p.2)).length
+  let pairs := DARM.Fixed64Native.testPairs
+  let okUp := (pairs.filter (fun p => DARM.Fixed64Native.agreeUp p.1 p.2)).length
+  let okDown := (pairs.filter (fun p => DARM.Fixed64Native.agreeDown p.1 p.2)).length
   IO.println s!"pairs tested        : {pairs.length}"
   IO.println s!"mulUp   agreements  : {okUp}"
   IO.println s!"mulDown agreements  : {okDown}"
