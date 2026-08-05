@@ -318,9 +318,7 @@ Three statements, three questions:
 Only the first existed before the benchmark; the third exists because the sweep
 showed the first was being read as it.
 
-**The 64-bit port is underway** (`HardwarePort.lean`, `Fixed64.lean`,
-`Fixed64Refinement.lean`). `FixedPoint.Fixed` wraps `Int`, which is
-arbitrary-precision and boxes into `lean_object*`. A callable library wants
+**The 64-bit port reaches a quantified evaluator.** `FixedPoint.Fixed` wraps `Int`, which is arbitrary-precision and boxes into `lean_object*`. A callable library wants
 `int64_t`. `HardwarePort.lean` proves the overflow envelope: on 64-bit
 hardware, fixed-point multiplication computes through a widening 128-bit
 intermediate before shifting back down, so the binding constraint is the
@@ -456,14 +454,13 @@ property no computable rule has.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
-- The `Int64` port's remaining pieces. `HardwarePort.lean`, `Fixed64.lean`,
-  `Fixed64Refinement.lean` and `RationalF64.lean` prove the envelope, the
-  arithmetic refinement, and single-coordinate connection to the certificate for
-  both instances of the boundary abstraction — `checkSafeCoord64` and
-  `refinement_coord64` needed no change to serve the rational update, confirming
-  they were generic rather than exp-specific. Still open: a sum bound against
-  `Int64` wraparound, needed for the quantified evaluator over either instance,
-  and any `@[extern]` binding.
+- Nothing further in Lean for the port. `evaluator_sound_tower64`
+  (`Fixed64Evaluator.lean`) takes the check run on `Int64` values over the whole
+  index type and returns `is_safe_signal_Z`. What remains is not proof work: an
+  `@[extern]` binding to a widening multiply — a trust boundary, since nothing
+  proves the C matches the Lean specification it replaces — a `[[lean_exe]]`
+  target, an actual compiled binary, and measurement against it rather than the
+  interpreter.
 - Product composition. The product of two monitors is **not** a monitor: `cap` and
   `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
   that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
@@ -508,6 +505,14 @@ DarmMonitor/
   HardwarePort.lean         64-bit overflow envelope
   Fixed64.lean              type refining Fixed; bridge, add, mul, both div
   Fixed64Refinement.lean    F64 connected to the certificate (one coordinate)
+  Fixed64SumOver.lean       Fintype-indexed sum over F64
+  Fixed64MulDown.lean       downward multiply over F64
+  Fixed64Sub.lean           subtraction over F64
+  Fixed64Tower.lean         doubling tower; unit invariant stable under squaring
+  Fixed64Bracket.lean       expBracket over F64
+  Fixed64ZhiN.lean          partition-function bound over F64
+  Fixed64Evaluator.lean     the quantified evaluator over F64
+  Fixed64Sum.lean           list summation (superseded by Fixed64SumOver)
   Feasibility.lean          sharp capacity bound; why the coarse one misleads
   FeasibilityRange.lean     design-time envelope from weight dynamic range
   BoundaryCore.lean         boundary theorems over an arbitrary update
