@@ -71,6 +71,16 @@ def agreeDown (x y : F64) : Bool :=
   (mulDownNative x y).raw == (Fixed64MulDown.F64.mulDown x y).raw
 
 private def fx (n : Int) : F64 := ⟨Int64.ofInt n⟩
+/-- Deterministically generate many test pairs.
+
+    Uses a simple integer recurrence so every CI run is identical.
+    This is NOT random. It is reproducible.
+-/
+def generatedPairs (n : Nat) : List (F64 × F64) :=
+  (List.range n).map fun i =>
+    let x : Int := (Int.ofNat ((i * 7919) % 100000)) - 50000
+    let y : Int := (Int.ofNat ((i * 1543) % 100000)) - 50000
+    (fx x, fx y)
 
 /-- A spread chosen to hit the cases where truncation and flooring differ:
     both signs, products of both signs, exact multiples of `2^32`, and small
@@ -91,6 +101,9 @@ def testPairs : List (F64 × F64) :=
 
 -- and the specific case the truncation bug got wrong
 -- #eval agreeUp (fx 3) (fx 3)
+
+def largeTestPairs : List (F64 × F64) :=
+ testPairs ++ generatedPairs 5000
 
 /-! ## Registered status
 

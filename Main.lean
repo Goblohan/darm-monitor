@@ -31,7 +31,7 @@ def main : IO Unit := do
   IO.println ""
 
   IO.println "-- native multiply, differential tests --"
-  let pairs := DARM.Fixed64Native.testPairs
+  let pairs := Fixed64Native.largeTestPairs
   let okUp := (pairs.filter (fun p => DARM.Fixed64Native.agreeUp p.1 p.2)).length
   let okDown := (pairs.filter (fun p => DARM.Fixed64Native.agreeDown p.1 p.2)).length
   IO.println s!"pairs tested        : {pairs.length}"
