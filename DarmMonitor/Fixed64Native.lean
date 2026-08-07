@@ -103,7 +103,7 @@ def testPairs : List (F64 × F64) :=
 -- #eval agreeUp (fx 3) (fx 3)
 
 def largeTestPairs : List (F64 × F64) :=
- testPairs ++ generatedPairs 5000
+ testPairs ++ generatedPairs 50000
 
 /-! ## Registered status
 

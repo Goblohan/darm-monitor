@@ -2,3 +2,6 @@
 JOURNAL.md 
 c/*.o 
 c/*.a 
+*.code-search 
+lakefile.toml.bak 
+BackupBeforeRuntime/ 
