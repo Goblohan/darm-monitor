@@ -221,7 +221,7 @@ theorem A1_insufficient_for_coherence :
            Ratification results, both expansion witnesses. Mechanical, and it
            makes the A2 column of the matrix real.
 
-  OPEN:    A1 (decision above). Every "necessary" cell other than
+  OPEN:    OPEN:    Every "necessary" cell other than
            A2/capacity. Necessity requires one drop-countermodel per cell;
            none of the others exist yet, and the matrix should not assert
            them until they do.
