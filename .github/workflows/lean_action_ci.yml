@@ -58,3 +58,32 @@ jobs:
             echo "::error::a module may have left the root import graph, or a #print axioms line was removed"
             exit 1
           fi
+
+      # Tier 4: the runtime. The C widening multiply is NOT verified - it is
+      # differentially tested against the proved Lean implementation. Those
+      # tests are worth nothing if they only run when someone remembers to run
+      # them, so they run here. A toolchain change that alters the arithmetic
+      # (a different Clang, different flags, a target where >> is not
+      # arithmetic shift) shows up as a divergence rather than silently.
+      #
+      # Lake does not build the C; it is compiled here the same way it is
+      # locally, which also checks those instructions still work.
+      - name: Build the native library
+        run: |
+          LEANBIN="$(dirname "$(which lean)")"
+          "$LEANBIN/leanc" -c c/darm_native.c -o c/darm_native.o -O2
+          ar rcs c/libdarm_native.a c/darm_native.o
+          ls -l c/
+
+      - name: Runtime differential tests (tier 4)
+        run: |
+          lake exe darmdemo | tee /tmp/demo.log
+          if grep -q 'DIVERGENCE' /tmp/demo.log; then
+            echo "::error::native C diverges from the verified Lean implementation"
+            exit 1
+          fi
+          if ! grep -q 'RESULT: native matches' /tmp/demo.log; then
+            echo "::error::demo did not report a differential result at all"
+            exit 1
+          fi
+          echo "Native implementation agrees with the verified one on all tested pairs."
