@@ -351,6 +351,32 @@ addition wraps, and nothing here yet bounds a sum of `F64` values against that
 proved but nothing calls them, so `RationalInstance` has no 64-bit path yet.
 And no `@[extern]` binding exists, so nothing has been compiled or profiled.
 
+**The port runs.** `c/darm_native.c` supplies the widening multiply — 64×64→128,
+shift back down — which `Fixed64Native.lean` binds with `@[extern]`. `Main.lean`
+is a `lean_exe` target linking it. `lake exe darmdemo` prints the discrete
+monitor's ALLOWED/BLOCKED table from compiled code and then the differential
+results.
+
+**The binding is deliberately not on the proved function.** `@[extern]` on
+`F64.mulUp` would replace its implementation everywhere, including inside every
+simulation theorem — those theorems would stay true about the Lean definition
+while the running code was something else, and nothing would check the gap. So
+`mulUpNative` is a separate definition, and the two are compared on **50,012
+deterministic pairs**, all agreeing in both rounding directions. That is not
+proof; it is a trust boundary made testable rather than merely asserted.
+
+**A bug this caught before shipping.** The first C used `/`, which truncates
+toward zero, where Lean's `Int.ediv` floors. They diverge on negative numerators,
+so `mulUp` would have been wrong on every *positive* product — at `3 × 3` the
+specification gives 1 and truncation gives 0. Arithmetic right shift is floor
+division for a positive power of two and is what the C now uses. No proof in this
+repository would have found that; the differential tests would.
+
+**The trusted computing base, precisely.** Before the binding: the Lean kernel.
+After it: the kernel, the Lean C emitter, Clang, the Lean FFI conventions, and
+`darm_native.c`. That is a real widening and it is the price of leaving the
+interpreter.
+
 ### Assumption registry (`Assumptions.lean`, `Minimality.lean`)
 
 | | Assumption | Status |
@@ -454,13 +480,15 @@ property no computable rule has.
   on a machine-computed bound.
 - Most necessity cells. Six are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
-- Nothing further in Lean for the port. `evaluator_sound_tower64`
-  (`Fixed64Evaluator.lean`) takes the check run on `Int64` values over the whole
-  index type and returns `is_safe_signal_Z`. What remains is not proof work: an
-  `@[extern]` binding to a widening multiply — a trust boundary, since nothing
-  proves the C matches the Lean specification it replaces — a `[[lean_exe]]`
-  target, an actual compiled binary, and measurement against it rather than the
-  interpreter.
+- Bulk FFI. The extern binding is called once per multiply, and at that
+  granularity the call and the `Int` boxing cost far more than the arithmetic —
+  500,120 multiplies took 472 ms, roughly 944 ns each, for what is one hardware
+  instruction. Correctness is unaffected; throughput would need the C to take a
+  whole vector rather than a pair.
+- Lake does not build the C. `c/libdarm_native.a` is compiled by hand with
+  `leanc` and `llvm-ar`; the executable links it via `moreLinkArgs`. A fresh
+  clone must run those two commands before `lake exe darmdemo` will link.
+  An `extern_lib` build rule would automate it.
 - Product composition. The product of two monitors is **not** a monitor: `cap` and
   `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
   that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
@@ -512,6 +540,9 @@ DarmMonitor/
   Fixed64Bracket.lean       expBracket over F64
   Fixed64ZhiN.lean          partition-function bound over F64
   Fixed64Evaluator.lean     the quantified evaluator over F64
+  Fixed64Native.lean        C bindings; differential tests vs the proved version
+  Main.lean                 demo executable
+  c/darm_native.c           widening multiply (NOT verified - see below)
   Fixed64Sum.lean           list summation (superseded by Fixed64SumOver)
   Feasibility.lean          sharp capacity bound; why the coarse one misleads
   FeasibilityRange.lean     design-time envelope from weight dynamic range
