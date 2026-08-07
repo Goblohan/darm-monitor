@@ -135,22 +135,21 @@ theorem eps_choice_bounds
       the witness realizes exactly `B`.
     * The `ε` choice discharging the first obligation: `eps_choice_bounds`.
 
-  NOT CLOSED — BE PRECISE ABOUT THIS. The second obligation, `ε < δ * Z`, is a
-  HYPOTHESIS of `active_witness_eq`, not a consequence of `δ * |B| < 1`. It
-  fails when `δ * |B|` is small relative to `1 / n`: with `B` a single element
-  and `δ` near `1 / n`, the chosen `ε` can exceed `δ * |B|`, and then the
-  off-target coordinates rise above the floor and the active set overshoots `B`.
+ CLOSED, 2026-08-07. The second obligation IS satisfiable simultaneously with
+  the first — see `ReachabilityClosed.lean`. Taking
 
-  So what is proved is: `B` is realizable whenever both obligations hold, and
-  the first always can be arranged. The unconditional biconditional
+      ε = min( (1 - δm)/(2δk),  δm/2 )
 
-      B realizable  ⟺  δ * |B| < 1
+  discharges both for every admissible input, so `δ * |B| < 1` is sufficient as
+  well as necessary and the biconditional holds.
 
-  remains OPEN. Closing it needs either a sharper `ε` (one depending on
-  `δ * |B|` rather than on `n` alone) or a demonstration that the conjecture is
-  false at the small-`δ|B|` end — in which case the correct threshold is
-  stronger than `δ * |B| < 1` and the conjecture as stated should be withdrawn.
-  I do not currently know which.
+  WHAT THIS FILE PREVIOUSLY RECORDED, AND WHY IT WAS WRONG. It said the
+  conjecture "may in fact be false at the small-δ|B| end", on the grounds that
+  `eps_choice_bounds`' ε violates the second obligation there. That much is
+  true and still is. But nothing followed about OTHER choices of ε, and the
+  note crossed from "this construction fails" to "the statement may be false" —
+  a gap of exactly one existential quantifier. The doubt was an error of
+  inference, not a feature of the mathematics.
 -/
 
 end ReachabilitySufficiency
