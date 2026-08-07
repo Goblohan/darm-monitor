@@ -344,12 +344,7 @@ the safety check on genuine `Int64` values via the proven native multiply, and
 `refinement_coord64` proves it agrees with the `Int`-based evaluator inside the
 envelope, for one coordinate.
 
-**What is not yet done, honestly.** The quantified sum: native `Int64`
-addition wraps, and nothing here yet bounds a sum of `F64` values against that
-— it is new content, not a restatement of what `HardwarePort` proves over
-`Int`. Division is unconnected: `divDown_simulates` and `divUp_simulates` are
-proved but nothing calls them, so `RationalInstance` has no 64-bit path yet.
-And no `@[extern]` binding exists, so nothing has been compiled or profiled.
+
 
 **The port runs.** `c/darm_native.c` supplies the widening multiply — 64×64→128,
 shift back down — which `Fixed64Native.lean` binds with `@[extern]`. `Main.lean`
@@ -436,7 +431,8 @@ property no computable rule has.
 - Not a deployed system. The discrete monitor compiles and runs; the boundary
   certificate has a computable, proved-sound path via `ExpEvaluator` and
   `EvaluatorTower`, and its rejection rate is measured at one parameter point.
-  Nothing has run against a real workload, and no binary has been produced.
+  Nothing has run against a real workload. The demo binary builds and runs, but
+  it exercises the differential tests, not a deployment.
 - Not a zero-TCB extraction. Lean's emitted C uses its own runtime, boxing and
   reference counting, so any host program needs marshalling glue that is
   hand-written and unverified. The honest TCB is: Lean kernel + Lean C emitter +
@@ -450,19 +446,25 @@ property no computable rule has.
 
 ## Open problems
 
-- Restating R1b over `Finset`s. The arithmetic core is CLOSED
-  (`ReachabilityClosed.lean`): `ε = min((1 - δm)/(2δk), δm/2)` discharges both
-  margin obligations for every admissible input, so `δ * |B| < 1` is sufficient
-  as well as necessary and the biconditional holds. Threading that back through
-  `active_witness_eq` is mechanical and not done.
+- **R1b is closed.** `ReachabilityClosed.lean` supplies
+  `ε = min((1 - δm)/(2δk), δm/2)`, which discharges both margin obligations for
+  every admissible input; `ReachabilityFinset.realizable_of_card_lt` states it
+  over actual `Finset`s — give it a nonempty proper subset with `δ * |B| < 1`
+  and it returns a weight vector whose active set is exactly `B`.
 
   
-
-  This bullet previously said the conjecture might be FALSE. That was an error
-  of inference: `eps_choice_bounds`' particular `ε` does violate the second
+  This entry previously said the conjecture might be FALSE. That was an error of
+  inference: `eps_choice_bounds`' particular `ε` does violate the second
   obligation at small `δ|B|` — true then and now — but nothing followed about
   other choices of `ε`. It crossed from "this construction fails" to "the
   statement may be false", a gap of one existential quantifier.
+
+  
+  Only sufficiency is packaged as a single theorem. Necessity exists
+  (`active_card_strict_lt_of_ne_univ`) but is stated over an arbitrary vector's
+  active set, so the two do not compose into one biconditional without more
+  work. A draft that took necessity as an unused hypothesis was deleted — the
+  linter caught that its signature advertised more than the proof delivered.
 - Migrating `BoundaryMargin.lean` onto `BoundaryCore`. The general theorems exist
   and the originals are proved to be instances, but `BoundaryMargin` still carries
   its own copies. Deleting them is mechanical and cascades through every
@@ -522,6 +524,7 @@ DarmMonitor/
   ReachabilityExact.lean    R1b: channel surjectivity, sharp capacity bound
   ReachabilitySufficiency.lean  R1b: witness construction
   ReachabilityClosed.lean   R1b: both obligations jointly satisfiable
+  ReachabilityFinset.lean   R1b: realizability over Finsets
   Influence.lean            minimal observation-channel example
   Interference.lean         general noninterference; A4 on the monitor itself
   SemanticQuotient.lean     semantic equivalence relation
