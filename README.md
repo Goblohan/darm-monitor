@@ -444,7 +444,7 @@ property no computable rule has.
 - Not a claim of physical soundness. Sensor and environment behaviour are outside
   the model entirely.
 
-## Open problems
+## Open problems, and one recently closed
 
 - **R1b is closed.** `ReachabilityClosed.lean` supplies
   `ε = min((1 - δm)/(2δk), δm/2)`, which discharges both margin obligations for
