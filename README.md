@@ -450,14 +450,19 @@ property no computable rule has.
 
 ## Open problems
 
-- **R1b** — sufficiency, unconditionally. Necessity is closed sharply
-  (`ReachabilityExact.lean`) and a witness construction exists given two margin
-  obligations (`ReachabilitySufficiency.lean`), the first of which the `ε` choice
-  always discharges. The second, `ε < δ * Z`, is **not** implied by `δ * |B| < 1`.
-  The conjecture may in fact be false at the small-`δ|B|` end: with `B` a singleton
-  and `δ` near `1/n`, the off-target coordinates can clear the floor and the active
-  set overshoots `B`. Closing this needs either a sharper `ε` depending on `δ|B|`
-  rather than on `n`, or the counterexample that withdraws the conjecture.
+- Restating R1b over `Finset`s. The arithmetic core is CLOSED
+  (`ReachabilityClosed.lean`): `ε = min((1 - δm)/(2δk), δm/2)` discharges both
+  margin obligations for every admissible input, so `δ * |B| < 1` is sufficient
+  as well as necessary and the biconditional holds. Threading that back through
+  `active_witness_eq` is mechanical and not done.
+
+  
+
+  This bullet previously said the conjecture might be FALSE. That was an error
+  of inference: `eps_choice_bounds`' particular `ε` does violate the second
+  obligation at small `δ|B|` — true then and now — but nothing followed about
+  other choices of `ε`. It crossed from "this construction fails" to "the
+  statement may be false", a gap of one existential quantifier.
 - Migrating `BoundaryMargin.lean` onto `BoundaryCore`. The general theorems exist
   and the originals are proved to be instances, but `BoundaryMargin` still carries
   its own copies. Deleting them is mechanical and cascades through every
@@ -516,6 +521,7 @@ DarmMonitor/
   Reachability.lean         capacity bound on the active set
   ReachabilityExact.lean    R1b: channel surjectivity, sharp capacity bound
   ReachabilitySufficiency.lean  R1b: witness construction
+  ReachabilityClosed.lean   R1b: both obligations jointly satisfiable
   Influence.lean            minimal observation-channel example
   Interference.lean         general noninterference; A4 on the monitor itself
   SemanticQuotient.lean     semantic equivalence relation
