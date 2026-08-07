@@ -53,8 +53,8 @@ jobs:
         run: |
           count=$(grep -c 'depends on axioms\|does not depend on any axioms' /tmp/build.log || true)
           echo "Axiom traces this run: $count"
-          if [ "$count" -lt 90 ]; then
-            echo "::error::only $count axiom traces found, expected at least 90"
+          if [ "$count" -lt 145 ]; then
+            echo "::error::only $count axiom traces found, expected at least 145"
             echo "::error::a module may have left the root import graph, or a #print axioms line was removed"
             exit 1
           fi
