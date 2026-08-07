@@ -76,18 +76,19 @@ example : True := trivial
   ratification theorem. Three cells, and the matrix entry for A1 is now
   complete for this theorem.
 
-  WHAT REMAINS FOR A1. Whether it is necessary for anything else — but the
-  argument above generalizes: no proof in this kernel inspects `validToken`'s
-  content, so no theorem can depend on its unforgeability. Making that a single
-  theorem rather than a per-theorem cell would need quantification over the
-  kernel's theorems, which Lean cannot express directly.
 
-  THE COVERAGE GAP THIS EXPOSES, which is the useful part. The kernel proves
-  what ratification does to coherence and is silent on who may invoke it. A
-  theorem that made A1 load-bearing would have to say something about
-  entitlement — for instance, that an unauthenticated event cannot reach the
-  ratification branch at all. No such theorem exists. That is worth recording
-  as a gap rather than leaving A1 looking like a satisfied premise.
+
+  THE COVERAGE GAP THIS EXPOSED, now filled. The kernel proved what ratification
+  does to coherence and said nothing about who may invoke it. `Entitlement.lean`
+  supplies that: an unauthenticated ratification is a no-op, so a policy change
+  implies the token was accepted — and `entitlement_vacuous_without_A1` shows
+  that property is empty at the predicate where A1 fails.
+
+  So A1's role is now exact. Idle for coherence, because both branches preserve
+  it regardless of the token. Load-bearing for entitlement, because there the
+  branches differ and A1 is what makes the difference matter. The negative cell
+  above is still correct; it was never that A1 was a bad assumption, only that
+  the theorem it supports had not been stated.
 -/
 
 end MinimalityA1

@@ -485,7 +485,7 @@ property no computable rule has.
 - A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
   ratification time is acceptable, given that it makes human authority contingent
   on a machine-computed bound.
-- Most necessity cells. Seven are proved; a full matrix over five assumptions and the
+- Most necessity cells. Eight are proved; a full matrix over five assumptions and the
   principal theorems needs many more, each with its own countermodel.
 - Bulk FFI. The extern binding is called once per multiply, and at that
   granularity the call and the `Int` boxing cost far more than the arithmetic —
