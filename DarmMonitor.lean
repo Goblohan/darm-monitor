@@ -39,3 +39,4 @@ import DarmMonitor.Fixed64ZhiN
 import DarmMonitor.Fixed64Evaluator
 import DarmMonitor.ReachabilityClosed
 import DarmMonitor.ReachabilityFinset
+import DarmMonitor.MinimalityA1
