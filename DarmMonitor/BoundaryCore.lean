@@ -175,16 +175,23 @@ theorem ratUpdate_neg_below : ratUpdate (-2) < 0 := by
   exactly-computable update needs none of it. That is a real simplification for
   targets that can accept the trade below.
 
-  THE TRADE, now proved rather than argued. `exp` is the only one of the two
-  that composes (`exp_semigroup` versus `rational_not_semigroup`) and the only
-  one positive everywhere (`ratUpdate_neg_below`). So the surrogate is
-  admissible only where losses are bounded below and history independence is not
-  needed. `exp` remains primary.
+  THE TRADE, now proved rather than argued, in three respects. `exp` is the only
+  one of the two that composes (`exp_semigroup` versus `rational_not_semigroup`)
+  and the only one positive everywhere (`ratUpdate_neg_below`). Third, and the
+  one a caller feels: under `exp` a deployment satisfying A5 has nothing further
+  to check, because `A5Redundancy.hZ_of_A5` discharges the positivity hypothesis
+  unconditionally — whereas `A5RedundancyRational.A5_insufficient_for_rat`
+  exhibits well-formed weights that reweight to zero mass, so the surrogate
+  needs the domain condition verified separately. That is a difference in
+  obligations, not only in properties. The surrogate is admissible where losses
+  are bounded below and history independence is not needed; `exp` remains
+  primary.
 
-  NOT DONE. `BoundaryMargin.lean` still states its theorems in terms of
-  `reweight` rather than citing these. Migrating it is mechanical and would let
-  the `exp`-specific forms be deleted, but it cascades through every downstream
-  module and re-earns their axiom traces. Deferred deliberately.
+  NOT DONE, AND NOT RECOMMENDED. `BoundaryMargin.lean` still states its theorems
+  in terms of `reweight` rather than citing these. Migrating would delete four
+  duplicated proofs at the cost of a fifty-module cascade, re-earning every
+  downstream axiom trace, and would add nothing to what is proved. See the
+  README's open-problems entry.
 
   ALSO OPEN. Whether an exactly-computable update exists that DOES satisfy the
   semigroup property. `exp` is the unique continuous solution of
