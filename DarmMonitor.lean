@@ -45,3 +45,4 @@ import DarmMonitor.MinimalityA2
 import DarmMonitor.MinimalityGuard
 import DarmMonitor.MinimalityZ
 import DarmMonitor.ExpansionSubsumption
+import DarmMonitor.GuardStability
