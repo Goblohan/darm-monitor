@@ -216,20 +216,20 @@ theorem A1_insufficient_for_coherence :
            and proved necessary for the capacity bound.
            A3 is not an assumption; see the header.
 
-NEXT:     Re-parameterize the remaining kernel theorems on A5 where they
-           carry `hZ` inline — StratumComposition, Ratification, Reachability,
-           GuardStability. Two instances are done (`A5Redundancy` for the
-           exponential update, `A5RedundancyRational` for the rational one) and
-           they behave DIFFERENTLY: the exponential's `hZ` follows from A5
-           alone, the rational's needs the domain condition, and A5 alone is
-           provably insufficient there. Not uniformly mechanical; each site
-           needs checking rather than assuming.
+  NEXT:           Nothing on A5. The re-parameterization is done for every site where
+                          it is possible, and splits three ways: exponential-form `hZ`
+                         discharges unconditionally (`A5Discharged`), rational-form needs the
+                         domain condition with A5 alone provably insufficient
+                         (`A5RedundancyRational`), and generic-form over an arbitrary
+                         post-update vector cannot be discharged at all — A5 constrains only
+                         the pre-update weights, so there is nothing to discharge. That last
+                         category is correctly stated with the hypothesis explicit, not a gap.
 
   OPEN:    Every "necessary" cell other than
            A2/capacity and A2/confinement. Necessity requires one drop-countermodel per cell;
-           several others now exist in `Minimality.lean`, `MinimalityA1.lean`
-           and `Entitlement.lean`, but the matrix is far from full and should
-           not assert cells until they are proved.
+        several others now exist across the `Minimality*` modules, but the
+           matrix is far from full and should not assert cells until they are
+           proved.
 -/
 
 end Assumptions
