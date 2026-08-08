@@ -43,3 +43,4 @@ import DarmMonitor.MinimalityA1
 import DarmMonitor.Entitlement
 import DarmMonitor.MinimalityA2
 import DarmMonitor.MinimalityGuard
+import DarmMonitor.MinimalityZ
