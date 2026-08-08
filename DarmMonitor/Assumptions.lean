@@ -216,9 +216,14 @@ theorem A1_insufficient_for_coherence :
            and proved necessary for the capacity bound.
            A3 is not an assumption; see the header.
 
-  NEXT:    Re-parameterize the existing kernel theorems on A5 where they
-           currently carry `hZ`/`hw` inline — StratumComposition, all three
-           Ratification results, both expansion witnesses. Mechanical.
+NEXT:     Re-parameterize the remaining kernel theorems on A5 where they
+           carry `hZ` inline — StratumComposition, Ratification, Reachability,
+           GuardStability. Two instances are done (`A5Redundancy` for the
+           exponential update, `A5RedundancyRational` for the rational one) and
+           they behave DIFFERENTLY: the exponential's `hZ` follows from A5
+           alone, the rational's needs the domain condition, and A5 alone is
+           provably insufficient there. Not uniformly mechanical; each site
+           needs checking rather than assuming.
 
   OPEN:    Every "necessary" cell other than
            A2/capacity and A2/confinement. Necessity requires one drop-countermodel per cell;
