@@ -218,13 +218,13 @@ theorem A1_insufficient_for_coherence :
 
   NEXT:    Re-parameterize the existing kernel theorems on A5 where they
            currently carry `hZ`/`hw` inline — StratumComposition, all three
-           Ratification results, both expansion witnesses. Mechanical, and it
-           makes the A2 column of the matrix real.
+           Ratification results, both expansion witnesses. Mechanical.
 
-  OPEN:    OPEN:    Every "necessary" cell other than
-           A2/capacity. Necessity requires one drop-countermodel per cell;
-           none of the others exist yet, and the matrix should not assert
-           them until they do.
+  OPEN:    Every "necessary" cell other than
+           A2/capacity and A2/confinement. Necessity requires one drop-countermodel per cell;
+           several others now exist in `Minimality.lean`, `MinimalityA1.lean`
+           and `Entitlement.lean`, but the matrix is far from full and should
+           not assert cells until they are proved.
 -/
 
 end Assumptions
