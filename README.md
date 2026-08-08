@@ -397,8 +397,21 @@ an assertion:
 - A1 is independent of coherence preservation
 - Capability confinement is independent of noninterference
 
-That last pair matters: bounding what the agent can *do* does not bound what the
-agent can cause the ratifier to *see*.
+- `capInvariant` is necessary for capability confinement (Lemma 7)
+- The guard `p ⊆ active δ w` is necessary for coherence preservation
+- A1 is **not** necessary for coherence preservation
+- A1 **is** necessary for entitlement to have content
+- `hZ` is necessary for `safe_signal_equiv` — but only because the statement
+  permits negative weights; under A5 with a positive margin it is automatic.
+
+
+The two independence cells matter particularly: bounding what the agent can *do* does not bound what the agent can cause the ratifier to *see*. 
+
+A third outcome is worth distinguishing from both. `hZ` is necessary for the
+theorem and idle for any real deployment: you need it only because the statement
+is more general than any weight vector A5 permits. That is a different obligation
+from `capInvariant`, which must actually be maintained. Reading "necessary" as
+"something to check" is right for the second and wrong for the first.
 
 ## Negative results
 
@@ -485,8 +498,7 @@ property no computable rule has.
 - A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
   ratification time is acceptable, given that it makes human authority contingent
   on a machine-computed bound.
-- Most necessity cells. Ten are proved; a full matrix over five assumptions and the
-  principal theorems needs many more, each with its own countermodel.
+- Most necessity cells. Eleven are proved; a full matrix over five assumptions and the principal theorems needs many more, each with  its own countermodel.
 - Bulk FFI. The extern binding is called once per multiply, and at that
   granularity the call and the `Int` boxing cost far more than the arithmetic —
   500,120 multiplies took 472 ms, roughly 944 ns each, for what is one hardware
