@@ -478,10 +478,14 @@ property no computable rule has.
   active set, so the two do not compose into one biconditional without more
   work. A draft that took necessity as an unused hypothesis was deleted — the
   linter caught that its signature advertised more than the proof delivered.
-- Migrating `BoundaryMargin.lean` onto `BoundaryCore`. The general theorems exist
-  and the originals are proved to be instances, but `BoundaryMargin` still carries
-  its own copies. Deleting them is mechanical and cascades through every
-  downstream module, re-earning their axiom traces. Deferred, not blocked.
+- Migrating `BoundaryMargin.lean` onto `BoundaryCore` — listed here for the
+  record, and NOT recommended. The general theorems exist and
+  `safe_signal_equiv_from_core` proves the originals are instances, so the
+  abstraction is already established. Migrating would delete four duplicated
+  proofs at the cost of editing a file fifty modules import, cascading through
+  all of them and re-earning 155 axiom traces, and would add nothing to what is
+  proved. `certificate_preserves_support` has no `BoundaryCore` counterpart and
+  would stay regardless. The duplication is redundant code, not a false claim.
 - The end-to-end `refinement_quantified` instantiation for the rational update.
   `RationalInstance` supplies the coordinate bounds; assembling them mirrors
   `evaluator_sound` and is mechanical. Left until a caller wants that instance.
