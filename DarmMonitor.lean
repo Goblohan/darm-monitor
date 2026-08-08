@@ -44,3 +44,4 @@ import DarmMonitor.Entitlement
 import DarmMonitor.MinimalityA2
 import DarmMonitor.MinimalityGuard
 import DarmMonitor.MinimalityZ
+import DarmMonitor.ExpansionSubsumption
