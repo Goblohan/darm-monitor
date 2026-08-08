@@ -23,7 +23,7 @@ import DarmMonitor.MinimalityGuard
   `Z (reweight η loss w) > 0` follows. So `hZ` is:
 
       NECESSARY   for the theorem as stated, which assumes nothing about signs
-      REDUNDANT   for any deployment satisfying A5 with a positive margin
+      REDUNDANT   for any deployment satisfying A5 — see `A5Redundancy.lean`
 
   That is a real distinction and worth keeping separate. The theorem is stated
   more generally than any deployment needs, and `hZ` is the price of that
@@ -88,11 +88,11 @@ theorem hZ_necessary_for_equiv :
 
   DONE: the `hZ` cell. Eleven cells now proved.
 
-  OPEN, and the more useful theorem: that `hZ` is REDUNDANT under A5 with a
-  positive margin and a nonempty active set. The argument is short — some
-  coordinate has `w i ≥ δ > 0`, `exp` is positive, the rest are non-negative,
-  so the sum is positive — but it needs `Real.exp_pos` and
-  `Finset.sum_pos'` or similar, and is not attempted here.
+ DONE ELSEWHERE. `A5Redundancy.hZ_of_A5` proves the redundancy. It needs LESS
+  than this file originally claimed: not a positive margin, not a nonempty
+  active set, just A5's `massPos`. A non-negative vector with positive mass has
+  a positive coordinate, `exp` is positive everywhere, so the reweighted sum is
+  positive. The extra conditions stated here were an over-hypothesis.
 
   WHY BOTH MATTER. A hypothesis can be necessary for a theorem and yet never
   bind in practice, because the theorem is stated more generally than any
