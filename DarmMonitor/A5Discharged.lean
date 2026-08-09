@@ -1,4 +1,5 @@
 import DarmMonitor.A5RedundancyRational
+import DarmMonitor.Reachability
 
 /-
   A5Discharged — the remaining `hZ` sites, with the hypothesis discharged.
@@ -94,6 +95,19 @@ theorem guard_preserved_by_safe_update_of_A5
   DARM.GuardStability.guard_preserved_by_safe_update δ η loss w
     (hZ_of_A5 η loss hw) hsafe p hguard
 
+/-! ## 4. Reachability bound -/
+
+/-- `reweight_active_card_bounded` with `hZ` discharged by A5. The active set
+    after any A5-safe exponential update is capped at `1/δ` coordinates, with
+    no positivity obligation on the caller. -/
+theorem reweight_active_card_bounded_of_A5
+    (δ η : ℝ) (loss w : Fin n → ℝ)
+    (hw : WellFormedWeights w) :
+    ((active δ (DARM.Boundary.normalize (reweight η loss w)
+      (Z (reweight η loss w)))).card : ℝ) * δ ≤ 1 :=
+  DARM.Reachability.reweight_active_card_bounded δ η loss w
+    hw.nonneg (hZ_of_A5 η loss hw)
+
 /-! ## Registered status
 
   DONE: every exponential-form `hZ` site now has an A5 variant. Together with
@@ -122,3 +136,4 @@ end DARM
 #print axioms DARM.A5Discharged.coherence_preserved_under_suspend_of_A5
 #print axioms DARM.A5Discharged.safe_update_expands_ratifiable_set_of_A5
 #print axioms DARM.A5Discharged.guard_preserved_by_safe_update_of_A5
+#print axioms DARM.A5Discharged.reweight_active_card_bounded_of_A5
