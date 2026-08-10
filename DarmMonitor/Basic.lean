@@ -1,3 +1,4 @@
+import Mathlib.Data.Finset.Basic
 /-!
   DARM Reference-Monitor Core — minimal executable formal model.
 
@@ -21,7 +22,6 @@
       whoever holds the ratification token (Negative Result 1).
 -/
 
-import Mathlib.Data.Finset.Basic
 
 /-- Operational states. Kept explicit rather than collapsed to booleans. -/
 inductive OpState
