@@ -1,6 +1,6 @@
 import DarmMonitor.Ratification
 
-/-
+/-!
   StrictExpansion — a concrete witness that `safe_update_expands_ratifiable_set`
   is not vacuous.
 

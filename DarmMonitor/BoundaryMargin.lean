@@ -1,6 +1,6 @@
 import Mathlib
 
-/-
+/-!
   BoundaryMargin — support-transport under a delta-margin floor.
 
   STATUS: VERIFIED - safe_signal_equiv machine-checked, axiom-clean. A1-A4 remain registered as open assumptions.

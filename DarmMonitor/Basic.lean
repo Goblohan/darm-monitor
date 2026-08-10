@@ -1,4 +1,4 @@
-/-
+/-!
   DARM Reference-Monitor Core — minimal executable formal model.
 
   STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
