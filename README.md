@@ -396,16 +396,20 @@ an assertion:
 - A5 positive-mass is **not** necessary for the capacity bound
 - A1 is independent of coherence preservation
 - Capability confinement is independent of noninterference
-
 - `capInvariant` is necessary for capability confinement (Lemma 7)
 - The guard `p ⊆ active δ w` is necessary for coherence preservation
 - A1 is **not** necessary for coherence preservation
 - A1 **is** necessary for entitlement to have content
 - `hZ` is necessary for `safe_signal_equiv` — but only because the statement
   permits negative weights; under A5 with a positive margin it is automatic.
+- `hsafe` (the safety certificate) is necessary for coherence preservation
+- `hZ` is necessary for coherence preservation — a *distinct* mechanism from the
+  `safe_signal_equiv` cell above: with `Z = 0` the normalizer is zero, so
+  `normalize` is the zero vector, the active set collapses to empty at any positive
+  margin, and a nonempty post-event policy is no longer covered. Here `hZ` forbids
+  active-set collapse, not the biconditional's degeneracy.
 
-
-The two independence cells matter particularly: bounding what the agent can *do* does not bound what the agent can cause the ratifier to *see*. 
+The two independence cells matter particularly: bounding what the agent can *do* does not bound what the agent can cause the ratifier to *see*.
 
 A third outcome is worth distinguishing from both. `hZ` is necessary for the
 theorem and idle for any real deployment: you need it only because the statement
@@ -465,14 +469,14 @@ property no computable rule has.
   over actual `Finset`s — give it a nonempty proper subset with `δ * |B| < 1`
   and it returns a weight vector whose active set is exactly `B`.
 
-  
+
   This entry previously said the conjecture might be FALSE. That was an error of
   inference: `eps_choice_bounds`' particular `ε` does violate the second
   obligation at small `δ|B|` — true then and now — but nothing followed about
   other choices of `ε`. It crossed from "this construction fails" to "the
   statement may be false", a gap of one existential quantifier.
 
-  
+
   Only sufficiency is packaged as a single theorem. Necessity exists
   (`active_card_strict_lt_of_ne_univ`) but is stated over an arbitrary vector's
   active set, so the two do not compose into one biconditional without more
@@ -483,7 +487,7 @@ property no computable rule has.
   `safe_signal_equiv_from_core` proves the originals are instances, so the
   abstraction is already established. Migrating would delete four duplicated
   proofs at the cost of editing a file fifty modules import, cascading through
-  all of them and re-earning 155 axiom traces, and would add nothing to what is
+  all of them and re-earning 178 axiom traces, and would add nothing to what is
   proved. `certificate_preserves_support` has no `BoundaryCore` counterpart and
   would stay regardless. The duplication is redundant code, not a false claim.
 - The end-to-end `refinement_quantified` instantiation for the rational update.
@@ -502,7 +506,7 @@ property no computable rule has.
 - A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
   ratification time is acceptable, given that it makes human authority contingent
   on a machine-computed bound.
-- Most necessity cells. Eleven are proved; a full matrix over five assumptions and the principal theorems needs many more, each with  its own countermodel.
+- Most necessity cells. Thirteen are proved; a full matrix over five assumptions and the principal theorems needs many more, each with its own countermodel.
 - Bulk FFI. The extern binding is called once per multiply, and at that
   granularity the call and the `Int` boxing cost far more than the arithmetic —
   500,120 multiplies took 472 ms, roughly 944 ns each, for what is one hardware
@@ -532,10 +536,13 @@ DarmMonitor.lean            root; imports every verified module
 DarmMonitor/
   Basic.lean                discrete authority core, capability gating
   BoundaryMargin.lean       O(n) -> O(1) margin collapse, support transport
+  BoundaryCore.lean         boundary theorems over an arbitrary update
   StratumComposition.lean   cross-stratum coherence
   Ratification.lean         the coherence-breaking transition and its guard
   StrictExpansion.lean      non-vacuity witness, eta = 0
   NontrivialExpansion.lean  non-vacuity witness, eta =/= 0
+  ExpansionSubsumption.lean  strict expansion follows from the nontrivial witness
+  GuardStability.lean       guard stability; a granted policy stays granted under a safe update
   Reachability.lean         capacity bound on the active set
   ReachabilityExact.lean    R1b: channel surjectivity, sharp capacity bound
   ReachabilitySufficiency.lean  R1b: witness construction
@@ -545,8 +552,18 @@ DarmMonitor/
   Interference.lean         general noninterference; A4 on the monitor itself
   SemanticQuotient.lean     semantic equivalence relation
   SemanticExpansion.lean    semantic image expansion
+  Entitlement.lean          entitlement theorems; A1 necessary for entitlement content
   Assumptions.lean          A1-A5 as predicates, with witnesses and countermodels
   Minimality.lean           necessity and independence cells
+  MinimalityA1.lean         A1 minimality: independence / non-necessity cells
+  MinimalityA2.lean         capInvariant necessary for capability confinement
+  MinimalityGuard.lean      the guard necessary for coherence preservation
+  MinimalityZ.lean          hZ necessary for safe_signal_equiv
+  MinimalitySafety.lean     hsafe necessary for coherence preservation
+  MinimalityHZ.lean         hZ necessary for coherence preservation (active-set collapse)
+  A5Redundancy.lean         hZ_of_A5: hZ follows from A5 for the exponential update
+  A5RedundancyRational.lean rational update; A5 alone provably insufficient
+  A5Discharged.lean         A5 variants discharging hZ for the exponential-form sites
   Deployment.lean           general unreachability, deployment comparison
   Runtime.lean              executable discrete monitor, Bool/Prop bridge
   FixedPoint.lean           fixed-point model, fail-closed refinement
@@ -566,15 +583,15 @@ DarmMonitor/
   Fixed64ZhiN.lean          partition-function bound over F64
   Fixed64Evaluator.lean     the quantified evaluator over F64
   Fixed64Native.lean        C bindings; differential tests vs the proved version
-  Main.lean                 demo executable
-  c/darm_native.c           widening multiply (NOT verified - see below)
   Fixed64Sum.lean           list summation (superseded by Fixed64SumOver)
   Feasibility.lean          sharp capacity bound; why the coarse one misleads
   FeasibilityRange.lean     design-time envelope from weight dynamic range
-  BoundaryCore.lean         boundary theorems over an arbitrary update
   RationalInstance.lean     second instance; exact, but does not compose
+  RationalF64.lean          rational update over F64 fixed-point
   LLMToolCall.lean          instantiation: LLM tool-calling
   CIRunner.lean             instantiation: CI runner, non-injective permissions
+  Main.lean                 demo executable
+  c/darm_native.c           widening multiply (NOT verified - see above)
 ```
 
 The root imports every module, so a green build covers all of them. This was not
