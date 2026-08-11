@@ -514,8 +514,11 @@ property no computable rule has.
   whole vector rather than a pair.
 - Lake does not build the C. `c/libdarm_native.a` is compiled by hand with
   `leanc` and `llvm-ar`; the executable links it via `moreLinkArgs`. A fresh
-  clone must run those two commands before `lake exe darmdemo` will link.
-  An `extern_lib` build rule would automate it.
+  clone must build the library before `lake exe darmdemo` will link: run
+  `build_native.ps1` (which finds the tools via `lean --print-prefix`), or the
+  two commands by hand — note `llvm-ar` is in the toolchain bin, not on PATH.
+  An `extern_lib` build rule would automate it further, but is deliberately
+  not used; see `lakefile.lean`.
 - Product composition. The product of two monitors is **not** a monitor: `cap` and
   `policy` compose via sum types, but `opState` and `lastExecuted` are scalar fields
   that cannot carry a pair. A product on the `(cap, policy, opState)` fragment, with
