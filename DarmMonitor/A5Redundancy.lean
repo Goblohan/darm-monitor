@@ -1,6 +1,6 @@
 import DarmMonitor.GuardStability
 
-/-
+/-!
   A5Redundancy — `hZ` follows from A5 alone.
 
   STATUS: VERIFIED. See the #print axioms declarations at the end of this file.
@@ -41,7 +41,7 @@ open DARM.Boundary DARM.Assumptions
 private lemma exists_pos_of_wellFormed {n : ℕ} {w : Fin n → ℝ}
     (hw : WellFormedWeights w) : ∃ j, 0 < w j := by
   by_contra h
-  push_neg at h
+  push Not at h
   have hall : ∀ j, w j = 0 := fun j => le_antisymm (h j) (hw.nonneg j)
   have hzero : Z w = 0 := by
     unfold Z
