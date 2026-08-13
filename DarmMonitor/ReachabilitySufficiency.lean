@@ -81,7 +81,7 @@ theorem active_witness_eq
     active δ (DARM.Boundary.normalize (witness B ε) (Z (witness B ε))) = B := by
   have hZpos : 0 < Z (witness B ε) := by
     by_contra h
-    push_neg at h
+    push Not at h
     nlinarith [hε, hδ, hout]
   ext i
   simp only [active, Finset.mem_filter, Finset.mem_univ, true_and]

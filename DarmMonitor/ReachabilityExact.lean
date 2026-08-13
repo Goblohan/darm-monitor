@@ -108,7 +108,7 @@ theorem active_card_strict_lt_of_ne_univ
     ((active δ (DARM.Boundary.normalize v (Z v))).card : ℝ) * δ < 1 := by
   obtain ⟨j, hj⟩ : ∃ j, j ∉ active δ (DARM.Boundary.normalize v (Z v)) := by
     by_contra h
-    push_neg at h
+    push Not at h
     exact hne (Finset.eq_univ_of_forall h)
   have h1 := card_mul_le_sum δ v hZ
   -- the coordinate outside the active set carries mass the active set does not

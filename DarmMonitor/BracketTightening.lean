@@ -51,7 +51,7 @@ theorem gamma_nonneg_iff (x : Fixed) : 0 ≤ γ x ↔ 0 ≤ x.raw := by
     have hs : (0:ℝ) < (2 ^ k : ℝ) := scale_pos
     have : (0:ℝ) ≤ (x.raw : ℝ) := by
       by_contra hc
-      push_neg at hc
+      push Not at hc
       have : (x.raw : ℝ) / (2 ^ k : ℝ) < 0 := div_neg_of_neg_of_pos hc hs
       linarith
     exact_mod_cast this
