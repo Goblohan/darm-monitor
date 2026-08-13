@@ -100,7 +100,7 @@ def bsZ : Fin 2 → F64 := fun _ => quarterZ
 
   This completes step 1 of the runtime path.
 
-  NEXT: `evaluator_sound_tower64` — the quantified theorem itself, threading
+  DONE (built in Fixed64Evaluator): `evaluator_sound_tower64` — the quantified theorem itself, threading
   these together with the real-number certificate. After that, the `@[extern]`
   boundary and an actual binary, neither of which is Lean work.
 -/
