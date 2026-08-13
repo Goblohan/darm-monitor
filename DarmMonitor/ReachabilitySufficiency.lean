@@ -46,6 +46,7 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 noncomputable def witness (B : Finset ι) (ε : ℝ) : ι → ℝ :=
   fun i => if i ∈ B then 1 else ε
 
+omit [Fintype ι] in
 lemma witness_pos {B : Finset ι} {ε : ℝ} (hε : 0 < ε) (i : ι) :
     0 < witness B ε i := by
   unfold witness
