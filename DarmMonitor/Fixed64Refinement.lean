@@ -108,7 +108,7 @@ def halfF64 : F64 := ⟨Int64.ofInt (2 ^ FixedPoint.k / 2)⟩
   that carries the overflow envelope, and the connection is proved rather than
   assumed.
 
-  NOT DONE, and this is the real remaining work the external review pointed at:
+  SINCE DONE (see Fixed64ZhiN/Fixed64Evaluator for the quantified version, and Fixed64Sum for why the wrapping concern below was wrong). The concern as recorded at the time was:
 
     * THE QUANTIFIED VERSION. `EvaluatorTower.evaluator_sound_tower` restated
       over F64 needs F64 analogues of `active_fx` (the surrogate active set),
