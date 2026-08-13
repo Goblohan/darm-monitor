@@ -52,7 +52,7 @@ theorem hZ_of_A5_rat {n : ℕ} (η : ℝ) (loss : Fin n → ℝ) {w : Fin n → 
     0 < Z (ratReweight η loss w) := by
   obtain ⟨j, hj⟩ : ∃ j, 0 < w j := by
     by_contra h
-    push_neg at h
+    push Not at h
     have hall : ∀ j, w j = 0 := fun j => le_antisymm (h j) (hw.nonneg j)
     have hzero : Z w = 0 := by unfold Z; simp [hall]
     have := hw.massPos
