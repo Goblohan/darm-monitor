@@ -124,6 +124,60 @@ theorem trace_prefixes_policy_subset_initial
       intro e he
       exact hAgent e (by simp [he]))
 
+/-- Suspension remains absorbing at every initial segment of a finite pure-agent trace. -/
+theorem trace_prefixes_suspended_absorbing
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (es : List (Event CapId ActionId Token))
+    (s : State CapId ActionId)
+    (hSusp : s.opState = OpState.suspended)
+    (hAgent : AgentTrace es) :
+    ∀ pre suf : List (Event CapId ActionId Token),
+      es = pre ++ suf →
+      (pre.foldl (step requires allowedCapLimit validToken) s).opState
+        = OpState.suspended := by
+  intro pre suf hDecomp
+  subst es
+  exact trace_suspended_absorbing
+    requires allowedCapLimit validToken
+    pre s hSusp
+    (by
+      intro e he
+      exact hAgent e (by simp [he]))
+
+/-- Behavioral capability confinement holds at every prefix of a finite
+    pure-agent trace: any action executable at that prefix requires a
+    capability inside the externally imposed capability bound. -/
+theorem trace_prefixes_execution_confined_by_cap_bound
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (es : List (Event CapId ActionId Token))
+    (s : State CapId ActionId)
+    (hCap : capInvariant allowedCapLimit s)
+    (hAgent : AgentTrace es) :
+    ∀ pre suf : List (Event CapId ActionId Token),
+      es = pre ++ suf →
+      ∀ a : ActionId,
+        canExecute requires
+          (pre.foldl (step requires allowedCapLimit validToken) s) a →
+        requires a ∈ allowedCapLimit := by
+  intro pre suf hDecomp a hExec
+  have hPrefixCap :
+      capInvariant allowedCapLimit
+        (pre.foldl (step requires allowedCapLimit validToken) s) := by
+    exact trace_prefixes_preserve_capInvariant
+      requires allowedCapLimit validToken
+      es s hCap hAgent
+      pre suf hDecomp
+  exact execution_confined_by_cap_bound
+    requires allowedCapLimit
+    (pre.foldl (step requires allowedCapLimit validToken) s)
+    a hPrefixCap hExec
+
 end DARM
 
 #print axioms DARM.trace_preserves_capInvariant
@@ -131,3 +185,5 @@ end DARM
 #print axioms DARM.trace_suspended_absorbing
 #print axioms DARM.trace_prefixes_preserve_capInvariant
 #print axioms DARM.trace_prefixes_policy_subset_initial
+#print axioms DARM.trace_prefixes_policy_subset_initial
+#print axioms DARM.trace_prefixes_suspended_absorbing
