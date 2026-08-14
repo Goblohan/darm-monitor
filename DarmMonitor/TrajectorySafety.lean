@@ -64,7 +64,23 @@ theorem trace_policy_subset_initial
   exact policy_monotone_absorbing
     requires allowedCapLimit validToken es s hAgent
 
+/-- Suspension remains absorbing across any finite agent trace. -/
+theorem trace_suspended_absorbing
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (es : List (Event CapId ActionId Token))
+    (s : State CapId ActionId)
+    (hSusp : s.opState = OpState.suspended)
+    (hAgent : AgentTrace es) :
+    (es.foldl (step requires allowedCapLimit validToken) s).opState
+      = OpState.suspended := by
+  exact suspended_absorbing
+    requires allowedCapLimit validToken es s hSusp hAgent
+
 end DARM
 
 #print axioms DARM.trace_preserves_capInvariant
 #print axioms DARM.trace_policy_subset_initial
+#print axioms DARM.trace_suspended_absorbing
