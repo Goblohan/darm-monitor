@@ -28,7 +28,7 @@ def AgentTrace
   ∀ e ∈ es, actor e = Actor.agent
 /-- Capability confinement survives an arbitrary finite agent trace. -/
 theorem trace_preserves_capInvariant
-    (requires : 
+    (requires :
 ActionId → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop)
@@ -79,8 +79,32 @@ theorem trace_suspended_absorbing
   exact suspended_absorbing
     requires allowedCapLimit validToken es s hSusp hAgent
 
+/-- Capability confinement holds for every initial segment of a finite pure-agent trace. -/
+theorem trace_prefixes_preserve_capInvariant
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (es : List (Event CapId ActionId Token))
+    (s : State CapId ActionId)
+    (hCap : capInvariant allowedCapLimit s)
+    (hAgent : AgentTrace es) :
+    ∀ pre suf : List (Event CapId ActionId Token),
+      es = pre ++ suf →
+      capInvariant allowedCapLimit
+        (pre.foldl (step requires allowedCapLimit validToken) s) := by
+  intro pre suf hDecomp
+  subst es
+  exact trace_preserves_capInvariant
+    requires allowedCapLimit validToken
+    pre s hCap
+    (by
+      intro e he
+      exact hAgent e (by simp [he]))
+
 end DARM
 
 #print axioms DARM.trace_preserves_capInvariant
 #print axioms DARM.trace_policy_subset_initial
 #print axioms DARM.trace_suspended_absorbing
+#print axioms DARM.trace_prefixes_preserve_capInvariant
