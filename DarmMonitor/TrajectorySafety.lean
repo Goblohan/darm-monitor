@@ -102,9 +102,32 @@ theorem trace_prefixes_preserve_capInvariant
       intro e he
       exact hAgent e (by simp [he]))
 
+/-- Policy confinement holds for every initial segment of a finite pure-agent trace. -/
+theorem trace_prefixes_policy_subset_initial
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (es : List (Event CapId ActionId Token))
+    (s : State CapId ActionId)
+    (hAgent : AgentTrace es) :
+    ∀ pre suf : List (Event CapId ActionId Token),
+      es = pre ++ suf →
+      (pre.foldl (step requires allowedCapLimit validToken) s).policy
+        ⊆ s.policy := by
+  intro pre suf hDecomp
+  subst es
+  exact trace_policy_subset_initial
+    requires allowedCapLimit validToken
+    pre s
+    (by
+      intro e he
+      exact hAgent e (by simp [he]))
+
 end DARM
 
 #print axioms DARM.trace_preserves_capInvariant
 #print axioms DARM.trace_policy_subset_initial
 #print axioms DARM.trace_suspended_absorbing
 #print axioms DARM.trace_prefixes_preserve_capInvariant
+#print axioms DARM.trace_prefixes_policy_subset_initial
