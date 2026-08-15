@@ -94,6 +94,35 @@ def historyStep
   step requires allowedCapLimit validToken s
     (generateEvent policy history)
 
+/-- A governance state together with the observation history exposed to the policy. -/
+structure HistoryState
+    {CapId ActionId : Type} where
+  state : State CapId ActionId
+  history : History ActionId
+
+/-- Extend the observation history with the observation of the current state. -/
+def extendHistory
+    {CapId ActionId : Type}
+    (hs : HistoryState (CapId := CapId) (ActionId := ActionId)) :
+    HistoryState (CapId := CapId) (ActionId := ActionId) :=
+  { state := hs.state
+    history := hs.history.concat (observe hs.state)}
+
+/-- Apply one history-dependent decision and record the resulting observation. -/
+def historyStepState
+    {CapId ActionId Token : Type}
+    [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token]
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (policy : HistoryPolicy CapId ActionId Token)
+    (hs : HistoryState (CapId := CapId) (ActionId := ActionId)) :
+    HistoryState (CapId := CapId) (ActionId := ActionId) :=
+  let s' := historyStep requires allowedCapLimit validToken policy hs.history hs.state
+  { state := s'
+    history := hs.history.concat (observe s') }
+
 end DARM.HistorySafety
 
 #print axioms DARM.HistorySafety.unguarded_ratification_counterexample
