@@ -1,6 +1,8 @@
 import DarmMonitor.Basic
 import DarmMonitor.Influence
 import DarmMonitor.BoundaryMargin
+import DarmMonitor.StratumComposition
+import DarmMonitor.Ratification
 import DarmMonitor.SemanticQuotient
 import DarmMonitor.SemanticExpansion
 import DarmMonitor.StrictExpansion
@@ -44,9 +46,12 @@ import DarmMonitor.Entitlement
 import DarmMonitor.MinimalityA2
 import DarmMonitor.MinimalityGuard
 import DarmMonitor.MinimalityZ
+import DarmMonitor.MinimalitySafety
+import DarmMonitor.MinimalityHZ
 import DarmMonitor.ExpansionSubsumption
 import DarmMonitor.GuardStability
 import DarmMonitor.A5Redundancy
 import DarmMonitor.A5RedundancyRational
 import DarmMonitor.A5Discharged
-import DarmMonitor.A5Discharged
+import DarmMonitor.TrajectorySafety
+import DarmMonitor.HistorySafety
