@@ -1,4 +1,5 @@
 import DarmMonitor.Basic
+import DarmMonitor.Deployment
 
 /-!
 # DARM Finite-Trace Safety
@@ -178,6 +179,40 @@ theorem trace_prefixes_execution_confined_by_cap_bound
     (pre.foldl (step requires allowedCapLimit validToken) s)
     a hPrefixCap hExec
 
+
+/-- An action whose capability was never granted can never execute at any
+    prefix of any finite pure-agent trace. The behavioural closure of
+    `Deployment.never_executable_of_ungranted`: not merely that what executes
+    is confined, but that an ungranted action is unreachable across the whole
+    run, whatever agent-event sequence is taken. -/
+theorem trace_prefixes_never_executable_of_ungranted
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (es : List (Event CapId ActionId Token))
+    (s : State CapId ActionId)
+    (hCap : capInvariant allowedCapLimit s)
+    (hAgent : AgentTrace es)
+    (a : ActionId)
+    (hUngranted : requires a ∉ allowedCapLimit) :
+    ∀ pre suf : List (Event CapId ActionId Token),
+      es = pre ++ suf →
+      ¬ canExecute requires
+          (pre.foldl (step requires allowedCapLimit validToken) s) a := by
+  intro pre suf hDecomp
+  have hPrefixCap :
+      capInvariant allowedCapLimit
+        (pre.foldl (step requires allowedCapLimit validToken) s) := by
+    exact trace_prefixes_preserve_capInvariant
+      requires allowedCapLimit validToken
+      es s hCap hAgent
+      pre suf hDecomp
+  exact Deployment.never_executable_of_ungranted
+    requires allowedCapLimit a hUngranted
+    (pre.foldl (step requires allowedCapLimit validToken) s)
+    hPrefixCap
+
 end DARM
 
 #print axioms DARM.trace_preserves_capInvariant
@@ -187,3 +222,5 @@ end DARM
 #print axioms DARM.trace_prefixes_policy_subset_initial
 #print axioms DARM.trace_prefixes_policy_subset_initial
 #print axioms DARM.trace_prefixes_suspended_absorbing
+#print axioms DARM.trace_prefixes_execution_confined_by_cap_bound
+#print axioms DARM.trace_prefixes_never_executable_of_ungranted
