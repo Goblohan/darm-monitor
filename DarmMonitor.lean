@@ -55,3 +55,4 @@ import DarmMonitor.A5RedundancyRational
 import DarmMonitor.A5Discharged
 import DarmMonitor.TrajectorySafety
 import DarmMonitor.HistorySafety
+import DarmMonitor.WeightedHistorySafety

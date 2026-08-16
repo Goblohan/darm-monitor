@@ -161,7 +161,55 @@ def generateTrajectory
         (historyStateStep
           requires allowedCapLimit validToken policy hs)
 
+
+/-- **Capability confinement against an unrestricted adaptive adversary.**
+    For ANY history-dependent policy — including one that adversarially selects
+    its next event (agent action, capability expansion, ratification, or
+    suspension) from the entire observation history it has seen — the capability
+    bound is never exceeded at any point along the generated finite trajectory.
+
+    This is the trajectory-level lift of `Basic.step_preserves_capInvariant`,
+    which holds for EVERY event class (its proof does `cases e` over all
+    constructors, including `authenticatedRatification`). Because `capInvariant`
+    constrains only `cap ⊆ allowedCapLimit` and no event grows `cap` past the
+    bound, no admissibility hypothesis on the policy is needed: the adversary is
+    entirely unrestricted.
+
+    Scope, stated honestly. This proves capability confinement ONLY. It does NOT
+    prove coherence, which an unguarded ratification genuinely breaks (see
+    `unguarded_ratification_counterexample`). Coherence preservation over a
+    trajectory is a separate, harder result: it requires threading the evolving
+    weight vector through the trajectory state and a per-step monitor
+    admissibility condition (the ratification guard, and the Z-certificate for
+    agent/suspend updates). That construction is deliberately not attempted here;
+    this theorem is the capability-boundary guarantee, which is exactly the
+    property that survives an unrestricted adversary. -/
+theorem generateTrajectory_preserves_capInvariant
+    {CapId ActionId Token : Type}
+    [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token]
+    (requires : ActionId → CapId)
+    (allowedCapLimit : Finset CapId)
+    (validToken : Token → Prop)
+    [DecidablePred validToken]
+    (policy : HistoryPolicy CapId ActionId Token)
+    (n : Nat)
+    (hs : HistoryState (CapId := CapId) (ActionId := ActionId))
+    (hCap : capInvariant allowedCapLimit hs.state) :
+    capInvariant allowedCapLimit
+      (generateTrajectory requires allowedCapLimit validToken policy n hs).state := by
+  induction n generalizing hs with
+  | zero => simpa [generateTrajectory] using hCap
+  | succ k ih =>
+      rw [generateTrajectory]
+      apply ih
+      show capInvariant allowedCapLimit
+        (historyStateStep requires allowedCapLimit validToken policy hs).state
+      simp only [historyStateStep, historyStep]
+      exact step_preserves_capInvariant requires allowedCapLimit validToken hs.state
+        (generateEvent policy hs.history) hCap
+
 end DARM.HistorySafety
 
 #print axioms DARM.HistorySafety.unguarded_ratification_counterexample
 #print axioms DARM.HistorySafety.guarded_ratification_step_preserves_coherence
+#print axioms DARM.HistorySafety.generateTrajectory_preserves_capInvariant
