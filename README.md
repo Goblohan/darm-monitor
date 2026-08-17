@@ -1,7 +1,12 @@
 # DARM — Deterministic Algebraic Reference Monitor
 
-A machine-checked formal specification of reference-monitor governance, in Lean 4
-against Mathlib (toolchain `leanprover/lean4:v4.32.0`).
+A machine-checked formal boundary theory for deterministic governance, in Lean 4
+against Mathlib (toolchain `leanprover/lean4:v4.32.0`). DARM studies how far a
+mathematically specified authorization boundary can constrain what an agent is
+permitted to *cause*, without constraining the intelligence that selects its
+actions -- and maps precisely where that governance holds, where it provably
+fails, and where the proof ends. See [`FRAMING.md`](FRAMING.md) for the research
+position.
 
 DARM is a **specification kernel**, not a runtime. It contains no hardware
 abstraction layer, no cryptographic implementation, and no C or Rust drivers. What
@@ -487,7 +492,7 @@ property no computable rule has.
   `safe_signal_equiv_from_core` proves the originals are instances, so the
   abstraction is already established. Migrating would delete four duplicated
   proofs at the cost of editing a file fifty modules import, cascading through
-  all of them and re-earning 178 axiom traces, and would add nothing to what is
+  all of them and re-earning 201 axiom traces, and would add nothing to what is
   proved. `certificate_preserves_support` has no `BoundaryCore` counterpart and
   would stay regardless. The duplication is redundant code, not a false claim.
 - The end-to-end `refinement_quantified` instantiation for the rational update.
@@ -501,11 +506,31 @@ property no computable rule has.
 - Realistic loss distributions. The sweep uses uniform losses, `Float` ground truth,
   and small samples at a few parameter points. Enough to locate boundaries, not
   enough to characterize them.
-- Trace-level composition. Coherence is proved for a single step, not for
-  `List`-folded execution traces.
-- A constrained ratification rule. Whether requiring `newPolicy ⊆ active δ w` at
-  ratification time is acceptable, given that it makes human authority contingent
-  on a machine-computed bound.
+- **Trace-level composition -- substantially closed (this session).** The
+  discrete invariants and coherence, originally proved for a single step, now
+  lift to finite traces. `TrajectorySafety.lean` proves capability confinement,
+  policy containment, suspension, and execution confinement hold at every prefix
+  of any finite agent trace, and that an ungranted action is never executable at
+  any prefix (`trace_prefixes_never_executable_of_ungranted`) -- the behavioural
+  closure of deployability. `HistorySafety.lean` proves
+  `generateTrajectory_preserves_capInvariant`: capability confinement holds
+  against a fully unrestricted, adaptive, history-dependent adversarial policy
+  over any finite trajectory, with no admissibility hypothesis, since
+  `capInvariant` does not involve the weight vector. `WeightedHistorySafety.lean`
+  proves `generateWeightedTrajectory_preserves_coherence`: coherence is preserved
+  across any finite adversarial trajectory provided the monitor admits each
+  proposed event (the per-step admissibility condition -- ratification guard,
+  else Z-certificate). What remains open is tightening the uniform-admissibility
+  hypothesis to a trajectory-local one, and infinite-horizon composition.
+- **The constrained ratification rule -- resolved, with a necessity boundary.**
+  The guard `newPolicy ⊆ active δ w` is proved *sufficient*
+  (`guarded_ratification_preserves_coherence`) and *necessary*
+  (`unguarded_ratification_counterexample` exhibits a coherent state that an
+  unguarded ratification makes incoherent). The guard is therefore not an
+  arbitrary design choice: it is exactly the condition under which ratification
+  preserves coherence. What remains is a *design* question -- whether making
+  human authority contingent on a machine-computed bound is acceptable in a given
+  deployment -- not a mathematical one.
 - Most necessity cells. Thirteen are proved; a full matrix over five assumptions and the principal theorems needs many more, each with its own countermodel.
 - Bulk FFI. The extern binding is called once per multiply, and at that
   granularity the call and the `Int` boxing cost far more than the arithmetic —

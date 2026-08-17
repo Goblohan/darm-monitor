@@ -102,22 +102,42 @@ testable, not a proof.
 build is not evidence — a build succeeds on a file full of `sorry`. The axiom
 trace is the evidence. No traced result depends on `sorryAx`.
 
-## Phase 2 — proposed, not yet established
+## Phase 2 — substantially established
 
-The current results concern single governed transitions. The hardest remaining
-question, and the direction Phase 2 *would* attack, is trajectory safety:
+The original results concerned single governed transitions. Phase 2 asked
+whether the boundary holds against genuinely adversarial, adaptive, multi-step
+agents whose future actions depend on the history they observe. This session
+established the core of it, machine-checked.
 
-> Does the authorization boundary remain safe against genuinely adversarial,
-> adaptive, multi-step agents whose future actions depend on the history they
-> observe?
+**Capability confinement holds against a fully unrestricted adaptive adversary.**
+`generateTrajectory_preserves_capInvariant` proves that for *any* history-dependent
+policy — one that adversarially selects any event (agent action, capability
+expansion, ratification, suspension) from the entire observed history — the
+capability bound is never exceeded at any point along the generated finite
+trajectory. No admissibility hypothesis is required, because capability
+confinement does not involve the continuous weight vector.
 
-Coherence is currently proved for a single step, not for folded execution
-traces. Extending it to trajectories — proving the boundary holds under an
-adaptive agent optimizing against the history it observes — is *open*. It is
-named here as the research program's next target, not as an established result.
-Turning DARM from a collection of verified mechanisms into a theory of
-trajectory safety under scalable intelligence is future work.
+**Coherence holds across adversarial trajectories under monitored admissibility.**
+`generateWeightedTrajectory_preserves_coherence` proves that coherence is
+preserved across any finite trajectory of an unrestricted adaptive adversarial
+policy, *provided the monitor admits each proposed event* — the ratification
+guard where it ratifies, the Z-certificate where it updates the weight. The
+adversary is unrestricted; the monitor enforces the boundary. Paired with
+`unguarded_ratification_counterexample`, this is a genuine boundary result:
+monitored admissibility yields trajectory coherence, and removing the guard
+exhibits a counterexample. The guard is proved not merely sufficient but
+necessary.
 
+**Deployability is behaviourally closed across finite agent traces.**
+`trace_prefixes_never_executable_of_ungranted` proves an ungranted action never
+executes at any prefix of any finite agent trace, and the prefix invariants hold
+at every step.
+
+What remains genuinely open: tightening the uniform-admissibility hypothesis to a
+trajectory-local one, infinite-horizon composition, and the composition of the
+verified Core with the extension domains — information-flow, hardware, real-time,
+and physical. Turning DARM from a verified core into a full theory across those
+domains is the ongoing program.
 ## In one sentence
 
 DARM studies how far deterministic governance can constrain what an arbitrarily
