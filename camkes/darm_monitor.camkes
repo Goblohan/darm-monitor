@@ -1,0 +1,14 @@
+assembly {
+  composition {
+    component StochasticAI ai;
+    component DarmMonitor darm;
+    component HardwareActuator hw;
+
+    connection seL4RPCCall ai_to_darm(from ai.monitor_ep, to darm.monitor_ep);
+    connection seL4RPCCall darm_to_hw(from darm.actuator_ep, to hw.actuator_ep);
+  }
+  configuration {
+    hw.mmio_region_paddr = 0x3F200000;
+    hw.mmio_region_size  = 0x1000;
+  }
+}
