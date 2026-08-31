@@ -1,0 +1,7 @@
+procedure DarmInterface {
+    uint64_t evaluate_actuation(in uint64_t raw_payload);
+};
+
+procedure ActuatorInterface {
+    uint64_t dispatch(in uint64_t validated_payload);
+};
