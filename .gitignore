@@ -5,3 +5,4 @@ c/*.a
 *.code-search 
 lakefile.toml.bak 
 BackupBeforeRuntime/ 
+setup_git.sh
