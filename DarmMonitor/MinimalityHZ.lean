@@ -37,11 +37,7 @@ theorem Z_witness_zero :
 /-- Before the update, coordinate 0 is the only active one. -/
 theorem active_before : Boundary.active (1 : ℝ) w2 = {0} := by
   ext i
-  simp only [Boundary.active, Finset.mem_filter, Finset.mem_univ, true_and, w2]
-  fin_cases i
-  · simp
-  · norm_num
-
+  fin_cases i <;> simp [Boundary.active] <;> norm_num [w2]
 /-- After the update, the active set is empty. -/
 theorem active_after :
     Boundary.active (1 : ℝ)

@@ -134,7 +134,7 @@ def demoWeights : Fin 3 → Fixed
 
   THE REMAINING GAP, and it is the substantial one. The theorem takes `wpLo` and
   `Zhi` as HYPOTHESES — conservative fixed-point bounds on the post-update
-  weights and their sum. Computing them requires bounding
+  weights and their sum. Computing them reqs bounding
 
       reweight η loss w i = w i * Real.exp (-η * loss i)
 

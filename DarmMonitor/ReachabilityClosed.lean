@@ -102,7 +102,7 @@ theorem epsOf_sat_b (δ m k : ℝ) (hδ : 0 < δ) (hm : 0 < m) (hk : 0 < k)
 
 /-! ## 3. R1b's sufficiency, unconditionally
 
-  The two obligations together are exactly what `active_witness_eq` requires. -/
+  The two obligations together are exactly what `active_witness_eq` reqs. -/
 
 /-- **Both obligations hold simultaneously.** This is the statement whose
     absence left R1b open: an `ε` that clears (a) and (b) at once, for every
@@ -126,7 +126,7 @@ theorem sufficiency_unconditional (δ m k : ℝ)
   All four parts now hold:
 
     * Surjectivity of the reweighting channel (`ReachabilityExact`).
-    * Necessity, sharply: a proper subset requires `δ * |B| < 1`
+    * Necessity, sharply: a proper subset reqs `δ * |B| < 1`
       (`ReachabilityExact`).
     * Sufficiency given the two obligations (`ReachabilitySufficiency`).
     * BOTH OBLIGATIONS SIMULTANEOUSLY SATISFIABLE (this module).

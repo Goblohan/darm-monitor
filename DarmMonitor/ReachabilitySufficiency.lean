@@ -8,7 +8,7 @@ import DarmMonitor.ReachabilityExact
   WHAT REMAINED. `ReachabilityExact` proved two halves of R1b:
     * the reweighting channel is surjective onto positive vectors, so R1b is a
       question about achievable active sets rather than about the update rule;
-    * necessity is sharp — a proper subset `B` requires `δ * |B| < 1`.
+    * necessity is sharp — a proper subset `B` reqs `δ * |B| < 1`.
 
   This module supplies sufficiency: given `δ * |B| < 1`, a weight vector whose
   active set is exactly `B`.
@@ -93,7 +93,7 @@ theorem active_witness_eq
     intro h
     by_contra hB
     unfold witness at h
-    rw [if_neg hB] at h
+    rw [ite_eq_right hB] at h
     unfold witness at hout
     linarith
   · -- in B ⇒ active: the coordinate is 1, and hin gives δ * Z ≤ 1
@@ -130,7 +130,7 @@ theorem eps_choice_bounds
 
   CLOSED:
     * Surjectivity of the reweighting channel (`ReachabilityExact`).
-    * Necessity, sharply: a proper subset requires `δ * |B| < 1`
+    * Necessity, sharply: a proper subset reqs `δ * |B| < 1`
       (`ReachabilityExact`).
     * Sufficiency, given the two margin obligations: `active_witness_eq` shows
       the witness realizes exactly `B`.

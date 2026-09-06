@@ -4,8 +4,9 @@ open Lake DSL
 package darmMonitor where
   -- Package configuration options
 
+require mathlib from git "https://github.com/leanprover-community/mathlib4"
+
 @[default_target]
 lean_lib DarmMonitor where
-  roots := #[`DarmMonitor.Fixed64Evaluator, `DarmMonitor.Fixed64ZhiN, `DarmMonitor.Fixed64Tower]
-  -- Enable exporting Lean symbols for external C linking
+  roots := #[`DarmMonitor]
   nativeFacets := fun shouldExport => if shouldExport then #[Module.oExportFacet] else #[Module.oFacet]

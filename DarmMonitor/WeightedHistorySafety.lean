@@ -43,7 +43,7 @@ theorem weighted_coherence_iff
     exactly as `coherence_preserved_under_agent_event` and
     `coherence_preserved_under_suspend` require. A human ratification event
     leaves the weight unchanged, exactly as `guarded_ratification_preserves_coherence`
-    requires. This makes the weight evolution part of the formal model rather than
+    reqs. This makes the weight evolution part of the formal model rather than
     an implicit parameter. -/
 noncomputable def nextWeight
     {CapId Token : Type} {n : ℕ}
@@ -58,7 +58,7 @@ noncomputable def nextWeight
 
 /-- The per-step monitor admissibility condition. The adversarial policy may
     propose ANY event; the reference monitor admits it only under the boundary
-    condition that its event class requires to preserve coherence.
+    condition that its event class reqs to preserve coherence.
 
     - A ratification event must satisfy the ratification guard `p ⊆ active δ w`
       (this is exactly `GuardedRatification`, and the unguarded case genuinely
@@ -94,7 +94,7 @@ def admissibleEvent
 theorem monitored_step_preserves_coherence
     {CapId Token : Type} {n : ℕ}
     [DecidableEq CapId] [DecidableEq Token]
-    (requires : Fin n → CapId)
+    (reqs : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId (Fin n)) (e : Event CapId (Fin n) Token)
@@ -102,34 +102,34 @@ theorem monitored_step_preserves_coherence
     (hcoh : Composition.IsCoherent s δ w)
     (hadm : admissibleEvent δ η loss w e) :
     Composition.IsCoherent
-      (step requires allowedCapLimit validToken s e) δ
+      (step reqs allowedCapLimit validToken s e) δ
       (nextWeight η loss w e) := by
   cases e with
   | autonomousPropose p =>
       simp only [nextWeight, actor, admissibleEvent] at hadm ⊢
       obtain ⟨hZ, hsafe⟩ := hadm
       exact Composition.coherence_preserved_under_agent_event
-        requires allowedCapLimit validToken s _ δ η loss w rfl hZ hsafe hcoh
+        reqs allowedCapLimit validToken s _ δ η loss w rfl hZ hsafe hcoh
   | autonomousExpandCap c =>
       simp only [nextWeight, actor, admissibleEvent] at hadm ⊢
       obtain ⟨hZ, hsafe⟩ := hadm
       exact Composition.coherence_preserved_under_agent_event
-        requires allowedCapLimit validToken s _ δ η loss w rfl hZ hsafe hcoh
+        reqs allowedCapLimit validToken s _ δ η loss w rfl hZ hsafe hcoh
   | authenticatedRatification t p =>
       simp only [nextWeight, actor] at ⊢
       simp only [admissibleEvent] at hadm
       exact Ratification.guarded_ratification_preserves_coherence
-        requires allowedCapLimit validToken s t p δ w hcoh hadm
+        reqs allowedCapLimit validToken s t p δ w hcoh hadm
   | externalSuspend =>
       simp only [nextWeight, actor, admissibleEvent] at hadm ⊢
       obtain ⟨hZ, hsafe⟩ := hadm
       exact Composition.coherence_preserved_under_suspend
-        requires allowedCapLimit validToken s δ η loss w hZ hsafe
+        reqs allowedCapLimit validToken s δ η loss w hZ hsafe
   | execute a =>
       simp only [nextWeight, actor, admissibleEvent] at hadm ⊢
       obtain ⟨hZ, hsafe⟩ := hadm
       exact Composition.coherence_preserved_under_agent_event
-        requires allowedCapLimit validToken s _ δ η loss w rfl hZ hsafe hcoh
+        reqs allowedCapLimit validToken s _ δ η loss w rfl hZ hsafe hcoh
 
 #print axioms monitored_step_preserves_coherence
 
@@ -140,7 +140,7 @@ theorem monitored_step_preserves_coherence
 noncomputable def weightedHistoryStep
     {CapId Token : Type} {n : ℕ}
     [DecidableEq CapId] [DecidableEq (Fin n)] [DecidableEq Token]
-    (requires : Fin n → CapId)
+    (reqs : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (η : ℝ) (loss : Fin n → ℝ)
@@ -148,7 +148,7 @@ noncomputable def weightedHistoryStep
     (hs : WeightedHistoryState (CapId := CapId) n) :
     WeightedHistoryState (CapId := CapId) n :=
   let e := HistorySafety.generateEvent policy hs.historyState.history
-  let s' := step requires allowedCapLimit validToken hs.historyState.state e
+  let s' := step reqs allowedCapLimit validToken hs.historyState.state e
   { historyState :=
       { state := s'
         history := hs.historyState.history.concat
@@ -160,7 +160,7 @@ noncomputable def weightedHistoryStep
 noncomputable def generateWeightedTrajectory
     {CapId Token : Type} {n : ℕ}
     [DecidableEq CapId] [DecidableEq (Fin n)] [DecidableEq Token]
-    (requires : Fin n → CapId)
+    (reqs : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (η : ℝ) (loss : Fin n → ℝ)
@@ -169,8 +169,8 @@ noncomputable def generateWeightedTrajectory
       WeightedHistoryState (CapId := CapId) n
   | 0, hs => hs
   | k + 1, hs =>
-      generateWeightedTrajectory requires allowedCapLimit validToken η loss policy k
-        (weightedHistoryStep requires allowedCapLimit validToken η loss policy hs)
+      generateWeightedTrajectory reqs allowedCapLimit validToken η loss policy k
+        (weightedHistoryStep reqs allowedCapLimit validToken η loss policy hs)
 
 
 /-- **Coherence is preserved across a finite adaptive-adversarial trajectory,
@@ -191,7 +191,7 @@ noncomputable def generateWeightedTrajectory
 theorem generateWeightedTrajectory_preserves_coherence
     {CapId Token : Type} {n : ℕ}
     [DecidableEq CapId] [DecidableEq Token]
-    (requires : Fin n → CapId)
+    (reqs : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (η : ℝ) (loss : Fin n → ℝ)
@@ -204,17 +204,17 @@ theorem generateWeightedTrajectory_preserves_coherence
         (HistorySafety.generateEvent policy hj.historyState.history))
     (hcoh : WeightedCoherent δ hs) :
     WeightedCoherent δ
-      (generateWeightedTrajectory requires allowedCapLimit validToken η loss policy k hs) := by
+      (generateWeightedTrajectory reqs allowedCapLimit validToken η loss policy k hs) := by
   induction k generalizing hs with
   | zero => simpa [generateWeightedTrajectory] using hcoh
   | succ m ih =>
       rw [generateWeightedTrajectory]
       apply ih
       show WeightedCoherent δ
-        (weightedHistoryStep requires allowedCapLimit validToken η loss policy hs)
+        (weightedHistoryStep reqs allowedCapLimit validToken η loss policy hs)
       unfold WeightedCoherent weightedHistoryStep
       exact monitored_step_preserves_coherence
-        requires allowedCapLimit validToken
+        reqs allowedCapLimit validToken
         hs.historyState.state
         (HistorySafety.generateEvent policy hs.historyState.history)
         δ η loss hs.weight hcoh (hstep hs)

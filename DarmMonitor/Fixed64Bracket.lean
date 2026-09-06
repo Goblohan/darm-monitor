@@ -99,7 +99,7 @@ def quarterB : F64 := ⟨Int64.ofInt (2 ^ FixedPoint.k / 4)⟩
 /-! ## Registered status
 
   DONE: `expBracket` over F64, agreeing with the `Int` model given the unit
-  hypotheses the tower's invariant requires.
+  hypotheses the tower's invariant reqs.
 
   WHAT REMAINS FOR `ZhiN64`: `wpHiN64` (one `mulUp` against the bracket's upper
   end) and the sum via `Fixed64SumOver.sumOver64_toFixed`. Both are single

@@ -73,7 +73,7 @@ def GuardedRatification (δ : ℝ) {n : ℕ} (w : Fin n → ℝ) (p : Finset (Fi
     reduces to this single predicate holding at each ratification event. -/
 theorem guarded_ratification_preserves_coherence
     {n : ℕ} {CapId Token : Type} [DecidableEq CapId] [DecidableEq Token]
-    (requires : Fin n → CapId)
+    (reqs : Fin n → CapId)
     (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId (Fin n)) (t : Token) (p : Finset (Fin n))
@@ -81,7 +81,7 @@ theorem guarded_ratification_preserves_coherence
     (hcoh : IsCoherent s δ w)
     (hguard : GuardedRatification δ w p) :
     IsCoherent
-      (step requires allowedCapLimit validToken s (Event.authenticatedRatification t p)) δ w := by
+      (step reqs allowedCapLimit validToken s (Event.authenticatedRatification t p)) δ w := by
   unfold IsCoherent at hcoh ⊢
   simp only [step]
   split
@@ -118,7 +118,7 @@ theorem safe_update_expands_ratifiable_set
       an arbitrary superset of the current active set while keeping
       `is_safe_signal_Z`. Since `reweight η loss w i = w i * exp (-η * loss i)`
       and `exp` is surjective onto the positives, the answer is plausibly yes
-      whenever `w i > 0` — but this requires real analysis not attempted here,
+      whenever `w i > 0` — but this reqs real analysis not attempted here,
       and the Z-bound may obstruct it. NOT PROVEN EITHER WAY.
 
   R2. THE TRILEMMA HAS NO PROVEN RESOLUTION. Options (a), (b), (c) in the

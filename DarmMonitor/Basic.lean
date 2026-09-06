@@ -1,4 +1,6 @@
 import Mathlib.Data.Finset.Basic
+
+set_option linter.unusedSectionVars false
 /-!
   DARM Reference-Monitor Core — minimal executable formal model.
 
@@ -11,7 +13,7 @@ import Mathlib.Data.Finset.Basic
   A2. Capability bound is external. `allowedCapLimit` is supplied by the TCB.
       `autonomousExpandCap` lets the agent grow `cap` monotonically up to that
       bound. Lemma 1 bounds capability; it does not restrict growth.
-      GATING (added): `requires : ActionId -> CapId` names the capability each
+      GATING (added): `reqs : ActionId -> CapId` names the capability each
       action consumes, and `allowedActions` now filters `policy` by whether
       that capability is held. Before this, `cap` was written by `step` and
       read by nothing, so Lemma 1 constrained state with no effect on
@@ -62,27 +64,21 @@ def actor {CapId ActionId Token : Type} (e : Event CapId ActionId Token) : Actor
 
 /-- Execution eligibility = policy gated by operational state.
     Capabilities are never mutated to implement suspension (Model B). -/
-def allowedActions {CapId ActionId : Type} [DecidableEq CapId]
-    (requires : ActionId → CapId) (s : State CapId ActionId) : Finset ActionId :=
+def allowedActions {CapId ActionId : Type} [DecidableEq CapId] (reqs : ActionId → CapId) (s : State CapId ActionId) : Finset ActionId :=
   match s.opState with
-  | .active => s.policy.filter (fun a => requires a ∈ s.cap)
-  | .degraded => s.policy.filter (fun a => requires a ∈ s.cap)
+  | .active => s.policy.filter (fun a => reqs a ∈ s.cap)
+  | .degraded => s.policy.filter (fun a => reqs a ∈ s.cap)
   | .uncertain => ∅
   | .suspended => ∅
   | .terminated => ∅
 
 @[reducible]
-def canExecute {CapId ActionId : Type} [DecidableEq CapId]
-    (requires : ActionId → CapId) (s : State CapId ActionId) (a : ActionId) : Prop :=
-  a ∈ allowedActions requires s
+def canExecute {CapId ActionId : Type} [DecidableEq CapId] (reqs : ActionId → CapId) (s : State CapId ActionId) (a : ActionId) : Prop :=
+  a ∈ allowedActions reqs s
 
 /-- The reference monitor. Every branch is a total function on states;
     rejected events yield a null transition. -/
-def step {CapId ActionId Token : Type}
-    [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token]
-    (requires : ActionId → CapId)
-    (allowedCapLimit : Finset CapId) (validToken : Token → Prop) [DecidablePred validToken]
-    (s : State CapId ActionId) (e : Event CapId ActionId Token) : State CapId ActionId :=
+def step {CapId ActionId Token : Type} [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token] (reqs : ActionId → CapId) (allowedCapLimit : Finset CapId) (validToken : Token → Prop) [DecidablePred validToken] (s : State CapId ActionId) (e : Event CapId ActionId Token) : State CapId ActionId :=
   match e with
   | .autonomousPropose newPolicy =>
       if newPolicy ⊆ s.policy then { s with policy := newPolicy } else s
@@ -93,7 +89,7 @@ def step {CapId ActionId Token : Type}
   | .externalSuspend =>
       { s with opState := .suspended, policy := ∅ }
   | .execute a =>
-      if canExecute requires s a then { s with lastExecuted := some a } else s
+      if canExecute reqs s a then { s with lastExecuted := some a } else s
 
 def capInvariant {CapId ActionId : Type}
     (allowedCapLimit : Finset CapId) (s : State CapId ActionId) : Prop :=
@@ -103,14 +99,14 @@ section Lemmas
 
 variable {CapId ActionId Token : Type}
   [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token]
-  (requires : ActionId → CapId)
-  (allowedCapLimit : Finset CapId) (validToken : Token → Prop) [DecidablePred validToken]
+  {reqs : ActionId → CapId}
+  {allowedCapLimit : Finset CapId} {validToken : Token → Prop} [DecidablePred validToken]
 
 /-- Lemma 1. Capability stays within the externally supplied bound. See A2. -/
 theorem step_preserves_capInvariant
     (s : State CapId ActionId) (e : Event CapId ActionId Token)
     (h : capInvariant allowedCapLimit s) :
-    capInvariant allowedCapLimit (step requires allowedCapLimit validToken s e) := by
+    capInvariant allowedCapLimit (step reqs allowedCapLimit validToken s e) := by
   cases e with
   | autonomousPropose _ =>
       simp only [step, capInvariant]
@@ -135,7 +131,7 @@ theorem step_preserves_capInvariant
 theorem step_agent_policy_monotone
     (s : State CapId ActionId) (e : Event CapId ActionId Token)
     (hAgent : actor e = Actor.agent) :
-    (step requires allowedCapLimit validToken s e).policy ⊆ s.policy := by
+    (step reqs allowedCapLimit validToken s e).policy ⊆ s.policy := by
   cases e with
   | autonomousPropose newPolicy =>
       simp only [step]
@@ -154,22 +150,22 @@ theorem step_agent_policy_monotone
 /-- Lemma 3. Unauthorized execution is a null transition.
     Non-trivial because authorized execution does mutate `lastExecuted`. -/
 theorem unauthorized_execution_is_blocked
-    (s : State CapId ActionId) (a : ActionId) (h : ¬ canExecute requires s a) :
-    step requires allowedCapLimit validToken s (.execute a) = s := by
-  simp only [step, if_neg h]
+    (s : State CapId ActionId) (a : ActionId) (h : ¬ canExecute reqs s a) :
+    step reqs allowedCapLimit validToken s (.execute a) = s := by
+  simp only [step, ite_eq_right h]
 
 /-- Companion to Lemma 3: authorized execution is *not* a null transition,
     which is what makes Lemma 3 say something. -/
 theorem authorized_execution_records
-    (s : State CapId ActionId) (a : ActionId) (h : canExecute requires s a) :
-    (step requires allowedCapLimit validToken s (.execute a)).lastExecuted = some a := by
-  simp only [step, if_pos h]
+    (s : State CapId ActionId) (a : ActionId) (h : canExecute reqs s a) :
+    (step reqs allowedCapLimit validToken s (.execute a)).lastExecuted = some a := by
+  simp only [step, ite_eq_left h]
 
 /-- Lemma 4. Single-step: suspension survives any agent event. -/
 theorem suspension_is_irreversible_under_agent_events
     (s : State CapId ActionId) (e : Event CapId ActionId Token)
     (hSusp : s.opState = .suspended) (hAgent : actor e = Actor.agent) :
-    (step requires allowedCapLimit validToken s e).opState = .suspended := by
+    (step reqs allowedCapLimit validToken s e).opState = .suspended := by
   cases e with
   | autonomousPropose newPolicy =>
       simp only [step]
@@ -180,9 +176,9 @@ theorem suspension_is_irreversible_under_agent_events
   | authenticatedRatification _ _ => simp [actor] at hAgent
   | externalSuspend => simp [actor] at hAgent
   | execute a =>
-      have h_no_exec : ¬ canExecute requires s a := by
+      have h_no_exec : ¬ canExecute reqs s a := by
         simp [canExecute, allowedActions, hSusp]
-      simp only [step, if_neg h_no_exec]
+      simp only [step, ite_eq_right h_no_exec]
       exact hSusp
 
 /-- Lemma 5. Multi-step: suspension is absorbing over any pure-agent trace.
@@ -191,14 +187,14 @@ theorem suspended_absorbing
     (es : List (Event CapId ActionId Token)) :
     ∀ (s : State CapId ActionId), s.opState = .suspended →
       (∀ e ∈ es, actor e = Actor.agent) →
-      (es.foldl (step requires allowedCapLimit validToken) s).opState = .suspended := by
+      (es.foldl (step reqs allowedCapLimit validToken) s).opState = .suspended := by
   induction es with
   | nil => intro s hs _; exact hs
   | cons e es ih =>
       intro s hs hAll
       simp only [List.foldl_cons]
       refine ih _ ?_ ?_
-      · exact suspension_is_irreversible_under_agent_events requires allowedCapLimit validToken s e hs
+      · exact suspension_is_irreversible_under_agent_events s e hs
           (hAll e (by simp))
       · intro e' he'; exact hAll e' (by simp [he'])
 
@@ -208,14 +204,14 @@ theorem policy_monotone_absorbing
     (es : List (Event CapId ActionId Token)) :
     ∀ (s : State CapId ActionId),
       (∀ e ∈ es, actor e = Actor.agent) →
-      (es.foldl (step requires allowedCapLimit validToken) s).policy ⊆ s.policy := by
+      (es.foldl (step reqs allowedCapLimit validToken) s).policy ⊆ s.policy := by
   induction es with
   | nil => intro s _; exact subset_rfl
   | cons e es ih =>
       intro s hAll
       simp only [List.foldl_cons]
-      have h_step := step_agent_policy_monotone requires allowedCapLimit validToken s e (hAll e (by simp))
-      have h_rest := ih (step requires allowedCapLimit validToken s e)
+      have h_step := step_agent_policy_monotone (reqs := reqs) (allowedCapLimit := allowedCapLimit) (validToken := validToken) s e (hAll e (by simp))
+      have h_rest := ih (step reqs allowedCapLimit validToken s e)
         (fun e' he' => hAll e' (by simp [he']))
       exact h_rest.trans h_step
 
@@ -230,9 +226,9 @@ theorem policy_monotone_absorbing
 theorem execution_confined_by_cap_bound
     (s : State CapId ActionId) (a : ActionId)
     (hCap : capInvariant allowedCapLimit s)
-    (hExec : canExecute requires s a) :
-    requires a ∈ allowedCapLimit := by
-  have hmem : requires a ∈ s.cap := by
+    (hExec : canExecute reqs s a) :
+    reqs a ∈ allowedCapLimit := by
+  have hmem : reqs a ∈ s.cap := by
     have h := hExec
     unfold canExecute allowedActions at h
     split at h

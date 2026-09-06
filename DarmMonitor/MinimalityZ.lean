@@ -96,7 +96,7 @@ theorem hZ_necessary_for_equiv :
 
   WHY BOTH MATTER. A hypothesis can be necessary for a theorem and yet never
   bind in practice, because the theorem is stated more generally than any
-  deployment requires. Recording only the necessity would suggest `hZ` is a
+  deployment reqs. Recording only the necessity would suggest `hZ` is a
   constraint users must check; recording only the redundancy would suggest it
   could be deleted from the statement. Neither alone is the whole picture.
 -/

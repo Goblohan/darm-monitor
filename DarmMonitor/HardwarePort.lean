@@ -28,7 +28,7 @@ import DarmMonitor.RationalInstance
   single mapping: `Int` multiplication on a proved-bounded range, implemented as
   `__int128_t`. It does NOT eliminate it. Lean's code generator emits
   `lean_object*` with a GMP fallback for `Int`; getting a 128-bit register
-  operation requires `@[extern]` or hand-written C, and that binding is
+  operation reqs `@[extern]` or hand-written C, and that binding is
   unverified. The honest TCB for an exported build is
 
       Lean kernel + Lean C emitter + C compiler + the extern binding + marshalling glue
@@ -156,7 +156,7 @@ theorem div_numerator_within_int128 (x : ℤ) (hx : |x| < int64Bound) :
       with `FixedPoint.Fixed` within the envelope. That is the next module and
       it is where the real work is.
     * Any `@[extern]` binding. Lean emits `lean_object*` for `Int`; a 128-bit
-      register operation requires a C mapping that is not verified here.
+      register operation reqs a C mapping that is not verified here.
     * Any measurement. "Unboxed" and "zero-alloc" are goals, not observations —
       nothing has been compiled to a binary and profiled.
 -/

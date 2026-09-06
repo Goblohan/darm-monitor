@@ -176,7 +176,7 @@ theorem agent_hypothesis_necessary_for_coherence :
     needed *for this formalization*, not that positive mass is mathematically
     irrelevant to normalization. Recorded as a cell because a minimality
     matrix that silently carries an unnecessary hypothesis is overstating what
-    the theorem requires — but the reason it is unnecessary is a convention,
+    the theorem reqs — but the reason it is unnecessary is a convention,
     not a discovery. -/
 theorem massPos_not_necessary_for_capacity
     {n : ℕ} (δ : ℝ) (v : Fin n → ℝ) (hv : ∀ i, 0 ≤ v i) :

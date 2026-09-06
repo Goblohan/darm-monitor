@@ -17,11 +17,11 @@ import DarmMonitor.Entitlement
 
       allowedCapLimit = {false}       -- the bound permits only `false`
       s.cap           = {true}        -- but the state holds `true`
-      requires _      = true          -- the action needs `true`
+      reqs _      = true          -- the action needs `true`
       s.opState       = .active       -- so allowedActions filters by cap
 
   Then `canExecute` holds — the action is in the policy and its capability is
-  held — while `requires a = true ∉ {false}`. The conclusion of Lemma 7 is
+  held — while `reqs a = true ∉ {false}`. The conclusion of Lemma 7 is
   false, and the only hypothesis missing is `capInvariant`.
 
   WHY THIS MATTERS AND IS NOT TRIVIAL. Before capability gating, `cap` was
@@ -48,7 +48,7 @@ def badState : State Bool Bool :=
 /-- The external bound permits only `false`. -/
 def tightBound : Finset Bool := {false}
 
-/-- Every action requires capability `true`. -/
+/-- Every action reqs capability `true`. -/
 def needsTrue : Bool → Bool := fun _ => true
 
 /-- **`capInvariant` is necessary for Lemma 7.**

@@ -26,7 +26,7 @@ import DarmMonitor.ActiveSurrogate
   `1 + a > 0`. An earlier plan used `exp_bound_div_one_sub_of_interval` with a
   two-case split on the sign of `a`; that is unnecessary.
 
-  THE DOMAIN RESTRICTION IS REAL AND MUST BE STATED. The upper bound requires
+  THE DOMAIN RESTRICTION IS REAL AND MUST BE STATED. The upper bound reqs
   `η * loss i > -1`. Outside that region this evaluator produces nothing, and a
   monitor built on it must refuse to certify rather than compute — fail-closed,
   consistently with the rest of the refinement. So the deliverable is a monitor

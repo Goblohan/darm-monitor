@@ -32,7 +32,7 @@ import DarmMonitor.NontrivialExpansion
   TIGHTNESS. The bound is close to exact. Taking v = 1 on a target set B and
   v = ε off it, and letting ε → 0, gives active = B whenever δ|B| < 1. So
   reachable sets are characterized by δ|B| < 1, against a proven bound of
-  δ|B| ≤ 1 — the two differ only at the boundary. The construction requires
+  δ|B| ≤ 1 — the two differ only at the boundary. The construction reqs
   `Real.log` to invert `exp` and is NOT formalized here; see R1b below.
 
   GENERALIZATION. The index type is an arbitrary `Fintype`. The proof sums over

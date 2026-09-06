@@ -54,7 +54,7 @@ theorem sub_simulates_of_inUnit (x y : F64)
   DONE: subtraction over F64, with both a general range-hypothesis form and the
   specialization to unit-range operands that `expLoFx` needs.
 
-  With this, EVERY primitive `expBracket` requires exists in verified 64-bit
+  With this, EVERY primitive `expBracket` reqs exists in verified 64-bit
   form. What remains for `ZhiN64` is composition: `expBracket64` from the tower
   plus `expLoFx64`/`expHiFx64`, then `wpHiN64`, then the sum via
   `Fixed64SumOver.sumOver64_toFixed`.

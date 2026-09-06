@@ -41,7 +41,7 @@ variable {n : ℕ} {CapId Token : Type} [DecidableEq CapId] [DecidableEq Token]
 
 /-- `coherence_preserved_under_agent_event` with `hZ` discharged by A5. -/
 theorem coherence_preserved_under_agent_event_of_A5
-    (requires : Fin n → CapId) (allowedCapLimit : Finset CapId)
+    (reqs : Fin n → CapId) (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId (Fin n)) (e : Event CapId (Fin n) Token)
     (δ η : ℝ) (loss w : Fin n → ℝ)
@@ -49,22 +49,22 @@ theorem coherence_preserved_under_agent_event_of_A5
     (hw : WellFormedWeights w)
     (hsafe : is_safe_signal_Z δ η loss w)
     (hcoh : IsCoherent s δ w) :
-    IsCoherent (step requires allowedCapLimit validToken s e) δ
+    IsCoherent (step reqs allowedCapLimit validToken s e) δ
       (DARM.Boundary.normalize (reweight η loss w) (Z (reweight η loss w))) :=
-  coherence_preserved_under_agent_event requires allowedCapLimit validToken s e
+  coherence_preserved_under_agent_event reqs allowedCapLimit validToken s e
     δ η loss w hAgent (hZ_of_A5 η loss hw) hsafe hcoh
 
 /-- `coherence_preserved_under_suspend` with `hZ` discharged by A5. -/
 theorem coherence_preserved_under_suspend_of_A5
-    (requires : Fin n → CapId) (allowedCapLimit : Finset CapId)
+    (reqs : Fin n → CapId) (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId (Fin n))
     (δ η : ℝ) (loss w : Fin n → ℝ)
     (hw : WellFormedWeights w)
     (hsafe : is_safe_signal_Z δ η loss w) :
-    IsCoherent (step requires allowedCapLimit validToken s Event.externalSuspend) δ
+    IsCoherent (step reqs allowedCapLimit validToken s Event.externalSuspend) δ
       (DARM.Boundary.normalize (reweight η loss w) (Z (reweight η loss w))) :=
-  coherence_preserved_under_suspend requires allowedCapLimit validToken s
+  coherence_preserved_under_suspend reqs allowedCapLimit validToken s
     δ η loss w (hZ_of_A5 η loss hw) hsafe
 
 /-! ## 2. Ratifiable set expansion -/

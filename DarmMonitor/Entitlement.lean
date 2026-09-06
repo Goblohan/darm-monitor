@@ -48,11 +48,11 @@ open DARM.Assumptions
     when someone does. -/
 theorem unauthenticated_is_noop
     {CapId ActionId Token : Type} [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token]
-    (requires : ActionId → CapId) (allowedCapLimit : Finset CapId)
+    (reqs : ActionId → CapId) (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId ActionId) (t : Token) (p : Finset ActionId)
     (hbad : ¬ validToken t) :
-    step requires allowedCapLimit validToken s
+    step reqs allowedCapLimit validToken s
       (Event.authenticatedRatification t p) = s := by
   simp [step, hbad]
 
@@ -60,14 +60,14 @@ theorem unauthenticated_is_noop
     ratification altered the policy, the token was accepted. -/
 theorem policy_change_implies_valid_token
     {CapId ActionId Token : Type} [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token]
-    (requires : ActionId → CapId) (allowedCapLimit : Finset CapId)
+    (reqs : ActionId → CapId) (allowedCapLimit : Finset CapId)
     (validToken : Token → Prop) [DecidablePred validToken]
     (s : State CapId ActionId) (t : Token) (p : Finset ActionId)
-    (hchanged : step requires allowedCapLimit validToken s
+    (hchanged : step reqs allowedCapLimit validToken s
       (Event.authenticatedRatification t p) ≠ s) :
     validToken t := by
   by_contra hbad
-  exact hchanged (unauthenticated_is_noop requires allowedCapLimit validToken s t p hbad)
+  exact hchanged (unauthenticated_is_noop reqs allowedCapLimit validToken s t p hbad)
 
 /-! ## 2. Why A1 matters here and not for coherence
 
@@ -85,9 +85,9 @@ theorem policy_change_implies_valid_token
     entitlement is only a restriction if some token fails. -/
 theorem entitlement_vacuous_without_A1
     {CapId ActionId Token : Type} [DecidableEq CapId] [DecidableEq ActionId] [DecidableEq Token]
-    (requires : ActionId → CapId) (allowedCapLimit : Finset CapId)
+    (reqs : ActionId → CapId) (allowedCapLimit : Finset CapId)
     (s : State CapId ActionId) (t : Token) (p : Finset ActionId) :
-    step requires allowedCapLimit (fun _ => True) s
+    step reqs allowedCapLimit (fun _ => True) s
       (Event.authenticatedRatification t p)
       = { s with policy := p } := by
   simp [step]

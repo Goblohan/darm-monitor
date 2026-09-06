@@ -13,7 +13,7 @@ import DarmMonitor.Interference
 
       ActionId          ->  tool name
       CapId             ->  API scope / permission
-      requires          ->  which scope a tool consumes
+      reqs          ->  which scope a tool consumes
       cap               ->  scopes currently held
       policy            ->  tools currently permitted
       allowedCapLimit   ->  scopes granted by the deployment (the TCB bound)
@@ -59,7 +59,7 @@ inductive Approval
   | humanSigned
 deriving DecidableEq, Repr
 
-/-- The permission matrix: `requires`, instantiated. -/
+/-- The permission matrix: `reqs`, instantiated. -/
 def toolScope : Tool → Scope
   | .readFile  => .fsRead
   | .writeFile => .fsWrite
@@ -100,16 +100,16 @@ theorem tool_scope_confined
     (hExec : canExecute toolScope s t) :
     toolScope t ∈ granted :=
   execution_confined_by_cap_bound
-    (requires := toolScope) (allowedCapLimit := granted)
+    (reqs := toolScope) (allowedCapLimit := granted)
     (s := s) (a := t) (hCap := hCap) (hExec := hExec)
 
 /-- **The agent cannot widen its own tool set.** Inherited from
-    `step_agent_policy_monotone`. Widening requires a non-agent event. -/
+    `step_agent_policy_monotone`. Widening reqs a non-agent event. -/
 theorem agent_cannot_widen_tools
     (s : LLMState) (e : LLMEvent) (hAgent : actor e = Actor.agent) :
     (llmStep s e).policy ⊆ s.policy :=
   step_agent_policy_monotone
-    (requires := toolScope) (allowedCapLimit := granted)
+    (reqs := toolScope) (allowedCapLimit := granted)
     (validToken := validApproval) (s := s) (e := e) (hAgent := hAgent)
 
 /-! ## 3. The negative results — what this deployment provably cannot do

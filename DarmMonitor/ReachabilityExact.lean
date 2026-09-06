@@ -129,7 +129,7 @@ theorem active_card_strict_lt_of_ne_univ
     * The reweighting channel is surjective onto positive vectors, so R1b is a
       question about achievable active sets, not about the expressiveness of
       the update rule.
-    * The necessity half is sharp: a proper subset `B` requires `δ * |B| < 1`,
+    * The necessity half is sharp: a proper subset `B` reqs `δ * |B| < 1`,
       strictly. The weak inequality `δ * |B| ≤ 1` is attainable only when
       `B` is the whole index type.
 

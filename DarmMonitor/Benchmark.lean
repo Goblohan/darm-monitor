@@ -179,7 +179,7 @@ def measure (c : Config) (n : Nat) : Nat × Nat :=
   TWO THINGS THE SWEEP FOUND.
 
   1. `n` MUST SCALE WITH `η`. The bracket is taken at `η * loss / 2^n`, so
-     holding it sharp as `η` grows requires `2^n` to grow with it. The baseline
+     holding it sharp as `η` grows reqs `2^n` to grow with it. The baseline
      `n = 3` is adequate at `η = 0.5` and not at `η = 2`.
 
   2. THE CAPACITY BOUND IS NECESSARY BUT FAR FROM SUFFICIENT.

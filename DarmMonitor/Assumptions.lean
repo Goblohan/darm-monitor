@@ -226,7 +226,7 @@ theorem A1_insufficient_for_coherence :
                          category is correctly stated with the hypothesis explicit, not a gap.
 
   OPEN:    Every "necessary" cell other than
-           A2/capacity and A2/confinement. Necessity requires one drop-countermodel per cell;
+           A2/capacity and A2/confinement. Necessity reqs one drop-countermodel per cell;
         several others now exist across the `Minimality*` modules, but the
            matrix is far from full and should not assert cells until they are
            proved.

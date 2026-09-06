@@ -55,14 +55,14 @@ namespace Deployment
     the instantiations. -/
 theorem never_executable_of_ungranted
     {CapId ActionId : Type} [DecidableEq CapId] [DecidableEq ActionId]
-    (requires : ActionId → CapId) (grant : Finset CapId)
-    (a : ActionId) (hUngranted : requires a ∉ grant)
+    (reqs : ActionId → CapId) (grant : Finset CapId)
+    (a : ActionId) (hUngranted : reqs a ∉ grant)
     (s : State CapId ActionId) (hCap : capInvariant grant s) :
-    ¬ canExecute requires s a := by
+    ¬ canExecute reqs s a := by
   intro hExec
   exact hUngranted
     (execution_confined_by_cap_bound
-      (requires := requires) (allowedCapLimit := grant)
+      (reqs := reqs) (allowedCapLimit := grant)
       (s := s) (a := a) (hCap := hCap) (hExec := hExec))
 
 /-! ## 2. The unreachable set
@@ -71,25 +71,25 @@ theorem never_executable_of_ungranted
 
 /-- Actions that can never execute under this grant, whatever the policy. -/
 def unreachable {CapId ActionId : Type} [DecidableEq CapId] [Fintype ActionId]
-    (requires : ActionId → CapId) (grant : Finset CapId) : Finset ActionId :=
-  Finset.univ.filter (fun a => requires a ∉ grant)
+    (reqs : ActionId → CapId) (grant : Finset CapId) : Finset ActionId :=
+  Finset.univ.filter (fun a => reqs a ∉ grant)
 
 theorem mem_unreachable_iff
     {CapId ActionId : Type} [DecidableEq CapId] [Fintype ActionId]
-    (requires : ActionId → CapId) (grant : Finset CapId) (a : ActionId) :
-    a ∈ unreachable requires grant ↔ requires a ∉ grant := by
+    (reqs : ActionId → CapId) (grant : Finset CapId) (a : ActionId) :
+    a ∈ unreachable reqs grant ↔ reqs a ∉ grant := by
   simp [unreachable]
 
 /-- Membership in `unreachable` delivers the impossibility. -/
 theorem not_executable_of_mem_unreachable
     {CapId ActionId : Type} [DecidableEq CapId] [DecidableEq ActionId]
     [Fintype ActionId]
-    (requires : ActionId → CapId) (grant : Finset CapId)
-    (a : ActionId) (ha : a ∈ unreachable requires grant)
+    (reqs : ActionId → CapId) (grant : Finset CapId)
+    (a : ActionId) (ha : a ∈ unreachable reqs grant)
     (s : State CapId ActionId) (hCap : capInvariant grant s) :
-    ¬ canExecute requires s a :=
-  never_executable_of_ungranted requires grant a
-    ((mem_unreachable_iff requires grant a).mp ha) s hCap
+    ¬ canExecute reqs s a :=
+  never_executable_of_ungranted reqs grant a
+    ((mem_unreachable_iff reqs grant a).mp ha) s hCap
 
 /-! ## 3. Deployment comparison — the theorem a typeclass would forbid
 
@@ -104,8 +104,8 @@ theorem not_executable_of_mem_unreachable
     admits only one grant per action space. -/
 theorem unreachable_antitone
     {CapId ActionId : Type} [DecidableEq CapId] [Fintype ActionId]
-    (requires : ActionId → CapId) (G₁ G₂ : Finset CapId) (h : G₁ ⊆ G₂) :
-    unreachable requires G₂ ⊆ unreachable requires G₁ := by
+    (reqs : ActionId → CapId) (G₁ G₂ : Finset CapId) (h : G₁ ⊆ G₂) :
+    unreachable reqs G₂ ⊆ unreachable reqs G₁ := by
   intro a ha
   rw [mem_unreachable_iff] at ha ⊢
   exact fun hmem => ha (h hmem)

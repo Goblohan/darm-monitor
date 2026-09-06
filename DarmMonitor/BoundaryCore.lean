@@ -157,7 +157,7 @@ theorem rational_not_semigroup :
   norm_num
 
 /-- **And it is not globally positive.** Below `-1` the update flips sign,
-    breaking the non-negativity hypothesis every capacity bound requires. -/
+    breaking the non-negativity hypothesis every capacity bound reqs. -/
 theorem ratUpdate_neg_below : ratUpdate (-2) < 0 := by
   unfold ratUpdate
   norm_num

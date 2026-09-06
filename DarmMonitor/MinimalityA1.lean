@@ -52,14 +52,14 @@ open DARM.Assumptions DARM.Ratification DARM.Composition
     load-bearing, this would not typecheck. -/
 theorem A1_not_necessary_for_guarded_coherence
     {n : ℕ} {CapId Token : Type} [DecidableEq CapId] [DecidableEq Token]
-    (requires : Fin n → CapId) (allowedCapLimit : Finset CapId)
+    (reqs : Fin n → CapId) (allowedCapLimit : Finset CapId)
     (s : State CapId (Fin n)) (t : Token) (p : Finset (Fin n))
     (δ : ℝ) (w : Fin n → ℝ)
     (hcoh : IsCoherent s δ w) (hguard : GuardedRatification δ w p) :
     IsCoherent
-      (step requires allowedCapLimit (fun _ => True) s
+      (step reqs allowedCapLimit (fun _ => True) s
         (Event.authenticatedRatification t p)) δ w :=
-  guarded_ratification_preserves_coherence requires allowedCapLimit
+  guarded_ratification_preserves_coherence reqs allowedCapLimit
     (fun _ => True) s t p δ w hcoh hguard
 
 /-- The other half of the cell is `Assumptions.A1_fails_for_trivial_predicate`,

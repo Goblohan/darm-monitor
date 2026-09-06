@@ -86,14 +86,14 @@ theorem job_perm_confined
     (hExec : canExecute jobPerm s j) :
     jobPerm j ∈ prGrant :=
   execution_confined_by_cap_bound
-    (requires := jobPerm) (allowedCapLimit := prGrant)
+    (reqs := jobPerm) (allowedCapLimit := prGrant)
     (s := s) (a := j) (hCap := hCap) (hExec := hExec)
 
 theorem runner_cannot_widen_jobs
     (s : CIState) (e : CIEvent) (hAgent : actor e = Actor.agent) :
     (ciStep s e).policy ⊆ s.policy :=
   step_agent_policy_monotone
-    (requires := jobPerm) (allowedCapLimit := prGrant)
+    (reqs := jobPerm) (allowedCapLimit := prGrant)
     (validToken := validSignoff) (s := s) (e := e) (hAgent := hAgent)
 
 /-! ## 3. Negative results for this deployment -/
@@ -141,7 +141,7 @@ theorem cannot_self_grant_prod (s : CIState) :
     sole coherence-breaking transition.
 
     This is a limitation of the model as specified, not a defect in the
-    proofs. Making it expressible would require `requires` to return a set of
+    proofs. Making it expressible would require `reqs` to return a set of
     permissions, or an explicit per-action permission relation. -/
 theorem deploy_rollback_inseparable
     (s : CIState)
@@ -149,10 +149,20 @@ theorem deploy_rollback_inseparable
     canExecute jobPerm s Job.deploy ↔ canExecute jobPerm s Job.rollback := by
   unfold canExecute allowedActions
   split
-  · simp only [Finset.mem_filter, jobPerm]
-    exact ⟨fun h => ⟨hr, h.2⟩, fun h => ⟨hd, h.2⟩⟩
-  · simp only [Finset.mem_filter, jobPerm]
-    exact ⟨fun h => ⟨hr, h.2⟩, fun h => ⟨hd, h.2⟩⟩
+  · constructor
+    · intro h
+      rw [Finset.mem_filter] at h ⊢
+      exact ⟨hr, h.2⟩
+    · intro h
+      rw [Finset.mem_filter] at h ⊢
+      exact ⟨hd, h.2⟩
+  · constructor
+    · intro h
+      rw [Finset.mem_filter] at h ⊢
+      exact ⟨hr, h.2⟩
+    · intro h
+      rw [Finset.mem_filter] at h ⊢
+      exact ⟨hd, h.2⟩
   · simp
   · simp
   · simp
@@ -169,7 +179,7 @@ theorem deploy_rollback_inseparable
 
   3. Two independent instances now exist, so a `ReferenceMonitor` typeclass
      can be extracted from their shared structure rather than guessed at.
-     What they actually share: `requires`, `allowedCapLimit`, a validity
+     What they actually share: `reqs`, `allowedCapLimit`, a validity
      predicate on approval artifacts, and nothing else. Notably NOT
      noninterference, which is false in the base model
      (`Interference.not_noninterfering_basic`) and would render any class
