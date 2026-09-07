@@ -38,7 +38,7 @@ jobs:
       - name: Build and Run C-ABI Boundary Tests
         run: |
           gcc -Iinclude tests/test_darm_shim.c -o tests/test_darm_shim
-          ./tests/test_darm_shim | grep -q "[DARM C-ABI] All unboxed scalar boundary checks passed."
+          ./tests/test_darm_shim | grep -qF "[DARM C-ABI] All unboxed scalar boundary checks passed."
 
       - name: Assert Safety Boundary Invariants
         run: |
