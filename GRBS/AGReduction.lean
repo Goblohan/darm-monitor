@@ -88,9 +88,9 @@ def CoverageSensitive (M : Mediation) : Prop :=
     systems. The trace difference is DERIVED from `CoverageSensitive`, not
     stipulated. -/
 theorem above_interface_reduction
-    (M : Mediation) (drives : RawBehavior) (iface : Action → Prop)
+    (M : Mediation) (drives : RawBehavior)
     (d : Channel) (a : Action)
-    (hIface : iface a) (hDrives : drives a d)
+    (hDrives : drives a d)
     (hSens : CoverageSensitive M)
     (cov1 cov2 : Channel → Prop)
     (hcov1 : cov1 d) (hcov2 : ¬ cov2 d) :
@@ -115,7 +115,7 @@ theorem reachable_coverage_is_observable
     ∃ a : Action, iface a ∧
       observeAt M drives cov1 a d ≠ observeAt M drives cov2 a d := by
   obtain ⟨a, hIface, hDrives⟩ := hReach
-  exact ⟨a, hIface, above_interface_reduction M drives iface d a hIface hDrives hSens cov1 cov2 hcov1 hcov2⟩
+  exact ⟨a, hIface, above_interface_reduction M drives d a hDrives hSens cov1 cov2 hcov1 hcov2⟩
 
 end AGReduction
 end GRBS
