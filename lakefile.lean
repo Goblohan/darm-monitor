@@ -13,6 +13,10 @@ lean_lib DarmMonitor where
   roots := #[`DarmMonitor]
   nativeFacets := fun shouldExport => if shouldExport then #[Module.oExportFacet] else #[Module.oFacet]
 
+lean_lib GRBS where
+  srcDir := "GRBS"
+  roots := #[`GRBS]
+
 /-
   The demo executable links the hand-built static library `c/libdarm_native.a`,
   which supplies the widening fixed-point multiplies bound by `@[extern]` in
