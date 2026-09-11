@@ -49,7 +49,7 @@ Interface-bounded behavioral AG:
 cannot recover latent coverage information in the R3d witness.
 
 PhysicalAG given the constructed composite semantics:
-can recover the semantic Transfer judgment and, with the DARM seams,
+can recover the semantic `Transfer` judgment and, with the DARM seams,
 derive the GRBS conclusion in the R3e model.
 ```
 
