@@ -1,0 +1,360 @@
+/-
+R20: DARM-to-Semantics Correspondence
+
+PURPOSE
+
+R19 and R19b established two deliberately separate layers:
+
+  * R19 defines boundary-mediated semantic transfer.
+  * R19b defines an explicit adequacy bridge from structural dependencies
+    to semantic preservation.
+
+R20 connects those layers to the canonical DARM transfer calculus.
+
+The connection is intentionally conditional. DARM structural conditions do
+not themselves prove that an abstract dependency corresponds to a semantic
+transition. That correspondence is supplied by an explicit semantic
+realization and adequacy interface.
+
+ARCHITECTURE
+
+  DARM dependency
+        |
+        | semantic realization
+        v
+  semantic dependency
+        |
+        | transition adequacy
+        v
+  boundary-mediated semantic step
+        |
+        | discharge adequacy
+        v
+  guarantee preservation
+
+The intended conclusion is therefore:
+
+  DARM transfer admissibility
+      +
+  semantic realization adequacy
+      ->
+  semantic target assurance.
+
+No converse theorem is asserted.
+
+NON-GOALS
+
+This module does not establish:
+
+  * physical completeness of the semantic model;
+  * correctness of a hardware implementation;
+  * correctness of a reference monitor;
+  * validity of the semantic realization itself.
+
+Those are separate assurance obligations.
+-/
+
+import DARMCoreCalculus
+
+namespace GRBS.R20DARMToSemanticCorrespondence
+
+open GRBS
+open GRBS.R5AssuranceConservation
+open GRBS.DARMCoreCalculus
+
+/-- Minimal semantic system interface required by R20. -/
+structure SemanticSystem where
+  State : Type
+  Step : State → State → Prop
+
+/-- A semantic guarantee over system states. -/
+structure SemanticGuarantee (S : SemanticSystem) where
+  property : S.State → Prop
+
+/-- A semantic boundary identifying mediated transitions. -/
+structure SemanticBoundary (S : SemanticSystem) where
+  mediated : S.State → S.State → Prop
+
+/-- A boundary-mediated semantic transition. -/
+def BoundaryMediatedStep
+    (S : SemanticSystem)
+    (B : SemanticBoundary S)
+    (x y : S.State) : Prop :=
+  S.Step x y ∧ B.mediated x y
+
+/-- A semantic dependency associated with a structural dependency and states. -/
+structure SemanticDependency (D State : Type) where
+  dependency : D
+  source : State
+  target : State
+
+/--
+A semantic realization maps each structural dependency to a semantic
+dependency obligation.
+-/
+def SemanticRealization
+    (D : Type)
+    (S : SemanticSystem) :=
+  D → SemanticDependency D S.State
+
+/--
+The realization is dependency-faithful when the semantic dependency
+preserves the identity of the structural dependency.
+-/
+def RealizationFaithful
+    {D : Type}
+    {S : SemanticSystem}
+    (realize : SemanticRealization D S) : Prop :=
+  ∀ d, (realize d).dependency = d
+
+/--
+A realized dependency is transition-adequate when its source and target
+states form an actual boundary-mediated semantic step.
+-/
+def RealizationTransitionAdequate
+    {D : Type}
+    (S : SemanticSystem)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (d : D) : Prop :=
+  BoundaryMediatedStep S B
+    (realize d).source
+    (realize d).target
+
+/--
+Transition adequacy for every dependency that is semantically relevant.
+-/
+def RelevantRealizationsTransitionAdequate
+    {D : Type}
+    (S : SemanticSystem)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (relevant : SemanticDependency D S.State → Prop) : Prop :=
+  ∀ d, relevant (realize d) →
+    RealizationTransitionAdequate S B realize d
+
+/--
+A discharge predicate is semantically adequate when discharge of a
+dependency establishes the guarantee at the realized target state whenever
+the realized source state already satisfies the guarantee.
+-/
+def RealizationDischargeAdequate
+    {D : Type}
+    (S : SemanticSystem)
+    (G : SemanticGuarantee S)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (discharge : D → Prop) : Prop :=
+  ∀ d, discharge d →
+    BoundaryMediatedStep S B
+      (realize d).source
+      (realize d).target →
+    G.property (realize d).source →
+    G.property (realize d).target
+
+/--
+Semantic realization adequacy combines the three distinct obligations required
+to interpret a DARM transfer in the semantic system:
+
+  1. dependency identity is preserved;
+  2. relevant realized dependencies correspond to actual boundary-mediated
+     semantic transitions;
+  3. discharged dependencies preserve the semantic guarantee across those
+     realized mediated steps.
+
+DARM does not prove these obligations. They constitute the explicit semantic
+adequacy interface between the structural assurance layer and the semantic
+system.
+-/
+def SemanticRealizationAdequate
+    {D : Type}
+    (S : SemanticSystem)
+    (G : SemanticGuarantee S)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (relevant : SemanticDependency D S.State → Prop)
+    (discharge : D → Prop) : Prop :=
+  RealizationFaithful realize ∧
+  RelevantRealizationsTransitionAdequate S B realize relevant ∧
+  RealizationDischargeAdequate S G B realize discharge
+
+/--
+A DARM-admissible transfer can establish semantic target assurance when the
+structural delta is represented by a semantic realization whose relevant
+dependencies are actual boundary-mediated transitions and whose discharged
+transitions preserve the semantic guarantee.
+
+The theorem deliberately keeps semantic realization adequacy explicit. DARM
+supplies the structural transfer discipline; the semantic realization and its
+adequacy remain separate proof obligations.
+-/
+theorem darm_delta_realizations_preserve_guarantee
+    (F : Frame)
+    (g : F.Guarantee)
+    (s : F.System)
+    (b : F.Boundary)
+    (l : F.Locus)
+    (c : DARMCoreCalculus.TransferCandidate F.Dependency)
+    (S : SemanticSystem)
+    (G : SemanticGuarantee S)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization F.Dependency S)
+    (relevant : SemanticDependency F.Dependency S.State → Prop)
+    (discharge : F.Dependency → Prop)
+    (hAdmissible :
+      DARMCoreCalculus.DARMTransferAdmissible F g s b l c)
+    (hAdequate :
+      SemanticRealizationAdequate S G B realize relevant discharge)
+    (hDeltaSource :
+      ∀ d,
+        GRBS.R5AssuranceConservation.Delta
+          F.Dependency c.source c.target d →
+        c.property d →
+        G.property (realize d).source)
+    (hDeltaRelevant :
+      ∀ d,
+        GRBS.R5AssuranceConservation.Delta
+          F.Dependency c.source c.target d →
+        relevant (realize d))
+    (hDeltaDischarge :
+      ∀ d,
+        GRBS.R5AssuranceConservation.Delta
+          F.Dependency c.source c.target d →
+        discharge d) :
+    ∀ d,
+      GRBS.R5AssuranceConservation.Delta
+        F.Dependency c.source c.target d →
+      G.property (realize d).target := by
+  have hDeltaObligation :
+      GRBS.R5AssuranceConservation.DeltaObligation
+        F.Dependency c.source c.target c.property :=
+    DARMCoreCalculus.darm_admissibility_discharges_delta
+      F g s b l c hAdmissible
+  rcases hAdequate with ⟨hFaithful, hTransition, hDischarge⟩
+  intro d hDelta
+  have hStructuralProperty : c.property d :=
+    hDeltaObligation d hDelta
+  have hSemanticSource : G.property (realize d).source :=
+    hDeltaSource d hDelta hStructuralProperty
+  have hStep :
+      BoundaryMediatedStep S B
+        (realize d).source
+        (realize d).target :=
+    hTransition d (hDeltaRelevant d hDelta)
+  have hSemanticTarget :
+      G.property (realize d).target :=
+    hDischarge d
+      (hDeltaDischarge d hDelta)
+      hStep
+      hSemanticSource
+  exact hSemanticTarget
+
+
+/--
+Structural DARM coverage does not itself provide semantic realization
+adequacy.
+
+The theorem constructs a case where a dependency is covered but the
+realized transition violates the guarantee.
+-/
+theorem covered_dependency_does_not_imply_realization_adequacy :
+    ∃ (D : Type)
+      (covered : D → Prop)
+      (S : SemanticSystem)
+      (realize : SemanticRealization D S)
+      (G : SemanticGuarantee S)
+      (B : SemanticBoundary S),
+      (∀ d, covered d) ∧
+      (∃ d,
+        covered d ∧
+        RealizationTransitionAdequate S B realize d ∧
+        G.property (realize d).source ∧
+        ¬ G.property (realize d).target) := by
+  let D := Unit
+  let State := Bool
+
+  let S : SemanticSystem :=
+    { State := State
+      Step := fun x y => x = false ∧ y = true }
+
+  let G : SemanticGuarantee S :=
+    { property := fun x => x = false }
+
+  let B : SemanticBoundary S :=
+    { mediated := fun _ _ => True }
+
+  let realize : SemanticRealization D S :=
+    fun d =>
+      { dependency := d
+        source := false
+        target := true }
+
+  let covered : D → Prop := fun _ => True
+
+  refine ⟨D, covered, S, realize, G, B, ?_, ?_⟩
+  · intro d
+    trivial
+  · refine ⟨(), ?_, ?_, ?_, ?_⟩
+    · trivial
+    · constructor
+      · constructor <;> rfl
+      · trivial
+    · rfl
+    · simp [G]
+
+/--
+The structural DARM transfer condition is not sufficient for semantic
+transfer unless a semantic realization/adequacy interface is supplied.
+
+This is stated as a methodological negative result rather than as a claim
+about any particular implementation.
+-/
+theorem darm_structure_requires_semantic_adequacy :
+    ∃ (D : Type)
+      (covered discharge : D → Prop)
+      (S : SemanticSystem)
+      (realize : SemanticRealization D S)
+      (G : SemanticGuarantee S)
+        (_B : SemanticBoundary S),
+      (∀ d, covered d) ∧
+      (∀ d, discharge d) ∧
+      (∃ d,
+        covered d ∧
+        discharge d ∧
+        G.property (realize d).source ∧
+        ¬ G.property (realize d).target) := by
+  let D := Unit
+  let State := Bool
+
+  let S : SemanticSystem :=
+    { State := State
+      Step := fun x y => x = false ∧ y = true }
+
+  let G : SemanticGuarantee S :=
+    { property := fun x => x = false }
+
+  let B : SemanticBoundary S :=
+    { mediated := fun _ _ => True }
+
+  let realize : SemanticRealization D S :=
+    fun d =>
+      { dependency := d
+        source := false
+        target := true }
+
+  let covered : D → Prop := fun _ => True
+  let discharge : D → Prop := fun _ => True
+
+  refine ⟨D, covered, discharge, S, realize, G, B, ?_, ?_, ?_⟩
+  · intro d
+    trivial
+  · intro d
+    trivial
+  · refine ⟨(), ?_, ?_, ?_, ?_⟩
+    · trivial
+    · trivial
+    · rfl
+    · intro h
+      exact Bool.noConfusion h
+
+end GRBS.R20DARMToSemanticCorrespondence
