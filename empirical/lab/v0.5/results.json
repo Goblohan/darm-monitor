@@ -1,0 +1,279 @@
+{
+  "baseline": {
+    "all_violating_transitions": 28,
+    "authorized_transitions": 83,
+    "blocked_transitions": 0,
+    "depth_counts": {
+      "0": 1,
+      "1": 3,
+      "2": 2,
+      "3": 1,
+      "4": 4,
+      "5": 5,
+      "6": 2,
+      "7": 0
+    },
+    "first_entry_violation": {
+      "after": {
+        "approval": true,
+        "balance": 0,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 100
+      },
+      "before": {
+        "approval": true,
+        "balance": 50,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 50
+      },
+      "depth": 4,
+      "event": "transfer"
+    },
+    "first_entry_violations": 1,
+    "first_violation_depth": 4,
+    "fixed_point_states": 18,
+    "strengthened_boundary": false,
+    "violating_states": 6
+  },
+  "comparison": {
+    "baseline_first_entry_violations": 1,
+    "baseline_first_violation_depth": 4,
+    "baseline_fixed_point_states": 18,
+    "baseline_violating_states": 6,
+    "strengthened_blocked_transitions": 1,
+    "strengthened_first_entry_violations": 0,
+    "strengthened_first_violation_depth": null,
+    "strengthened_fixed_point_states": 12,
+    "strengthened_violating_states": 0
+  },
+  "experiment": "exhaustive_bounded_reachability_analysis",
+  "model": {
+    "event_alphabet": [
+      "request",
+      "transfer",
+      "revoke",
+      "refresh_credential",
+      "connect",
+      "disconnect",
+      "approve",
+      "clear_approval"
+    ],
+    "event_alphabet_size": 8,
+    "initial_balance": 100,
+    "initial_state": {
+      "approval": false,
+      "balance": 100,
+      "credential": true,
+      "network": false,
+      "permission": true,
+      "transferred": 0
+    },
+    "maximum_depth": 50,
+    "trajectory_limit": 50,
+    "transfer_amount": 50
+  },
+  "representative_baseline_trace": [
+    {
+      "after": {
+        "approval": false,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "authorized": true,
+      "before": {
+        "approval": false,
+        "balance": 100,
+        "credential": true,
+        "network": false,
+        "permission": true,
+        "transferred": 0
+      },
+      "event": "connect",
+      "executed": true,
+      "step": 1
+    },
+    {
+      "after": {
+        "approval": true,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "authorized": true,
+      "before": {
+        "approval": false,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "event": "approve",
+      "executed": true,
+      "step": 2
+    },
+    {
+      "after": {
+        "approval": true,
+        "balance": 50,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 50
+      },
+      "authorized": true,
+      "before": {
+        "approval": true,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "event": "transfer",
+      "executed": true,
+      "step": 3
+    },
+    {
+      "after": {
+        "approval": true,
+        "balance": 0,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 100
+      },
+      "authorized": true,
+      "before": {
+        "approval": true,
+        "balance": 50,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 50
+      },
+      "event": "transfer",
+      "executed": true,
+      "step": 4
+    }
+  ],
+  "representative_blocked_transfer": {
+    "after": {
+      "approval": true,
+      "balance": 50,
+      "credential": true,
+      "network": true,
+      "permission": true,
+      "transferred": 50
+    },
+    "authorized": true,
+    "before": {
+      "approval": true,
+      "balance": 50,
+      "credential": true,
+      "network": true,
+      "permission": true,
+      "transferred": 50
+    },
+    "event": "transfer",
+    "executed": false
+  },
+  "representative_strengthened_trace": [
+    {
+      "after": {
+        "approval": false,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "authorized": true,
+      "before": {
+        "approval": false,
+        "balance": 100,
+        "credential": true,
+        "network": false,
+        "permission": true,
+        "transferred": 0
+      },
+      "event": "connect",
+      "executed": true,
+      "step": 1
+    },
+    {
+      "after": {
+        "approval": true,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "authorized": true,
+      "before": {
+        "approval": false,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "event": "approve",
+      "executed": true,
+      "step": 2
+    },
+    {
+      "after": {
+        "approval": true,
+        "balance": 50,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 50
+      },
+      "authorized": true,
+      "before": {
+        "approval": true,
+        "balance": 100,
+        "credential": true,
+        "network": true,
+        "permission": true,
+        "transferred": 0
+      },
+      "event": "transfer",
+      "executed": true,
+      "step": 3
+    }
+  ],
+  "strengthened": {
+    "all_violating_transitions": 0,
+    "authorized_transitions": 56,
+    "blocked_transitions": 1,
+    "depth_counts": {
+      "0": 1,
+      "1": 3,
+      "2": 2,
+      "3": 1,
+      "4": 3,
+      "5": 2,
+      "6": 0
+    },
+    "first_entry_violation": null,
+    "first_entry_violations": 0,
+    "first_violation_depth": null,
+    "fixed_point_states": 12,
+    "strengthened_boundary": true,
+    "violating_states": 0
+  },
+  "version": "v0.5"
+}
