@@ -6,3 +6,10 @@ c/*.a
 lakefile.toml.bak 
 BackupBeforeRuntime/ 
 setup_git.sh
+
+# Generated Python artifacts
+__pycache__/
+*.py[cod]
+
+# Generated CMake/build artifacts
+/build/
