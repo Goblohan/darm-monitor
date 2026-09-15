@@ -1,0 +1,104 @@
+{
+  "version": "v0.1",
+  "baseline": {
+    "experiment": "baseline_local_authorization",
+    "trajectory": [
+      "request",
+      "approve",
+      "transfer",
+      "approve",
+      "transfer"
+    ],
+    "all_transitions_locally_authorized": true,
+    "final_balance": 0,
+    "total_transferred": 100,
+    "trajectory_guarantee_limit": 50,
+    "trajectory_guarantee_holds": false,
+    "counterexample": true,
+    "transitions": [
+      {
+        "event": "request",
+        "authorized": true,
+        "balance_before": 100,
+        "balance_after": 100,
+        "transferred_after": 0
+      },
+      {
+        "event": "approve",
+        "authorized": true,
+        "balance_before": 100,
+        "balance_after": 100,
+        "transferred_after": 0
+      },
+      {
+        "event": "transfer",
+        "authorized": true,
+        "balance_before": 100,
+        "balance_after": 50,
+        "transferred_after": 50
+      },
+      {
+        "event": "approve",
+        "authorized": true,
+        "balance_before": 50,
+        "balance_after": 50,
+        "transferred_after": 50
+      },
+      {
+        "event": "transfer",
+        "authorized": true,
+        "balance_before": 50,
+        "balance_after": 0,
+        "transferred_after": 100
+      }
+    ]
+  },
+  "strengthened_boundary": {
+    "experiment": "strengthened_boundary",
+    "trajectory": [
+      "request",
+      "approve",
+      "transfer",
+      "approve",
+      "transfer"
+    ],
+    "final_balance": 50,
+    "total_transferred": 50,
+    "trajectory_guarantee_limit": 50,
+    "trajectory_guarantee_holds": true,
+    "blocked_event": "transfer",
+    "boundary_enforces_global_invariant": true,
+    "transitions": [
+      {
+        "event": "request",
+        "locally_authorized": true,
+        "trajectory_safe": true,
+        "executed": true
+      },
+      {
+        "event": "approve",
+        "locally_authorized": true,
+        "trajectory_safe": true,
+        "executed": true
+      },
+      {
+        "event": "transfer",
+        "locally_authorized": true,
+        "trajectory_safe": true,
+        "executed": true
+      },
+      {
+        "event": "approve",
+        "locally_authorized": true,
+        "trajectory_safe": true,
+        "executed": true
+      },
+      {
+        "event": "transfer",
+        "locally_authorized": true,
+        "trajectory_safe": false,
+        "executed": false
+      }
+    ]
+  }
+}

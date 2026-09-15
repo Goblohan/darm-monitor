@@ -1,0 +1,68 @@
+{
+  "version": "v0.2",
+  "trajectory_length": 5,
+  "event_alphabet_size": 8,
+  "total_trajectories": 32768,
+  "locally_authorized_trajectories": 8756,
+  "locally_authorized_violating_trajectories": 229,
+  "strengthened_boundary_violations": 0,
+  "strengthened_boundary_blocked_trajectories": 287,
+  "first_counterexample": {
+    "trajectory": [
+      "request",
+      "request",
+      "approve",
+      "transfer",
+      "transfer"
+    ],
+    "baseline": {
+      "final_state": {
+        "balance": 0,
+        "permission": true,
+        "credential": true,
+        "network": true,
+        "approval": true,
+        "transferred": 100
+      },
+      "all_transitions_locally_authorized": true,
+      "trajectory_guarantee_holds": false,
+      "transitions": [
+        {
+          "event": "request",
+          "locally_authorized": true,
+          "executed": true,
+          "transferred_before": 0,
+          "transferred_after": 0
+        },
+        {
+          "event": "request",
+          "locally_authorized": true,
+          "executed": true,
+          "transferred_before": 0,
+          "transferred_after": 0
+        },
+        {
+          "event": "approve",
+          "locally_authorized": true,
+          "executed": true,
+          "transferred_before": 0,
+          "transferred_after": 0
+        },
+        {
+          "event": "transfer",
+          "locally_authorized": true,
+          "executed": true,
+          "transferred_before": 0,
+          "transferred_after": 50
+        },
+        {
+          "event": "transfer",
+          "locally_authorized": true,
+          "executed": true,
+          "transferred_before": 50,
+          "transferred_after": 100
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,686 @@
+{
+  "comparison": {
+    "A_to_B": {
+      "boundary_coverage_after": [
+        "authA"
+      ],
+      "boundary_coverage_before": [
+        "authA"
+      ],
+      "dependency_surface_after": [
+        "authA",
+        "authB"
+      ],
+      "dependency_surface_before": [
+        "authA"
+      ],
+      "grbs_after": false,
+      "grbs_before": true,
+      "initial_state_winning_after": true,
+      "initial_state_winning_before": false,
+      "winning_states_after": 14,
+      "winning_states_before": 0
+    },
+    "B_to_C": {
+      "boundary_coverage_after": [
+        "authA",
+        "authB"
+      ],
+      "boundary_coverage_before": [
+        "authA"
+      ],
+      "dependency_surface_after": [
+        "authA",
+        "authB"
+      ],
+      "dependency_surface_before": [
+        "authA",
+        "authB"
+      ],
+      "grbs_after": true,
+      "grbs_before": false,
+      "initial_state_winning_after": false,
+      "initial_state_winning_before": true,
+      "winning_states_after": 0,
+      "winning_states_before": 14
+    },
+    "coverage_expanded": true,
+    "dependency_expanded": true,
+    "grbs_changed": true,
+    "winning_region_changed": true
+  },
+  "configurations": {
+    "A": {
+      "adversarial_winning_states": 0,
+      "authorized_transitions": 56,
+      "blocked_transition_details": [
+        {
+          "after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "authorized": true,
+          "before": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "event": "transfer",
+          "executed": false
+        }
+      ],
+      "blocked_transitions": 1,
+      "boundary_coverage": [
+        "authA"
+      ],
+      "configuration": "A",
+      "declared_dependency_surface": [
+        "authA"
+      ],
+      "dependency_surface": [
+        "authA"
+      ],
+      "dependency_surface_consistent": true,
+      "event_alphabet": [
+        "request",
+        "transfer",
+        "revoke",
+        "refresh_credential",
+        "connect",
+        "disconnect",
+        "approve",
+        "clear_approval"
+      ],
+      "grbs": true,
+      "initial_state_winning": false,
+      "reachable_states": 12,
+      "semantic_dependency_surface": [
+        "authA"
+      ],
+      "strategy_trace": null,
+      "violating_states": 0,
+      "winning_state_details": [],
+      "winning_witnesses": 0
+    },
+    "B": {
+      "adversarial_winning_states": 14,
+      "authorized_transitions": 85,
+      "blocked_transition_details": [
+        {
+          "after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "authorized": true,
+          "before": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "event": "transfer",
+          "executed": false
+        }
+      ],
+      "blocked_transitions": 1,
+      "boundary_coverage": [
+        "authA"
+      ],
+      "configuration": "B",
+      "declared_dependency_surface": [
+        "authA",
+        "authB"
+      ],
+      "dependency_surface": [
+        "authA",
+        "authB"
+      ],
+      "dependency_surface_consistent": true,
+      "event_alphabet": [
+        "request",
+        "transfer",
+        "transfer_alt",
+        "revoke",
+        "refresh_credential",
+        "connect",
+        "disconnect",
+        "approve",
+        "clear_approval"
+      ],
+      "grbs": false,
+      "initial_state_winning": true,
+      "reachable_states": 18,
+      "semantic_dependency_surface": [
+        "authA",
+        "authB"
+      ],
+      "strategy_trace": [
+        {
+          "after": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 0
+          },
+          "authorized": true,
+          "before": {
+            "approval": false,
+            "balance": 100,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 0
+          },
+          "event": "approve",
+          "executed": true,
+          "step": 1
+        },
+        {
+          "after": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 0
+          },
+          "authorized": true,
+          "before": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 0
+          },
+          "event": "connect",
+          "executed": true,
+          "step": 2
+        },
+        {
+          "after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "authorized": true,
+          "before": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 0
+          },
+          "event": "transfer",
+          "executed": true,
+          "step": 3
+        },
+        {
+          "after": {
+            "approval": true,
+            "balance": 0,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 100
+          },
+          "authorized": true,
+          "before": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "event": "transfer_alt",
+          "executed": true,
+          "step": 4
+        }
+      ],
+      "violating_states": 6,
+      "winning_state_details": [
+        {
+          "rank": 4,
+          "state": {
+            "approval": false,
+            "balance": 100,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 0
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 0
+          },
+          "witness_event": "approve"
+        },
+        {
+          "rank": 3,
+          "state": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 0
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 0
+          },
+          "witness_event": "connect"
+        },
+        {
+          "rank": 3,
+          "state": {
+            "approval": false,
+            "balance": 100,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 0
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 0
+          },
+          "witness_event": "approve"
+        },
+        {
+          "rank": 2,
+          "state": {
+            "approval": true,
+            "balance": 100,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 0
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "witness_event": "transfer"
+        },
+        {
+          "rank": 3,
+          "state": {
+            "approval": false,
+            "balance": 50,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 50
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 50
+          },
+          "witness_event": "approve"
+        },
+        {
+          "rank": 2,
+          "state": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 50
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "witness_event": "connect"
+        },
+        {
+          "rank": 2,
+          "state": {
+            "approval": false,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "witness_event": "approve"
+        },
+        {
+          "rank": 1,
+          "state": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "violating": false,
+          "witness_after": {
+            "approval": true,
+            "balance": 0,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 100
+          },
+          "witness_event": "transfer_alt"
+        },
+        {
+          "rank": 0,
+          "state": {
+            "approval": false,
+            "balance": 0,
+            "credential": true,
+            "network": false,
+            "permission": false,
+            "transferred": 100
+          },
+          "violating": true,
+          "witness_after": null,
+          "witness_event": null
+        },
+        {
+          "rank": 0,
+          "state": {
+            "approval": false,
+            "balance": 0,
+            "credential": true,
+            "network": true,
+            "permission": false,
+            "transferred": 100
+          },
+          "violating": true,
+          "witness_after": null,
+          "witness_event": null
+        },
+        {
+          "rank": 0,
+          "state": {
+            "approval": false,
+            "balance": 0,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 100
+          },
+          "violating": true,
+          "witness_after": null,
+          "witness_event": null
+        },
+        {
+          "rank": 0,
+          "state": {
+            "approval": true,
+            "balance": 0,
+            "credential": true,
+            "network": false,
+            "permission": true,
+            "transferred": 100
+          },
+          "violating": true,
+          "witness_after": null,
+          "witness_event": null
+        },
+        {
+          "rank": 0,
+          "state": {
+            "approval": false,
+            "balance": 0,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 100
+          },
+          "violating": true,
+          "witness_after": null,
+          "witness_event": null
+        },
+        {
+          "rank": 0,
+          "state": {
+            "approval": true,
+            "balance": 0,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 100
+          },
+          "violating": true,
+          "witness_after": null,
+          "witness_event": null
+        }
+      ],
+      "winning_witnesses": 8
+    },
+    "C": {
+      "adversarial_winning_states": 0,
+      "authorized_transitions": 58,
+      "blocked_transition_details": [
+        {
+          "after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "authorized": true,
+          "before": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "event": "transfer",
+          "executed": false
+        },
+        {
+          "after": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "authorized": true,
+          "before": {
+            "approval": true,
+            "balance": 50,
+            "credential": true,
+            "network": true,
+            "permission": true,
+            "transferred": 50
+          },
+          "event": "transfer_alt",
+          "executed": false
+        }
+      ],
+      "blocked_transitions": 2,
+      "boundary_coverage": [
+        "authA",
+        "authB"
+      ],
+      "configuration": "C",
+      "declared_dependency_surface": [
+        "authA",
+        "authB"
+      ],
+      "dependency_surface": [
+        "authA",
+        "authB"
+      ],
+      "dependency_surface_consistent": true,
+      "event_alphabet": [
+        "request",
+        "transfer",
+        "transfer_alt",
+        "revoke",
+        "refresh_credential",
+        "connect",
+        "disconnect",
+        "approve",
+        "clear_approval"
+      ],
+      "grbs": true,
+      "initial_state_winning": false,
+      "reachable_states": 12,
+      "semantic_dependency_surface": [
+        "authA",
+        "authB"
+      ],
+      "strategy_trace": null,
+      "violating_states": 0,
+      "winning_state_details": [],
+      "winning_witnesses": 0
+    }
+  },
+  "experiment": "dependency_expansion_and_boundary_coverage",
+  "model": {
+    "boundary_coverage": {
+      "A": [
+        "authA"
+      ],
+      "B": [
+        "authA"
+      ],
+      "C": [
+        "authA",
+        "authB"
+      ]
+    },
+    "configuration_event_alphabets": {
+      "A": [
+        "request",
+        "transfer",
+        "revoke",
+        "refresh_credential",
+        "connect",
+        "disconnect",
+        "approve",
+        "clear_approval"
+      ],
+      "B": [
+        "request",
+        "transfer",
+        "transfer_alt",
+        "revoke",
+        "refresh_credential",
+        "connect",
+        "disconnect",
+        "approve",
+        "clear_approval"
+      ],
+      "C": [
+        "request",
+        "transfer",
+        "transfer_alt",
+        "revoke",
+        "refresh_credential",
+        "connect",
+        "disconnect",
+        "approve",
+        "clear_approval"
+      ]
+    },
+    "dependency_requirements": {
+      "transfer": [
+        "authA"
+      ],
+      "transfer_alt": [
+        "authB"
+      ]
+    },
+    "event_alphabet": [
+      "request",
+      "transfer",
+      "transfer_alt",
+      "revoke",
+      "refresh_credential",
+      "connect",
+      "disconnect",
+      "approve",
+      "clear_approval"
+    ],
+    "event_alphabet_size": 9,
+    "initial_balance": 100,
+    "initial_state": {
+      "approval": false,
+      "balance": 100,
+      "credential": true,
+      "network": false,
+      "permission": true,
+      "transferred": 0
+    },
+    "invariant": "transferred <= TRAJECTORY_LIMIT",
+    "maximum_depth": 50,
+    "trajectory_limit": 50,
+    "transfer_amount": 50
+  },
+  "version": "v0.7"
+}

@@ -1,0 +1,1682 @@
+{
+  "version": "v0.4",
+  "experiment": "bounded_adaptive_policy_family",
+  "max_steps": 10,
+  "event_alphabet_size": 8,
+  "policy_count": 5,
+  "baseline_violations": 5,
+  "strengthened_boundary_violations": 0,
+  "policies_with_blocked_events": 5,
+  "policies": [
+    {
+      "policy": "direct_pursuit",
+      "baseline": {
+        "adversary": "direct_pursuit",
+        "strengthened_boundary": false,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 0,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 100
+        },
+        "total_transferred": 100,
+        "trajectory_limit": 50,
+        "guarantee_holds": false,
+        "violation_step": 3,
+        "blocked_events": [],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 4,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 5,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 6,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 7,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 8,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 9,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 10,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          }
+        ]
+      },
+      "strengthened_boundary": {
+        "adversary": "direct_pursuit",
+        "strengthened_boundary": true,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 50,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 50
+        },
+        "total_transferred": 50,
+        "trajectory_limit": 50,
+        "guarantee_holds": true,
+        "violation_step": null,
+        "blocked_events": [
+          {
+            "step": 3,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 4,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 5,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "transferred_before": 50
+          }
+        ],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 4,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 5,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          }
+        ]
+      }
+    },
+    {
+      "policy": "authorization_rebuilder",
+      "baseline": {
+        "adversary": "authorization_rebuilder",
+        "strengthened_boundary": false,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 0,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 100
+        },
+        "total_transferred": 100,
+        "trajectory_limit": 50,
+        "guarantee_holds": false,
+        "violation_step": 3,
+        "blocked_events": [],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 4,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 5,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 6,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 7,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 8,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 9,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 10,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          }
+        ]
+      },
+      "strengthened_boundary": {
+        "adversary": "authorization_rebuilder",
+        "strengthened_boundary": true,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 50,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 50
+        },
+        "total_transferred": 50,
+        "trajectory_limit": 50,
+        "guarantee_holds": true,
+        "violation_step": null,
+        "blocked_events": [
+          {
+            "step": 3,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 4,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 5,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "transferred_before": 50
+          }
+        ],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 4,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 5,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          }
+        ]
+      }
+    },
+    {
+      "policy": "rejection_recovery",
+      "baseline": {
+        "adversary": "rejection_recovery",
+        "strengthened_boundary": false,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 0,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 100
+        },
+        "total_transferred": 100,
+        "trajectory_limit": 50,
+        "guarantee_holds": false,
+        "violation_step": 3,
+        "blocked_events": [],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 4,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 5,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 6,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 7,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 8,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 9,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 10,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          }
+        ]
+      },
+      "strengthened_boundary": {
+        "adversary": "rejection_recovery",
+        "strengthened_boundary": true,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 50,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 50
+        },
+        "total_transferred": 50,
+        "trajectory_limit": 50,
+        "guarantee_holds": true,
+        "violation_step": null,
+        "blocked_events": [
+          {
+            "step": 3,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "transferred_before": 50
+          }
+        ],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 4,
+            "event": "clear_approval",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": false,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 5,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          }
+        ]
+      }
+    },
+    {
+      "policy": "state_cycler",
+      "baseline": {
+        "adversary": "state_cycler",
+        "strengthened_boundary": false,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 0,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 100
+        },
+        "total_transferred": 100,
+        "trajectory_limit": 50,
+        "guarantee_holds": false,
+        "violation_step": 5,
+        "blocked_events": [],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "clear_approval",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": false,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 4,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 5,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 6,
+            "event": "clear_approval",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": false,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 7,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 8,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 9,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 10,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          }
+        ]
+      },
+      "strengthened_boundary": {
+        "adversary": "state_cycler",
+        "strengthened_boundary": true,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 50,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 50
+        },
+        "total_transferred": 50,
+        "trajectory_limit": 50,
+        "guarantee_holds": true,
+        "violation_step": null,
+        "blocked_events": [
+          {
+            "step": 5,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "transferred_before": 50
+          }
+        ],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "clear_approval",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": false,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 4,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 5,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 6,
+            "event": "clear_approval",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": false,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 7,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 9,
+            "event": "clear_approval",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": false,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 10,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          }
+        ]
+      }
+    },
+    {
+      "policy": "mixed_adaptive",
+      "baseline": {
+        "adversary": "mixed_adaptive",
+        "strengthened_boundary": false,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 0,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 100
+        },
+        "total_transferred": 100,
+        "trajectory_limit": 50,
+        "guarantee_holds": false,
+        "violation_step": 3,
+        "blocked_events": [],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 4,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 5,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 6,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 7,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 8,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 9,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          },
+          {
+            "step": 10,
+            "event": "request",
+            "executed": true,
+            "state_after": {
+              "balance": 0,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 100
+            }
+          }
+        ]
+      },
+      "strengthened_boundary": {
+        "adversary": "mixed_adaptive",
+        "strengthened_boundary": true,
+        "steps_executed": 10,
+        "final_state": {
+          "balance": 50,
+          "permission": true,
+          "credential": true,
+          "network": true,
+          "approval": true,
+          "transferred": 50
+        },
+        "total_transferred": 50,
+        "trajectory_limit": 50,
+        "guarantee_holds": true,
+        "violation_step": null,
+        "blocked_events": [
+          {
+            "step": 3,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "transferred_before": 50
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "transferred_before": 50
+          }
+        ],
+        "history": [
+          {
+            "step": 1,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 100,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 0
+            }
+          },
+          {
+            "step": 2,
+            "event": "transfer",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 3,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 4,
+            "event": "clear_approval",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": false,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 5,
+            "event": "approve",
+            "executed": true,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 6,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 7,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 8,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 9,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          },
+          {
+            "step": 10,
+            "event": "transfer",
+            "executed": false,
+            "state_after": {
+              "balance": 50,
+              "permission": true,
+              "credential": true,
+              "network": true,
+              "approval": true,
+              "transferred": 50
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

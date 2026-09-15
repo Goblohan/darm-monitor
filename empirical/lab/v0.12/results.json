@@ -1,0 +1,159 @@
+{
+  "experiment": "counterfactual_semantic_dependence",
+  "experiment_question": "Does neutralizing a semantic capability distinction change guarantee-relevant future behavior?",
+  "method": "Replay the same bounded histories under the actual and counterfactual transition relations, neutralizing only the latent-route capability transition, then compare their independent future behavioral signatures.",
+  "result": {
+    "behavior_changed_given_capability_change": 3,
+    "behavior_unchanged_given_capability_change": 0,
+    "behaviorally_distinguishing_witnesses": [
+      {
+        "actual_capability": true,
+        "actual_future_behavior": [
+          [
+            "transfer",
+            100,
+            true
+          ],
+          [
+            "transfer",
+            50,
+            false
+          ],
+          [
+            "transfer_alt",
+            100,
+            true
+          ],
+          [
+            "transfer_alt",
+            50,
+            false
+          ],
+          [
+            "transfer_aux",
+            100,
+            true
+          ],
+          [
+            "transfer_aux",
+            50,
+            false
+          ]
+        ],
+        "behavior_differs": true,
+        "capability_differs": true,
+        "counterfactual_capability": false,
+        "counterfactual_future_behavior": [],
+        "history": [
+          "approve",
+          "revoke",
+          "connect",
+          "activate_latent_route"
+        ],
+        "represented_state_same": true
+      },
+      {
+        "actual_capability": true,
+        "actual_future_behavior": [
+          [
+            "transfer",
+            100,
+            true
+          ],
+          [
+            "transfer_alt",
+            100,
+            true
+          ],
+          [
+            "transfer_aux",
+            100,
+            true
+          ]
+        ],
+        "behavior_differs": true,
+        "capability_differs": true,
+        "counterfactual_capability": false,
+        "counterfactual_future_behavior": [],
+        "history": [
+          "approve",
+          "connect",
+          "transfer",
+          "revoke",
+          "activate_latent_route"
+        ],
+        "represented_state_same": true
+      },
+      {
+        "actual_capability": true,
+        "actual_future_behavior": [
+          [
+            "transfer",
+            100,
+            true
+          ],
+          [
+            "transfer",
+            50,
+            false
+          ],
+          [
+            "transfer_alt",
+            100,
+            true
+          ],
+          [
+            "transfer_alt",
+            50,
+            false
+          ],
+          [
+            "transfer_aux",
+            100,
+            true
+          ],
+          [
+            "transfer_aux",
+            50,
+            false
+          ]
+        ],
+        "behavior_differs": true,
+        "capability_differs": true,
+        "counterfactual_capability": false,
+        "counterfactual_future_behavior": [],
+        "history": [
+          "approve",
+          "revoke",
+          "connect",
+          "activate_latent_route",
+          "audit"
+        ],
+        "represented_state_same": true
+      }
+    ],
+    "capability_and_behavior_distinguishing_cases": 3,
+    "capability_behavior_pairs": [
+      [
+        false,
+        false
+      ],
+      [
+        false,
+        true
+      ],
+      [
+        true,
+        true
+      ]
+    ],
+    "capability_changed_cases": 3,
+    "capability_only_cases": 0,
+    "capability_only_witnesses": [],
+    "effective_history_states": 63,
+    "history_depth": 5,
+    "represented_state_invariant_for_capability_changes": true,
+    "tested_latent_route_histories": 18
+  },
+  "version": "v0.12"
+}
