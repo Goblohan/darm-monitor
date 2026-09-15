@@ -21,7 +21,7 @@ jobs:
       # `sorry` and `admit`, not the substring inside other identifiers.
       - name: Placeholder search (tier 1)
         run: |
-          if grep -rnE '^\s*(sorry|admit)\b' DarmMonitor/*.lean; then
+          if grep -rnE '^\s*(sorry|admit)\b' DarmMonitor/*.lean GRBS/*.lean; then
             echo "::error::literal sorry/admit found outside comments"
             exit 1
           fi
@@ -29,8 +29,8 @@ jobs:
 
       - uses: leanprover/lean-action@v1
 
-      # Tier 2: axiom audit. This is the guard that actually matters - it
-      # catches sorryAx arriving through an import, which tier 1 cannot see.
+      # Tier 2: axiom audit. This is the guard that actually matters -
+      # it catches sorryAx arriving through an import, which tier 1 cannot see.
       # Re-runs the build (fast: everything is cached from lean-action above)
       # and inspects the trace output directly, so this checks what was
       # actually built rather than re-deriving it separately.
@@ -58,6 +58,66 @@ jobs:
             echo "::error::a module may have left the root import graph, or a #print axioms line was removed"
             exit 1
           fi
+
+      # Tier 3: complete formal corpus. The default lake build intentionally
+      # checks the integrated DarmMonitor import closure, not every research
+      # experiment in the repository. This step closes that verification gap
+      # without changing the import architecture.
+      #
+      # DARM modules outside the current integrated closure are discovered
+      # dynamically from the build trace, so this does not hard-code a module
+      # list. GRBS is separately elaborated file-by-file because its library
+      # declares only its four root modules as Lake roots.
+      - name: Complete corpus elaboration (tier 3)
+        run: |
+          : > /tmp/corpus.log
+          covered=$(grep -oE 'DarmMonitor/[A-Za-z0-9_]+\.lean' /tmp/build.log |
+            sed 's#DarmMonitor/##' | sort -u)
+
+          darm_count=0
+          while read -r f; do
+            [ "$f" = "DarmMonitor.lean" ] && continue
+            if ! printf '%s\n' "$covered" | grep -qx "$f"; then
+              echo "CHECK: DarmMonitor/$f"
+              if ! lake lean "DarmMonitor/$f" 2>&1 | tee -a /tmp/corpus.log; then
+                echo "::error::DARM module failed: DarmMonitor/$f"
+                exit 1
+              fi
+              darm_count=$((darm_count + 1))
+            fi
+          done < <(find DarmMonitor -maxdepth 1 -name '*.lean' -printf '%f\n' | sort)
+
+          grbs_count=0
+          for f in GRBS/*.lean; do
+            echo "CHECK: $f"
+            if ! lake lean "$f" 2>&1 | tee -a /tmp/corpus.log; then
+              echo "::error::GRBS module failed: $f"
+              exit 1
+            fi
+            grbs_count=$((grbs_count + 1))
+          done
+
+          echo "Excluded DARM modules elaborated: $darm_count"
+          echo "GRBS modules elaborated: $grbs_count"
+
+          if [ "$darm_count" -eq 0 ]; then
+            echo "::error::no excluded DARM modules were discovered"
+            echo "::error::the integrated import graph may have changed unexpectedly"
+            exit 1
+          fi
+
+          if [ "$grbs_count" -eq 0 ]; then
+            echo "::error::no GRBS modules were discovered"
+            exit 1
+          fi
+
+          if grep -q 'sorryAx' /tmp/corpus.log; then
+            echo "::error::sorryAx present in complete corpus elaboration"
+            grep 'sorryAx' -B1 /tmp/corpus.log
+            exit 1
+          fi
+
+          echo "Complete formal corpus elaboration passed with no sorryAx."
 
       # Tier 4: the runtime. The C widening multiply is NOT verified - it is
       # differentially tested against the proved Lean implementation. Those
