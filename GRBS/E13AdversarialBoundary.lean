@@ -290,3 +290,46 @@ theorem local_boundary_does_not_cover_external_transition :
 
 end E13AdversarialBoundary
 end GRBS
+
+namespace GRBS
+namespace E13AdversarialBoundary
+
+/--
+Every externally realizable state transition is represented by a
+governed transition for an action selected by some strategy.
+-/
+def ExternalCoverage
+    {State Action : Type}
+    (step : Transition State Action)
+    (externalStep : ExternalTransition State) : Prop :=
+  ∀ (s s' : State),
+    externalStep s s' →
+    ∃ (σ : Strategy State Action),
+      step s (σ s) s'
+
+/--
+If every external transition is represented by a strategy-realizable
+governed transition, complete mediation and boundary soundness lift
+the local safety result to the external transition relation.
+-/
+theorem external_transition_safe_of_coverage
+    {State Action : Type}
+    (step : Transition State Action)
+    (authorized : Authorized State Action)
+    (safe : SafeState State)
+    (externalStep : ExternalTransition State)
+    (s₀ s₁ : State)
+    (hInitial : InitialSafe safe s₀)
+    (hMediation : CompleteMediation step authorized)
+    (hBoundary : BoundarySound step authorized safe)
+    (hCoverage : ExternalCoverage step externalStep)
+    (hExternal : externalStep s₀ s₁) :
+    safe s₁ := by
+  unfold ExternalCoverage at hCoverage
+  obtain ⟨σ, hStep⟩ := hCoverage s₀ s₁ hExternal
+  exact adversary_independent_one_step
+    step authorized safe s₀ σ s₁
+    hInitial hMediation hBoundary hStep
+
+end E13AdversarialBoundary
+end GRBS
