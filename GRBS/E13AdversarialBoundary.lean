@@ -224,3 +224,69 @@ theorem complete_mediation_blocks_unsafe_trace
 
 end E13AdversarialBoundary
 end GRBS
+
+namespace GRBS
+namespace E13AdversarialBoundary
+
+/--
+E13.2 separates the transition relation governed by the boundary from
+additional effects that an adversary may induce outside that relation.
+-/
+abbrev ExternalTransition (State : Type) := State → State → Prop
+
+/--
+The local DARM theorem can remain valid while an external transition
+reaches an unsafe state. This demonstrates that boundary soundness for
+the governed transition relation does not by itself establish safety
+over a larger effect space.
+-/
+theorem local_boundary_does_not_cover_external_transition :
+    ∃ (State Action : Type)
+      (step : Transition State Action)
+      (authorized : Authorized State Action)
+      (safe : SafeState State)
+      (externalStep : ExternalTransition State)
+      (s₀ s₁ : State)
+      (σ : Strategy State Action),
+      InitialSafe safe s₀ ∧
+      CompleteMediation step authorized ∧
+      BoundarySound step authorized safe ∧
+      externalStep s₀ s₁ ∧
+      ¬ safe s₁ := by
+  let State := Bool
+  let Action := Bool
+
+  let step : Transition State Action :=
+    fun _ _ _ => False
+
+  let authorized : Authorized State Action :=
+    fun _ _ _ => False
+
+  let safe : SafeState State :=
+    fun s => s = false
+
+  let externalStep : ExternalTransition State :=
+    fun s s' =>
+      s = false ∧ s' = true
+
+  let σ : Strategy State Action :=
+    fun _ => false
+
+  refine
+    ⟨State, Action, step, authorized, safe, externalStep,
+      false, true, σ, ?_, ?_, ?_, ?_, ?_⟩
+
+  · rfl
+
+  · intro _σ s s' hStep
+    exact False.elim hStep
+
+  · intro s a s' hSafe hAuthorized hStep
+    exact False.elim hStep
+
+  · constructor <;> rfl
+
+  · simp [safe]
+
+end E13AdversarialBoundary
+end GRBS
