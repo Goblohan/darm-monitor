@@ -1,134 +1,64 @@
-import R5AssuranceConservation
 import R4dEvidenceCoverage
+import DarmMonitor.R5BoundaryRepresentation
 
-namespace GRBS.R4dCorrespondence
+namespace GRBS.R5R4dCorrespondence
 
 open GRBS.R4dEvidenceCoverage
-open GRBS.R5AssuranceConservation
+open DARM
 
-/-
-  R4d is an epistemic instance of the R5 assurance-conservation pattern.
+def r4dProperty : Tr → Prop :=
+  G
 
-  Unlike R4a-R4c, the system-side execution domain remains fixed.
+def r4dEvidenceDomain : Tr → Prop :=
+  E₂.covers
 
-  The substitution changes evidentiary coverage.
+def r4dAssuranceDomain : Tr → Prop :=
+  fun _ => True
 
-      source domain = executions covered by E₂
-      target domain = executions produced by the system
-
-  The delta therefore consists of produced executions that E₂ does
-  not cover.
-
-      Delta(t) = produces(t) ∧ ¬ E₂.covers(t)
-
-  The property imposed on that delta is evidentiary coverage itself.
--/
-
-def R4dSourceDomain : Tr → Prop :=
-  fun t => E₂.covers t
-
-def R4dTargetDomain : Tr → Prop :=
-  produces
-
-def R4dProperty : Tr → Prop :=
-  fun t => E₂.covers t
-
-def R4dDeltaObligation : Prop :=
-  DeltaObligation
+def r4dCoverageDelta : Tr → Prop :=
+  GRBS.R5DomainPolymorphism.Delta
     Tr
-    R4dSourceDomain
-    R4dTargetDomain
-    R4dProperty
+    r4dEvidenceDomain
+    r4dAssuranceDomain
 
-/--
-  The R5 delta obligation is equivalent to the R4d
-  evidence-substitution obligation.
--/
-theorem r4d_delta_obligation_iff_evidence_obligation :
-    R4dDeltaObligation ↔
-      EvidenceSubstitutionObligation E₂ produces := by
+theorem r4d_coverage_gap_is_r5_delta :
+    r4dCoverageDelta Tr.violation := by
+  exact ⟨trivial, fun h => Tr.noConfusion h⟩
+
+theorem r4d_coverage_gap_property_fails :
+    ¬ r4dProperty Tr.violation := by
+  exact fun h => h
+
+theorem r4d_coverage_obligation_is_r5_delta_obligation :
+    GRBS.R5DomainPolymorphism.DeltaObligation
+      Tr
+      r4dEvidenceDomain
+      r4dAssuranceDomain
+      r4dProperty ↔
+      ∀ t : Tr,
+        (r4dAssuranceDomain t →
+         ¬ r4dEvidenceDomain t →
+         r4dProperty t) := by
   constructor
-  · intro h t ht
-    by_cases hc : E₂.covers t
-    · exact hc
-    · exact h t ⟨ht, hc⟩
-  · intro h t hdelta
-    exact h t hdelta.1
+  · intro hR5 t htTarget htNotSource
+    exact hR5 t ⟨htTarget, htNotSource⟩
+  · intro hCoverage t hDelta
+    exact hCoverage t hDelta.1 hDelta.2
 
-/--
-  safeB is a produced execution outside E₂'s evidentiary coverage.
--/
-theorem r4d_safeB_is_delta :
-    Delta
+theorem r4d_coverage_obligation_is_undischarged :
+    ¬ GRBS.R5DomainPolymorphism.DeltaObligation
       Tr
-      R4dSourceDomain
-      R4dTargetDomain
-      Tr.safeB := by
-  constructor
-  · trivial
-  · intro h
-    exact Tr.noConfusion h
+      r4dEvidenceDomain
+      r4dAssuranceDomain
+      r4dProperty := by
+  intro hR5
+  exact
+    r4d_coverage_gap_property_fails
+      (hR5 Tr.violation r4d_coverage_gap_is_r5_delta)
 
-/--
-  The R4d delta obligation fails because safeB is not covered.
--/
-theorem r4d_delta_obligation_fails :
-    ¬ R4dDeltaObligation := by
-  intro h
-  have hc : E₂.covers Tr.safeB := by
-    exact h Tr.safeB ⟨trivial, fun h => Tr.noConfusion h⟩
-  exact Tr.noConfusion hc
+end GRBS.R5R4dCorrespondence
 
-/--
-  R4d therefore contains an undischarged R5 delta.
--/
-theorem r4d_is_undischarged_r5_delta :
-    Delta
-      Tr
-      R4dSourceDomain
-      R4dTargetDomain
-      Tr.safeB
-    ∧ ¬ R4dDeltaObligation := by
-  exact ⟨r4d_safeB_is_delta, r4d_delta_obligation_fails⟩
-
-/--
-  Preserve the original R4d result.
--/
-theorem r4d_original_failure :
-    Assured E₁ produces
-    ∧ (∀ t, E₂.observes t → G t)
-    ∧ ¬ Assured E₂ produces :=
-  unsupported_evidence_substitution
-
-/--
-  R4d matches the R5 pattern while preserving the distinction
-  between evidence truthfulness and evidence completeness.
--/
-theorem r4d_matches_r5_pattern :
-    Delta
-      Tr
-      R4dSourceDomain
-      R4dTargetDomain
-      Tr.safeB
-    ∧ ¬ R4dDeltaObligation
-    ∧ Assured E₁ produces
-    ∧ (∀ t, E₂.observes t → G t)
-    ∧ ¬ Assured E₂ produces := by
-  exact ⟨
-    r4d_safeB_is_delta,
-    r4d_delta_obligation_fails,
-    E1_assured,
-    E2_truthful,
-    E2_not_complete
-  ⟩
-
-/--
-  The R4d failure is specifically a coverage failure.
-  Truthfulness of E₂ does not discharge the R5 delta obligation.
--/
-theorem r4d_truthfulness_does_not_discharge_delta :
-    (∀ t, E₂.observes t → G t)
-    ∧ ¬ R4dDeltaObligation := by
-  exact ⟨E2_truthful, r4d_delta_obligation_fails⟩
-
-end GRBS.R4dCorrespondence
+#print axioms GRBS.R5R4dCorrespondence.r4d_coverage_gap_is_r5_delta
+#print axioms GRBS.R5R4dCorrespondence.r4d_coverage_gap_property_fails
+#print axioms GRBS.R5R4dCorrespondence.r4d_coverage_obligation_is_r5_delta_obligation
+#print axioms GRBS.R5R4dCorrespondence.r4d_coverage_obligation_is_undischarged

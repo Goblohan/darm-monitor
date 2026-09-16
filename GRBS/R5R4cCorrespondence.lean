@@ -1,119 +1,64 @@
-import R5AssuranceConservation
 import R4cLocusSubstitution
+import DarmMonitor.R5BoundaryRepresentation
 
-namespace GRBS.R4cCorrespondence
+namespace GRBS.R5R4cCorrespondence
 
 open GRBS.R4cLocusSubstitution
-open GRBS.R5AssuranceConservation
+open DARM
 
-/-
-  R4c is an instance of the R5 assurance-conservation pattern.
-
-  The transformation is a substitution of enforcement locus:
-
-      Locus.mediating -> Locus.observing
-
-  The R5 delta is the set of traces newly passable at the target
-  locus but not passable at the source locus.
-
-  The transfer property is the original guarantee G.
--/
-
-def R4cSourceDomain : Tr → Prop :=
-  fun t => tracesAtLocus Locus.mediating t
-
-def R4cTargetDomain : Tr → Prop :=
-  fun t => tracesAtLocus Locus.observing t
-
-def R4cProperty : Tr → Prop :=
+def r4cProperty : Tr → Prop :=
   G
 
-def R4cDeltaObligation : Prop :=
-  DeltaObligation Tr R4cSourceDomain R4cTargetDomain R4cProperty
+def r4cSourceDomain : Tr → Prop :=
+  tracesAtLocus Locus.mediating
 
-/--
-  The generic R5 delta obligation is equivalent to the
-  locus-substitution obligation discovered independently in R4c.
--/
-theorem r4c_delta_obligation_iff_locus_obligation :
-    R4cDeltaObligation ↔
-      LocusSubstitutionObligation
-        G Locus.mediating Locus.observing tracesAtLocus := by
+def r4cTargetDomain : Tr → Prop :=
+  tracesAtLocus Locus.observing
+
+theorem r4c_locus_obligation_iff_r5_delta_obligation :
+    LocusSubstitutionObligation
+      G
+      Locus.mediating
+      Locus.observing
+      tracesAtLocus ↔
+      GRBS.R5DomainPolymorphism.DeltaObligation
+        Tr
+        r4cSourceDomain
+        r4cTargetDomain
+        r4cProperty := by
   constructor
-  · intro h t ht2 hnot1
-    exact h t ⟨ht2, hnot1⟩
-  · intro h t hdelta
-    exact h t hdelta.1 hdelta.2
+  · intro hR4c t hDelta
+    exact hR4c t hDelta.1 hDelta.2
+  · intro hR5 t htTarget htNotSource
+    exact hR5 t ⟨htTarget, htNotSource⟩
 
-/--
-  The violation trace is newly passable at the observing locus.
--/
-theorem r4c_violation_is_delta :
-    Delta
+theorem r4c_violation_is_r5_delta_witness :
+    GRBS.R5DomainPolymorphism.Delta
       Tr
-      R4cSourceDomain
-      R4cTargetDomain
+      r4cSourceDomain
+      r4cTargetDomain
       Tr.violation := by
-  constructor
-  · trivial
-  · intro h
-    exact Tr.noConfusion h
+  exact ⟨trivial, fun h => Tr.noConfusion h⟩
 
-/--
-  The R4c delta obligation is not dischargeable in the constructed
-  witness because the newly passable violation does not satisfy G.
--/
-theorem r4c_delta_obligation_fails :
-    ¬ R4cDeltaObligation := by
-  intro h
-  exact h Tr.violation
-    ⟨trivial, fun h => Tr.noConfusion h⟩
+theorem r4c_violation_property_fails :
+    ¬ r4cProperty Tr.violation := by
+  exact fun h => h
 
-/--
-  R4c therefore contains an undischarged R5 delta.
--/
 theorem r4c_is_undischarged_r5_delta :
-    Delta
+    ¬ GRBS.R5DomainPolymorphism.DeltaObligation
       Tr
-      R4cSourceDomain
-      R4cTargetDomain
-      Tr.violation
-    ∧ ¬ R4cDeltaObligation := by
-  exact ⟨r4c_violation_is_delta, r4c_delta_obligation_fails⟩
-
-/--
-  Preserve the original R4c failure result.
--/
-theorem r4c_original_failure :
-    SafeAtLocus G Locus.mediating tracesAtLocus
-    ∧ Locus.mediating ≠ Locus.observing
-    ∧ ¬ SafeAtLocus G Locus.observing tracesAtLocus
-    ∧ ¬ LocusSubstitutionObligation
-        G Locus.mediating Locus.observing tracesAtLocus :=
-  unsupported_locus_substitution
-
-/--
-  R4c matches the R5 pattern.
--/
-theorem r4c_matches_r5_pattern :
-    Delta
-      Tr
-      R4cSourceDomain
-      R4cTargetDomain
-      Tr.violation
-    ∧ ¬ R4cDeltaObligation
-    ∧ SafeAtLocus G Locus.mediating tracesAtLocus
-    ∧ Locus.mediating ≠ Locus.observing
-    ∧ ¬ SafeAtLocus G Locus.observing tracesAtLocus
-    ∧ ¬ LocusSubstitutionObligation
-        G Locus.mediating Locus.observing tracesAtLocus := by
-  exact ⟨
-    r4c_violation_is_delta,
-    r4c_delta_obligation_fails,
-    safe_at_mediating,
-    locus_differs,
-    not_safe_at_observing,
+      r4cSourceDomain
+      r4cTargetDomain
+      r4cProperty := by
+  intro hR5
+  exact
     obligation_not_dischargeable
-  ⟩
+      (fun t htTarget htNotSource =>
+        hR5 t ⟨htTarget, htNotSource⟩)
 
-end GRBS.R4cCorrespondence
+end GRBS.R5R4cCorrespondence
+
+#print axioms GRBS.R5R4cCorrespondence.r4c_locus_obligation_iff_r5_delta_obligation
+#print axioms GRBS.R5R4cCorrespondence.r4c_violation_is_r5_delta_witness
+#print axioms GRBS.R5R4cCorrespondence.r4c_violation_property_fails
+#print axioms GRBS.R5R4cCorrespondence.r4c_is_undischarged_r5_delta
