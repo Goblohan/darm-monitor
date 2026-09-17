@@ -100,6 +100,31 @@ def AccessMediatedTransition
         mediated a s s'
 
 /--
+Under the natural representation in which each action is an access channel,
+E13 strategy-quantified complete mediation is equivalent to
+representation-level complete mediation.
+-/
+theorem e13_complete_mediation_iff_representation_complete_mediation :
+    ∀ {State Action : Type}
+      (step : State → Action → State → Prop)
+      (authorized : State → Action → State → Prop),
+      (∀ (σ : State → Action) (s s' : State),
+        step s (σ s) s' →
+        authorized s (σ s) s') ↔
+      RepresentationCompleteMediation
+        (fun a s s' => step s a s')
+        (fun a s s' => authorized s a s') := by
+  intro State Action step authorized
+  constructor
+  · intro hComplete
+    intro a s s' hStep
+    let σ : State → Action := fun _ => a
+    exact hComplete σ s s' hStep
+  · intro hRepresentation
+    intro σ s s' hStep
+    exact hRepresentation (σ s) s s' hStep
+
+/--
 Access-level complete mediation plus complete representation of causeable
 effects implies E13 mediated causal coverage.
 -/
