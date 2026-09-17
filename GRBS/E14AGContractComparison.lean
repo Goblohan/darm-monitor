@@ -804,5 +804,97 @@ theorem ag_causeable_coverage_plus_e13_obligations_does_not_imply_ag_trace_bridg
         trivial
     simp [s] at hTrace
 
+
+/--
+E14-J domain alignment:
+the transitions represented and mediated at the E13 access layer are
+extensionally identical to the transitions designated causeable by the
+AG model.
+-/
+def E13AGDomainAligned
+    {Trace Channel : Type}
+    (causeable : CauseableTransition Trace)
+    (represents : Represents Channel Trace)
+    (mediated : AccessMediated Channel Trace) : Prop :=
+  ∀ s0 s1,
+    causeable s0 s1 ↔
+      ∃ a,
+        represents a s0 s1 ∧
+        mediated a s0 s1
+
+/--
+E14-J1:
+Under exact domain alignment, the E13-to-AG trace bridge implies
+AG causeable coverage.
+-/
+theorem e13_to_ag_trace_bridge_implies_ag_causeable_coverage_of_domain_alignment :
+    ∀
+      {Trace Channel : Type}
+      (A : AGAssumption)
+      (s : System Trace Channel)
+      (causeable : CauseableTransition Trace)
+      (represents : Represents Channel Trace)
+      (mediated : AccessMediated Channel Trace),
+      E13AGDomainAligned causeable represents mediated →
+      E13ToAGTraceBridge A s represents mediated →
+      AGCauseableCoverage A s causeable := by
+  intro Trace Channel A s causeable represents mediated
+  intro hAlignment hBridge
+  intro s0 s1 hCause e hAdm hA
+  obtain ⟨a, hRepresents, hMediated⟩ :=
+    (hAlignment s0 s1).mp hCause
+  exact hBridge a s0 s1 hRepresents hMediated e hAdm hA
+
+
+
+/--
+E14-J2:
+Under exact domain alignment, AG causeable coverage implies the
+E13-to-AG trace bridge.
+
+The reverse implication requires the same domain alignment used by E14-J1.
+-/
+theorem ag_causeable_coverage_implies_e13_to_ag_trace_bridge_of_domain_alignment :
+    ∀
+      {Trace Channel : Type}
+      (A : AGAssumption)
+      (s : System Trace Channel)
+      (causeable : CauseableTransition Trace)
+      (represents : Represents Channel Trace)
+      (mediated : AccessMediated Channel Trace),
+      E13AGDomainAligned causeable represents mediated →
+      AGCauseableCoverage A s causeable →
+      E13ToAGTraceBridge A s represents mediated := by
+  intro Trace Channel A s causeable represents mediated
+  intro hAlignment hCoverage
+  intro a s0 s1 hRepresents hMediated e hAdm hA
+  have hCauseable : causeable s0 s1 := by
+    exact (hAlignment s0 s1).mpr ⟨a, hRepresents, hMediated⟩
+  exact hCoverage s0 s1 hCauseable e hAdm hA
+
+/--
+E14-J:
+Under exact domain alignment, the E13-to-AG trace bridge and AG
+causeable coverage are equivalent.
+-/
+theorem e13_to_ag_trace_bridge_iff_ag_causeable_coverage_of_domain_alignment :
+    ∀
+      {Trace Channel : Type}
+      (A : AGAssumption)
+      (s : System Trace Channel)
+      (causeable : CauseableTransition Trace)
+      (represents : Represents Channel Trace)
+      (mediated : AccessMediated Channel Trace),
+      E13AGDomainAligned causeable represents mediated →
+      (E13ToAGTraceBridge A s represents mediated ↔
+        AGCauseableCoverage A s causeable) := by
+  intro Trace Channel A s causeable represents mediated hAlignment
+  constructor
+  · exact e13_to_ag_trace_bridge_implies_ag_causeable_coverage_of_domain_alignment
+      A s causeable represents mediated hAlignment
+  · exact ag_causeable_coverage_implies_e13_to_ag_trace_bridge_of_domain_alignment
+      A s causeable represents mediated hAlignment
+
+
 end E14AGContractComparison
 end GRBS
