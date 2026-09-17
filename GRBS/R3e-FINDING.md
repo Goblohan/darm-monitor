@@ -38,6 +38,41 @@ Our `PhysicalAG` construction demonstrates that an assume-guarantee analysis giv
 
 Therefore the contribution should not be characterized as: AG cannot express GRBS. That claim is not supported by the formal results.
 
+## R3e-3: Exact-Lift Relative Minimality
+
+The E13→R20 causal guarantee lift was subjected to a deletion experiment covering five obligations:
+
+```text
+A1  causal effect representation completeness
+A2  realization correspondence
+A3  semantic step correspondence
+A4  boundary correspondence
+A5  semantic discharge / guarantee preservation
+```
+
+Five independently constructed Lean countermodels were added:
+
+```text
+GRBS/E13ExactLiftMissingA1.lean
+GRBS/E13ExactLiftMissingA2.lean
+GRBS/E13ExactLiftMissingA3.lean
+GRBS/E13ExactLiftMissingA4.lean
+GRBS/E13ExactLiftMissingA5.lean
+```
+
+Each file contains a machine-checked existential witness in which the designated obligation is removed, the remaining obligations of the current E13→R20 lift are retained, and an unsafe causeable transition exists.
+
+The five witnesses establish the following relative result:
+
+> Within the present E13→R20 causal guarantee-lift formulation, each of the five obligations has an independently constructed deletion countermodel. Removing any one of the five therefore invalidates the causal guarantee conclusion in some concrete model satisfying the remaining obligations.
+
+The result is relative to the current formulation. It is not a proof of universal minimality over all possible formulations of DARM, nor does it show that the five obligations are the only possible way to establish the same guarantee.
+
+The witnesses also separate obligations that could otherwise be hidden inside one behavioral assumption. In particular, causal coverage, realization correspondence, semantic transition correspondence, boundary correspondence, and guarantee-preserving discharge are independently stressable proof obligations.
+
+This strengthens the interpretation of the E13→R20 construction as an explicit causal-to-semantic assurance bridge. It does not remove the separate requirement for physical completeness or correctness of the enforcement and semantic-realization mechanisms.
+
+
 ## Relationship to R3d
 
 R3d established a complementary result. Under the explicitly restricted interface behavioral observation boundary, two systems can be observationally indistinguishable to every admissible AG assumption while their GRBS status differs.
