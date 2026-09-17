@@ -1,158 +1,374 @@
-/-
-  E14 — AG CONTRACT COMPARISON
+import GRBS
+import AGBypass
+import GRBS.E13CausalSemanticCorrespondence
+import GRBS.R20DARMToSemanticCorrespondence
 
-  QUESTION: Is the E13/R20 causal assurance structure genuinely different
-  from assume-guarantee reasoning, or can ordinary AG already express it?
+namespace GRBS
+namespace E14AGContractComparison
 
-  THREE TESTS:
-  1. AG satisfaction WITHOUT causal coverage -> safety gap exists
-  2. AG satisfaction WITH causal coverage -> causal safety restored
-  3. CausalCoverage is invisible to AG's observation
+open AGBypass
+open E13CausalSemanticCorrespondence
+open R20DARMToSemanticCorrespondence
 
-  THREE POSSIBLE OUTCOMES:
-  Outcome 1: Ordinary AG expresses everything -> DARM novelty weak
-  Outcome 2: AG + explicit causal coverage -> E13/R20 -> DARM is a discipline
-  Outcome 3: Enriched AG cannot express the obligation -> genuine primitive
+/--
+E14-A:
+Test whether the existing behavioral AG judgment entails
+effect-representation completeness.
 
-  ADVERSARIAL DISCIPLINE: The model is not rigged. AG is given a fair
-  observation model. CausalCoverage is defined independently of DARM.
-  The experiment tests what AG can and cannot see.
+The AGBypass S2 witness exposes only `Tr.ok` through the
+interface-visible trace relation, while its physical substrate
+contains a live `d0` path to `Tr.violated`.
 -/
 
-namespace GRBS.E14AGContractComparison
+def e14Assumption : AGAssumption :=
+  fun _ => True
 
--- Minimal carriers: two states, safe and compromised.
-inductive St where
-  | safe
-  | compromised
-deriving DecidableEq
+def e14Causeable :
+    CauseableTransition AGBypass.Witness.Tr :=
+  fun s s' =>
+    ∃ d : AGBypass.Witness.Ch,
+      AGBypass.Witness.S2.physicalStep d s' ∧
+      s = AGBypass.Witness.Tr.ok
 
--- Modeled transitions: what AG reasons about.
--- Only safe -> safe is modeled. The bypass is unmodeled.
-def modeledStep : St -> St -> Prop
-  | St.safe, St.safe => True
-  | _, _ => False
+/-- Empty effect representation: no physical transition is represented. -/
+def e14Represents :
+    Represents AGBypass.Witness.Ch AGBypass.Witness.Tr :=
+  fun _ _ _ => False
 
--- Causeable transitions: physical reality.
--- Includes safe -> compromised (the bypass), which is
--- physically possible but absent from the model.
-def causeableStep : St -> St -> Prop
-  | St.safe, St.safe => True
-  | St.safe, St.compromised => True
-  | _, _ => False
+/--
+The existing behavioral AG judgment is satisfied.
 
--- The guarantee.
-def G : St -> Prop
-  | St.safe => True
-  | St.compromised => False
-
--- AG satisfaction: all MODELED transitions preserve G.
-def AGSafe : Prop :=
-  forall s s', modeledStep s s' -> G s -> G s'
-
--- Causal coverage (E13 A1 analog): every causeable transition is modeled.
-def CausalCoverage : Prop :=
-  forall s s', causeableStep s s' -> modeledStep s s'
-
--- Causal safety: all CAUSEABLE transitions preserve G.
-def CausalSafe : Prop :=
-  forall s s', causeableStep s s' -> G s -> G s'
-
--- ====================================================
--- TEST 1: AG safe but causally unsafe
--- ====================================================
-
-theorem ag_is_satisfied : AGSafe := by
-  intro s s' h hg
-  cases s with
-  | safe => cases s' with
-    | safe => trivial
-    | compromised => simp [modeledStep] at h
-  | compromised => simp [G] at hg
-
-theorem causal_coverage_fails : Not CausalCoverage := by
-  intro h
-  have := h St.safe St.compromised trivial
-  simp [modeledStep] at this
-
-theorem causal_safety_fails : Not CausalSafe := by
-  intro h
-  have := h St.safe St.compromised trivial trivial
-  simp [G] at this
-
-theorem test1_ag_without_causal_coverage :
-    AGSafe
-    ∧ Not CausalCoverage
-    ∧ Not CausalSafe :=
-  ⟨ag_is_satisfied, causal_coverage_fails, causal_safety_fails⟩
-
--- ====================================================
--- TEST 2: AG + CausalCoverage -> CausalSafe
--- ====================================================
-
-theorem ag_plus_coverage_implies_causal_safe
-    (hAG : AGSafe) (hCov : CausalCoverage) : CausalSafe := by
-  intro s s' hcause hg
-  exact hAG s s' (hCov s s' hcause) hg
-
--- ====================================================
--- TEST 3: CausalCoverage is invisible to AG
--- ====================================================
-
--- Two systems with identical AG observation (same modeledStep, same G)
--- but different causal structure. AG cannot distinguish them.
--- CausalCoverage gives different answers.
-
--- System A: causeable = modeled (coverage holds)
-def causeableA : St -> St -> Prop := modeledStep
-
--- System B: causeable includes the bypass (coverage fails)
-def causeableB : St -> St -> Prop := causeableStep
-
-theorem same_ag_view_different_coverage :
-    -- Same AG observation
-    (forall s s', modeledStep s s' ↔ modeledStep s s')
-    -- System A has coverage
-    ∧ (forall s s', causeableA s s' -> modeledStep s s')
-    -- System B does NOT have coverage
-    ∧ Not (forall s s', causeableB s s' -> modeledStep s s') := by
-  refine ⟨fun _ _ => Iff.rfl, ?_, ?_⟩
-  · intro s s' h; exact h
-  · exact causal_coverage_fails
-
--- ====================================================
--- E14 VERDICT
--- ====================================================
-
-/-
-  OUTCOME 2 CONFIRMED.
-
-  AG satisfaction is not sufficient for causal safety (Test 1).
-  AG + CausalCoverage is sufficient (Test 2).
-  CausalCoverage is not visible within AG's observation (Test 3).
-
-  Therefore: the safety CONCLUSION is AG-recoverable (R3e established this).
-  The causal COVERAGE CONDITION is not. An AG framework that needs causal
-  safety must import the distinction between "modeled transitions" and
-  "causeable transitions" -- which is the boundary concept.
-
-  DARM's contribution is making CausalCoverage explicit and first-class.
-  This is not a new safety logic (R3e). It is a specific assurance
-  discipline that names and checks a condition AG leaves implicit.
-
-  Connection to E13: CausalCoverage is A1 (Causeable subset Represented).
-  The MissingA1 witness showed A1 is independently necessary for the
-  full causal lift. E14 shows it is also independently invisible to AG.
-  Those two results together characterize DARM's precise contribution:
-  a necessary condition that the standard observation model cannot state.
+Every interface-visible trace of S2 is `ok`, and the guarantee
+holds on `ok`.
 -/
+theorem ag_satisfaction_holds :
+    AGSatisfiesAdm
+      e14Assumption
+      AGBypass.Witness.g
+      AGBypass.Witness.S2 := by
+  intro e hAdm hA t ht
+  exact ht ▸ True.intro
 
-theorem e14_verdict :
-    AGSafe
-    ∧ Not CausalSafe
-    ∧ (AGSafe -> CausalCoverage -> CausalSafe)
-    ∧ Not CausalCoverage :=
-  ⟨ag_is_satisfied, causal_safety_fails,
-   ag_plus_coverage_implies_causal_safe, causal_coverage_fails⟩
+/--
+The physical causeable domain contains an unsafe transition.
+-/
+theorem unsafe_causeable_exists :
+    ∃ s s',
+      e14Causeable s s' ∧
+      ¬ AGBypass.Witness.g s' := by
+  obtain ⟨t, hStep, hUnsafe⟩ :=
+    AGBypass.Witness.physical_exploit_S2
+  refine ⟨AGBypass.Witness.Tr.ok, t, ?_, hUnsafe⟩
+  exact ⟨AGBypass.Witness.Ch.d0, hStep, rfl⟩
 
-end GRBS.E14AGContractComparison
+/--
+The existing behavioral AG judgment does not entail
+effect-representation completeness.
+
+This is the E14-A counterexample: AG satisfaction holds while
+the causeable physical transition domain contains an effect that
+has no representation.
+-/
+theorem ag_does_not_imply_effect_representation :
+    AGSatisfiesAdm
+      e14Assumption
+      AGBypass.Witness.g
+      AGBypass.Witness.S2 ∧
+    ¬ EffectRepresentationComplete
+      e14Causeable
+      e14Represents := by
+  constructor
+  · exact ag_satisfaction_holds
+  · intro hComplete
+    obtain ⟨s, s', hCauseable, hUnsafe⟩ :=
+      unsafe_causeable_exists
+
+    obtain ⟨a, hRepresents⟩ :=
+      hComplete s s' hCauseable
+
+    exact hRepresents
+
+
+/--
+E14-B:
+An AG judgment becomes sufficient for the causeable domain once an
+explicit causal-coverage premise is added.
+
+The coverage premise is deliberately separate from AG satisfaction:
+it states that every causeable transition is visible as an
+interface trace for every admissible environment satisfying the AG
+assumption.
+
+Thus this theorem tests the enriched contract:
+
+  AG satisfaction + causal-domain coverage
+    -> safety over the causeable domain.
+
+It does not claim that ordinary AG satisfaction supplies the coverage
+premise. E14-A established the contrary.
+-/
+def AGCauseableCoverage
+    {Trace Channel : Type}
+    (A : AGAssumption)
+    (s : System Trace Channel)
+    (causeable : CauseableTransition Trace) : Prop :=
+  ∀ s0 s1,
+    causeable s0 s1 →
+    ∀ e : Environment,
+      Admissible s e →
+      A e →
+      s.interfaceTraces e s1
+
+/--
+The enriched AG contract recovers causal safety.
+-/
+theorem enriched_ag_implies_causeable_safety
+    {Trace Channel : Type}
+    (A : AGAssumption)
+    (g : Guarantee Trace)
+    (s : System Trace Channel)
+    (causeable : CauseableTransition Trace)
+    (hAG : AGSatisfiesAdm A g s)
+    (hCoverage : AGCauseableCoverage A s causeable) :
+    ∀ s0 s1,
+      causeable s0 s1 →
+      ∀ e : Environment,
+        Admissible s e →
+        A e →
+        g s1 := by
+  intro s0 s1 hCause e hAdm hA
+  exact hAG e hAdm hA s1 (hCoverage s0 s1 hCause e hAdm hA)
+
+/--
+E14-B applied to a nonempty causeable domain gives safety of every
+causeable endpoint under the AG assumptions.
+-/
+theorem enriched_ag_recovers_causal_safety
+    {Trace Channel : Type}
+    (A : AGAssumption)
+    (g : Guarantee Trace)
+    (s : System Trace Channel)
+    (causeable : CauseableTransition Trace)
+    (hAG : AGSatisfiesAdm A g s)
+    (hCoverage : AGCauseableCoverage A s causeable)
+    (hEnvironment :
+      ∀ e : Environment, Admissible s e → A e) :
+    ∀ s0 s1,
+      causeable s0 s1 →
+      g s1 := by
+  intro s0 s1 hCause
+  let e : Environment := fun _ => False
+  have hAdm : Admissible s e := by
+    intro a ha
+    exact False.elim ha
+  have hA : A e := hEnvironment e hAdm
+  exact enriched_ag_implies_causeable_safety
+    A g s causeable hAG hCoverage s0 s1 hCause e hAdm hA
+
+
+/--
+E14-C:
+An AG formulation can internalize causal coverage if its contract is
+explicitly quantified over the causeable domain.
+
+This is deliberately stronger than ordinary `AGSatisfiesAdm`.
+It makes the causal-domain obligation part of the contract itself.
+The experiment therefore tests whether the missing E14-A premise can
+be expressed inside an enriched AG formulation rather than requiring
+a distinct logical primitive.
+-/
+def AGCausalContract
+    {Trace Channel : Type}
+    (A : AGAssumption)
+    (g : Guarantee Trace)
+    (s : System Trace Channel)
+    (causeable : CauseableTransition Trace) : Prop :=
+  AGSatisfiesAdm A g s ∧
+  AGCauseableCoverage A s causeable
+
+/--
+The enriched AG contract directly entails safety of every causeable
+endpoint.
+
+The proof uses only the two components of the enriched contract:
+ordinary AG satisfaction and explicit causal coverage.
+-/
+theorem ag_causal_contract_implies_causeable_safety
+    {Trace Channel : Type}
+    (A : AGAssumption)
+    (g : Guarantee Trace)
+    (s : System Trace Channel)
+    (causeable : CauseableTransition Trace)
+    (hContract : AGCausalContract A g s causeable) :
+    ∀ s0 s1,
+      causeable s0 s1 →
+      ∀ e : Environment,
+        Admissible s e →
+        A e →
+        g s1 := by
+  exact enriched_ag_implies_causeable_safety
+    A
+    g
+    s
+    causeable
+    hContract.1
+    hContract.2
+
+/--
+E14-C establishes that the missing causal-coverage obligation can be
+internalized into an enriched AG contract.
+
+It does not establish that ordinary AG satisfaction already contains
+that obligation. E14-A established the contrary.
+-/
+theorem causal_coverage_is_explicitly_internalizable :
+    ∀ (A : AGAssumption)
+      (g : Guarantee AGBypass.Witness.Tr)
+      (causeable : CauseableTransition AGBypass.Witness.Tr),
+      AGCausalContract
+        A
+        g
+        AGBypass.Witness.S2
+        causeable →
+      ∀ s0 s1,
+        causeable s0 s1 →
+        ∀ e : Environment,
+          Admissible AGBypass.Witness.S2 e →
+          A e →
+          g s1 := by
+  intro A g causeable hContract
+  exact ag_causal_contract_implies_causeable_safety
+    A
+    g
+    AGBypass.Witness.S2
+    causeable
+    hContract
+
+
+/--
+E14-D:
+R20 semantic realization adequacy does not by itself imply causal
+effect-representation completeness.
+
+This is a non-vacuous countermodel: the sole dependency is relevant,
+the realization is faithful to that dependency, the realized transition
+is boundary-mediated, and discharge is satisfied. Nevertheless, the
+causeable domain contains a transition for which no representation exists.
+-/ 
+theorem r20_adequacy_does_not_imply_effect_representation :
+    ∃
+      (D : Type)
+      (S : R20DARMToSemanticCorrespondence.SemanticSystem)
+      (G : R20DARMToSemanticCorrespondence.SemanticGuarantee S)
+      (B : R20DARMToSemanticCorrespondence.SemanticBoundary S)
+      (realize :
+        R20DARMToSemanticCorrespondence.SemanticRealization D S)
+      (relevant :
+        R20DARMToSemanticCorrespondence.SemanticDependency D S.State → Prop)
+      (discharge : D → Prop)
+      (causeable :
+        E13CausalSemanticCorrespondence.CauseableTransition S.State),
+      R20DARMToSemanticCorrespondence.SemanticRealizationAdequate
+        S G B realize relevant discharge ∧
+      ¬ E13CausalSemanticCorrespondence.EffectRepresentationComplete
+        (Access := D)
+        causeable
+        (fun _ _ _ => False) := by
+  let D := Unit
+  let State := Bool
+
+  let S : R20DARMToSemanticCorrespondence.SemanticSystem :=
+    { State := State
+      Step := fun x y => x = false ∧ y = false }
+
+  let G : R20DARMToSemanticCorrespondence.SemanticGuarantee S :=
+    { property := fun _ => True }
+
+  let B : R20DARMToSemanticCorrespondence.SemanticBoundary S :=
+    { mediated := fun x y => x = false ∧ y = false }
+
+  let realize :
+      R20DARMToSemanticCorrespondence.SemanticRealization D S :=
+    fun d =>
+      { dependency := d
+        source := false
+        target := false }
+
+  let relevant :
+      R20DARMToSemanticCorrespondence.SemanticDependency D S.State → Prop :=
+    fun _ => True
+
+  let discharge : D → Prop :=
+    fun _ => True
+
+  let causeable :
+      E13CausalSemanticCorrespondence.CauseableTransition S.State :=
+    fun x y => x = false ∧ y = true
+
+  refine ⟨
+    D,
+    S,
+    G,
+    B,
+    realize,
+    relevant,
+    discharge,
+    causeable,
+    ?_,
+    ?_⟩
+
+  · constructor
+    · intro d
+      rfl
+    constructor
+    · intro d hRelevant
+      constructor
+      · constructor <;> rfl
+      · trivial
+    · intro d hDischarge hStep hSource
+      trivial
+
+  · intro hComplete
+    have hRepresents :
+        ∃ a : D, False :=
+      hComplete false true (by
+        constructor <;> rfl)
+    exact hRepresents.elim (fun _ hFalse => hFalse)
+
+/--
+E14-E:
+Effect-representation completeness together with representation-level
+complete mediation yields causal coverage.
+
+This is the composition of the two independent obligations:
+
+  1. every causeable effect has a representation;
+  2. every represented transition is mediated.
+
+The result is that every causeable transition is itself mediated.
+-/
+theorem effect_representation_plus_complete_mediation_implies_causal_coverage :
+    ∀ {Access State : Type}
+      (causeable : CauseableTransition State)
+      (represents : Represents Access State)
+      (mediated : AccessMediated Access State),
+      EffectRepresentationComplete
+        causeable
+        represents →
+      RepresentationCompleteMediation
+        represents
+        mediated →
+      CausalCoverage
+        causeable
+        (fun s s' =>
+          ∃ a,
+            represents a s s' ∧
+            mediated a s s') := by
+  intro Access State causeable represents mediated hRepresentation hMediation
+  intro s s' hCauseable
+  obtain ⟨a, hRepresents⟩ :=
+    hRepresentation s s' hCauseable
+  exact ⟨a, hRepresents, hMediation a s s' hRepresents⟩
+
+end E14AGContractComparison
+end GRBS
