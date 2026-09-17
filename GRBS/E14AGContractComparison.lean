@@ -564,5 +564,245 @@ theorem e13_representation_mediation_plus_ag_trace_bridge_implies_ag_causeable_c
   exact hBridge a s0 s1 hRepresents hMediated e hAdm hA
 
 
+
+/--
+E14-I1:
+The E13-to-AG trace bridge alone does not imply AG causeable coverage.
+This separates the bridge correspondence from effect representation and
+complete mediation.
+-/
+theorem e13_to_ag_trace_bridge_does_not_imply_ag_causeable_coverage :
+    ∃
+      (A : AGAssumption)
+      (s : System AGBypass.Witness.Tr AGBypass.Witness.Ch)
+      (causeable : CauseableTransition AGBypass.Witness.Tr)
+      (represents :
+        Represents
+          AGBypass.Witness.Ch
+          AGBypass.Witness.Tr)
+      (mediated :
+        AccessMediated
+          AGBypass.Witness.Ch
+          AGBypass.Witness.Tr),
+      E13ToAGTraceBridge A s represents mediated ∧
+      ¬ AGCauseableCoverage A s causeable := by
+  let A : AGAssumption := fun _ => True
+  let s : System AGBypass.Witness.Tr AGBypass.Witness.Ch :=
+    { interface := fun _ => True
+      interfaceTraces := fun _ _ => False
+      physicalStep := AGBypass.Witness.S2.physicalStep
+      cov := fun _ => True }
+  let causeable : CauseableTransition AGBypass.Witness.Tr :=
+    fun s s' =>
+      s = AGBypass.Witness.Tr.ok ∧
+      s' = AGBypass.Witness.Tr.violated
+  let represents :
+      Represents
+        AGBypass.Witness.Ch
+        AGBypass.Witness.Tr :=
+    fun _ _ _ => False
+  let mediated :
+      AccessMediated
+        AGBypass.Witness.Ch
+        AGBypass.Witness.Tr :=
+    fun _ _ _ => False
+  refine ⟨A, s, causeable, represents, mediated, ?_, ?_⟩
+  · intro a s0 s1 hRepresents
+    exact False.elim hRepresents
+  · intro hCoverage
+    have hCause :
+        causeable
+          AGBypass.Witness.Tr.ok
+          AGBypass.Witness.Tr.violated :=
+      And.intro rfl rfl
+    have hAdmissible :
+        Admissible s (fun _ => True) := by
+      intro a ha
+      trivial
+    have hFalse :
+        s.interfaceTraces
+          (fun _ => True)
+          AGBypass.Witness.Tr.violated :=
+      hCoverage
+        AGBypass.Witness.Tr.ok
+        AGBypass.Witness.Tr.violated
+        hCause
+        (fun _ => True)
+        hAdmissible
+        trivial
+    exact hFalse
+
+
+/--
+E14-I2:
+Even with complete effect representation, the E13-to-AG trace bridge
+does not imply AG causeable coverage when complete mediation is absent.
+This isolates complete mediation as an independent obligation.
+-/
+theorem e13_to_ag_trace_bridge_plus_effect_representation_does_not_imply_ag_causeable_coverage :
+    ∃
+      (A : AGAssumption)
+      (s : System AGBypass.Witness.Tr AGBypass.Witness.Ch)
+      (causeable : CauseableTransition AGBypass.Witness.Tr)
+      (represents :
+        Represents
+          AGBypass.Witness.Ch
+          AGBypass.Witness.Tr)
+      (mediated :
+        AccessMediated
+          AGBypass.Witness.Ch
+          AGBypass.Witness.Tr),
+      E13ToAGTraceBridge A s represents mediated ∧
+      EffectRepresentationComplete causeable represents ∧
+      ¬ AGCauseableCoverage A s causeable := by
+  let A : AGAssumption := fun _ => True
+  let s : System AGBypass.Witness.Tr AGBypass.Witness.Ch :=
+    { interface := fun _ => True
+      interfaceTraces := fun _ _ => False
+      physicalStep := AGBypass.Witness.S2.physicalStep
+      cov := fun _ => True }
+  let causeable : CauseableTransition AGBypass.Witness.Tr :=
+    fun s s' =>
+      s = AGBypass.Witness.Tr.ok ∧
+      s' = AGBypass.Witness.Tr.violated
+  let represents :
+      Represents
+        AGBypass.Witness.Ch
+        AGBypass.Witness.Tr :=
+    fun _ s0 s1 =>
+      s0 = AGBypass.Witness.Tr.ok ∧
+      s1 = AGBypass.Witness.Tr.violated
+  let mediated :
+      AccessMediated
+        AGBypass.Witness.Ch
+        AGBypass.Witness.Tr :=
+    fun _ _ _ => False
+  refine ⟨A, s, causeable, represents, mediated, ?_, ?_, ?_⟩
+  · intro a s0 s1 hRepresents hMediated
+    exact False.elim hMediated
+  · intro s0 s1 hCause
+    refine ⟨AGBypass.Witness.Ch.d0, ?_⟩
+    exact hCause
+  · intro hCoverage
+    have hCause :
+        causeable
+          AGBypass.Witness.Tr.ok
+          AGBypass.Witness.Tr.violated :=
+      And.intro rfl rfl
+    have hAdmissible :
+        Admissible s (fun _ => True) := by
+      intro a ha
+      trivial
+    have hFalse :
+        s.interfaceTraces
+          (fun _ => True)
+          AGBypass.Witness.Tr.violated :=
+      hCoverage
+        AGBypass.Witness.Tr.ok
+        AGBypass.Witness.Tr.violated
+        hCause
+        (fun _ => True)
+        hAdmissible
+        trivial
+    exact hFalse
+
+
+
+
+/--
+E14-I3:
+AG causeable coverage does not establish the full E13-to-AG trace bridge,
+even when effect representation and complete mediation hold.
+
+The countermodel contains an additional represented and mediated effect
+outside the causeable relation. AG coverage constrains only causeable
+effects, while the bridge quantifies over every represented and mediated
+effect.
+-/
+theorem ag_causeable_coverage_plus_e13_obligations_does_not_imply_ag_trace_bridge :
+    ∃
+      (A : AGAssumption)
+      (s : System AGBypass.Witness.Tr AGBypass.Witness.Ch)
+      (causeable : CauseableTransition AGBypass.Witness.Tr)
+      (represents :
+        Represents
+          AGBypass.Witness.Ch
+          AGBypass.Witness.Tr)
+      (mediated :
+        AccessMediated
+          AGBypass.Witness.Ch
+          AGBypass.Witness.Tr),
+      AGCauseableCoverage A s causeable ∧
+      EffectRepresentationComplete causeable represents ∧
+      RepresentationCompleteMediation represents mediated ∧
+      ¬ E13ToAGTraceBridge A s represents mediated := by
+  let A : AGAssumption := fun _ => True
+  let s : System AGBypass.Witness.Tr AGBypass.Witness.Ch :=
+    { interface := fun _ => True
+      interfaceTraces := fun _ t => t = AGBypass.Witness.Tr.violated
+      physicalStep := AGBypass.Witness.S2.physicalStep
+      cov := fun _ => True }
+  let causeable : CauseableTransition AGBypass.Witness.Tr :=
+    fun s0 s1 =>
+      s0 = AGBypass.Witness.Tr.ok ∧
+      s1 = AGBypass.Witness.Tr.violated
+  let represents :
+      Represents
+        AGBypass.Witness.Ch
+        AGBypass.Witness.Tr :=
+    fun _ s0 s1 =>
+      (s0 = AGBypass.Witness.Tr.ok ∧
+        s1 = AGBypass.Witness.Tr.violated) ∨
+      (s0 = AGBypass.Witness.Tr.violated ∧
+        s1 = AGBypass.Witness.Tr.ok)
+  let mediated :
+      AccessMediated
+        AGBypass.Witness.Ch
+        AGBypass.Witness.Tr :=
+    fun _ s0 s1 =>
+      (s0 = AGBypass.Witness.Tr.ok ∧
+        s1 = AGBypass.Witness.Tr.violated) ∨
+      (s0 = AGBypass.Witness.Tr.violated ∧
+        s1 = AGBypass.Witness.Tr.ok)
+  refine ⟨A, s, causeable, represents, mediated, ?_, ?_, ?_, ?_⟩
+  · intro s0 s1 hCause e hAdm hA
+    exact hCause.2
+  · intro s0 s1 hCause
+    refine ⟨AGBypass.Witness.Ch.d0, ?_⟩
+    exact Or.inl hCause
+  · intro a s0 s1 hRepresents
+    exact hRepresents
+  · intro hBridge
+    have hRepresents :
+        represents
+          AGBypass.Witness.Ch.d0
+          AGBypass.Witness.Tr.violated
+          AGBypass.Witness.Tr.ok :=
+      Or.inr (And.intro rfl rfl)
+    have hMediated :
+        mediated
+          AGBypass.Witness.Ch.d0
+          AGBypass.Witness.Tr.violated
+          AGBypass.Witness.Tr.ok :=
+      Or.inr (And.intro rfl rfl)
+    have hAdmissible :
+        Admissible s (fun _ => True) := by
+      intro a ha
+      trivial
+    have hTrace :
+        s.interfaceTraces
+          (fun _ => True)
+          AGBypass.Witness.Tr.ok :=
+      hBridge
+        AGBypass.Witness.Ch.d0
+        AGBypass.Witness.Tr.violated
+        AGBypass.Witness.Tr.ok
+        hRepresents
+        hMediated
+        (fun _ => True)
+        hAdmissible
+        trivial
+    simp [s] at hTrace
+
 end E14AGContractComparison
 end GRBS
