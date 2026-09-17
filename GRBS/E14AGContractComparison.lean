@@ -421,6 +421,30 @@ theorem ag_causeable_coverage_does_not_imply_effect_representation :
     exact hRepresents.elim (fun _ hFalse => hFalse)
 
 
+
+/--
+E14-H bridge:
+connects an E13 access-level represented and mediated effect to the
+AG interface-trace observation model.
+
+This is an explicit cross-layer correspondence. It is not supplied by
+E13 effect representation or complete mediation alone.
+-/
+def E13ToAGTraceBridge
+    {Trace Channel : Type}
+    (A : AGAssumption)
+    (s : System Trace Channel)
+    (represents : Represents Channel Trace)
+    (mediated : AccessMediated Channel Trace) : Prop :=
+  ∀ a s0 s1,
+    represents a s0 s1 →
+    mediated a s0 s1 →
+    ∀ e : Environment,
+      Admissible s e →
+      A e →
+      s.interfaceTraces e s1
+
+
 /--
 E14-G:
 E13 effect representation plus complete mediation does not by itself
@@ -507,6 +531,37 @@ theorem e13_representation_mediation_does_not_imply_ag_causeable_coverage :
         trivial
 
     exact hFalse
+
+
+/--
+E14-H:
+Once an explicit E13-to-AG trace correspondence is supplied, E13
+effect representation and complete mediation are sufficient to recover
+AG causeable coverage.
+
+This isolates the additional cross-layer obligation required to connect
+the E13 access/mediation layer to the E14 AG observation layer.
+-/
+theorem e13_representation_mediation_plus_ag_trace_bridge_implies_ag_causeable_coverage :
+    ∀
+      {Trace Channel : Type}
+      (A : AGAssumption)
+      (s : System Trace Channel)
+      (causeable : CauseableTransition Trace)
+      (represents : Represents Channel Trace)
+      (mediated : AccessMediated Channel Trace),
+      EffectRepresentationComplete causeable represents →
+      RepresentationCompleteMediation represents mediated →
+      E13ToAGTraceBridge A s represents mediated →
+      AGCauseableCoverage A s causeable := by
+  intro Trace Channel A s causeable represents mediated
+  intro hRepresentation hMediation hBridge
+  intro s0 s1 hCause e hAdm hA
+  obtain ⟨a, hRepresents⟩ :=
+    hRepresentation s0 s1 hCause
+  have hMediated : mediated a s0 s1 :=
+    hMediation a s0 s1 hRepresents
+  exact hBridge a s0 s1 hRepresents hMediated e hAdm hA
 
 
 end E14AGContractComparison
