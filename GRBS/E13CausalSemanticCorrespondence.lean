@@ -42,12 +42,185 @@ def CausalCoverage
     (causeable : CauseableTransition State)
     (governed : GovernedTransition State) : Prop :=
   ∀ s s', causeable s s' → governed s s'
+/--
+An access/effect representation associates an abstract access channel with
+the state transition it represents.
+-/
+abbrev Represents
+    (Access : Type)
+    (State : Type) :=
+  Access -> State -> State -> Prop
+
+/--
+Mediation is a property of the represented access channel itself.
+-/
+abbrev AccessMediated
+    (Access : Type)
+    (State : Type) :=
+  Access -> State -> State -> Prop
+
+/--
+Complete mediation over an access/effect representation: every represented
+transition is mediated by the boundary.
+-/
+def RepresentationCompleteMediation
+    {Access State : Type}
+    (represents : Represents Access State)
+    (mediated : AccessMediated Access State) : Prop :=
+  forall a s s',
+    represents a s s' ->
+    mediated a s s'
+
+/--
+Every causeable effect has at least one access representation.
+
+This is the completeness condition connecting an access-level mediation
+claim to the larger causeable effect domain.
+-/
+def EffectRepresentationComplete
+    {Access State : Type}
+    (causeable : CauseableTransition State)
+    (represents : Represents Access State) : Prop :=
+  forall s s',
+    causeable s s' ->
+    exists a, represents a s s'
+
+/--
+A state transition is mediated when some access representing that transition
+is itself mediated.
+-/
+def AccessMediatedTransition
+    {Access State : Type}
+    (represents : Represents Access State)
+    (mediated : AccessMediated Access State) :
+    State -> State -> Prop :=
+  fun s s' =>
+    exists a,
+      represents a s s' /\
+        mediated a s s'
+
+/--
+Access-level complete mediation plus complete representation of causeable
+effects implies E13 mediated causal coverage.
+-/
+theorem complete_mediation_plus_effect_representation_implies_causal_coverage
+    {Access State : Type}
+    (causeable : CauseableTransition State)
+    (represents : Represents Access State)
+    (mediated : AccessMediated Access State)
+    (hComplete :
+      RepresentationCompleteMediation represents mediated)
+    (hRepresentation :
+      EffectRepresentationComplete causeable represents) :
+    MediatedCausalCoverage
+      causeable
+      (AccessMediatedTransition represents mediated) := by
+  intro s s' hCause
+  obtain ⟨a, hRepresents⟩ := hRepresentation s s' hCause
+  exact ⟨a, hRepresents, hComplete a s s' hRepresents⟩
+
+/--
+Mediated causal coverage does not by itself imply representation-level
+complete mediation.
+
+Two access channels may represent the same causeable effect. One is mediated
+and the other is not. E13 causal coverage is satisfied because a mediated
+representation exists, while complete mediation over all representations
+fails because an unmediated representation also exists.
+-/
+theorem causal_coverage_does_not_imply_complete_mediation :
+    ∃
+      (Access State : Type)
+      (causeable : CauseableTransition State)
+      (represents : Represents Access State)
+      (mediated : AccessMediated Access State),
+      MediatedCausalCoverage
+        causeable
+        (AccessMediatedTransition represents mediated) ∧
+      ¬ RepresentationCompleteMediation represents mediated := by
+  let Access := Bool
+  let State := Bool
+
+  let represents : Represents Access State :=
+    fun a s s' =>
+      s = false ∧ s' = true
+
+  let mediated : AccessMediated Access State :=
+    fun a _ _ => a = true
+
+  let causeable : CauseableTransition State :=
+    fun s s' =>
+      s = false ∧ s' = true
+
+  refine ⟨Access, State, causeable, represents, mediated, ?_, ?_⟩
+
+  · intro s s' hCause
+    have hRepresents : represents true s s' := by
+      simpa [represents] using hCause
+    exact ⟨true, hRepresents, rfl⟩
+
+  · intro hComplete
+    have hRepresents : represents false false true := by
+      constructor <;> rfl
+
+    have hMediated : mediated false false true :=
+      hComplete false false true hRepresents
+
+    exact Bool.noConfusion hMediated
+
+
+/--
+Access-level complete mediation alone does not imply E13 causal coverage.
+
+The counterexample contains a causeable effect that has no representation at
+all. Complete mediation is therefore true vacuously for every represented
+effect, while mediated causal coverage fails for the unrepresented effect.
+-/
+theorem complete_mediation_does_not_imply_causal_coverage :
+    ∃
+      (Access State : Type)
+      (causeable : CauseableTransition State)
+      (represents : Represents Access State)
+      (mediated : AccessMediated Access State),
+      RepresentationCompleteMediation represents mediated ∧
+      ¬ MediatedCausalCoverage
+        causeable
+        (AccessMediatedTransition represents mediated) := by
+  let Access := Unit
+  let State := Bool
+
+  let represents : Represents Access State :=
+    fun _ s s' =>
+      s = false ∧ s' = false
+
+  let mediated : AccessMediated Access State :=
+    fun _ _ _ => True
+
+  let causeable : CauseableTransition State :=
+    fun s s' =>
+      s = false ∧ s' = true
+
+  refine ⟨Access, State, causeable, represents, mediated, ?_, ?_⟩
+
+  · intro a s s' hRepresents
+    trivial
+
+  · intro hCoverage
+    have hCause : causeable false true := by
+      constructor <;> rfl
+
+    have hMediated := hCoverage false true hCause
+    obtain ⟨a, hRepresents, hMediated⟩ := hMediated
+
+    have : true = false := hRepresents.2
+    exact Bool.noConfusion this
+
 
 /--
 The semantic realization interface can be perfectly adequate while
 causal coverage remains a separate obligation.
 -/
-theorem semantic_adequacy_does_not_imply_causal_coverage :
+theorem structural_adequacy_does_not_imply_causal_coverage :
     ∃ (State : Type)
       (causeable governed : GovernedTransition State),
       (∀ s s', governed s s' → governed s s') ∧
