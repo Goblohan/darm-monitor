@@ -145,6 +145,37 @@ theorem complete_mediation_plus_effect_representation_implies_causal_coverage
   exact ⟨a, hRepresents, hComplete a s s' hRepresents⟩
 
 /--
+The original E13 complete-mediation condition, together with complete
+representation of the causeable effect domain, implies mediated causal
+coverage.
+-/
+theorem e13_complete_mediation_plus_effect_representation_implies_causal_coverage
+    {State Action : Type}
+    (causeable : CauseableTransition State)
+    (step : State -> Action -> State -> Prop)
+    (authorized : State -> Action -> State -> Prop)
+    (hComplete :
+      (forall (σ : State -> Action) (s s' : State),
+        step s (σ s) s' ->
+        authorized s (σ s) s'))
+    (hRepresentation :
+      EffectRepresentationComplete
+        causeable
+        (fun a s s' => step s a s')) :
+    MediatedCausalCoverage
+      causeable
+      (fun s s' =>
+        exists a,
+          step s a s' ∧
+            authorized s a s') := by
+  intro s s' hCause
+  obtain ⟨a, hStep⟩ := hRepresentation s s' hCause
+  have hAuthorized : authorized s a s' := by
+    let σ : State -> Action := fun _ => a
+    exact hComplete σ s s' hStep
+  exact ⟨a, hStep, hAuthorized⟩
+
+/--
 Mediated causal coverage does not by itself imply representation-level
 complete mediation.
 
