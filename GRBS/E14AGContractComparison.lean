@@ -370,5 +370,55 @@ theorem effect_representation_plus_complete_mediation_implies_causal_coverage :
     hRepresentation s s' hCauseable
   exact ⟨a, hRepresents, hMediation a s s' hRepresents⟩
 
+
+/--
+E14-F:
+AG causeable-coverage and E13 effect-representation completeness are
+distinct obligations.
+
+A system may expose every causeable endpoint through its AG interface
+while having no access-level representation of those effects.
+This tests whether E14's enriched AG coverage is already equivalent to
+the E13 representation obligation.
+-/
+theorem ag_causeable_coverage_does_not_imply_effect_representation :
+    ∃
+      (A : AGAssumption)
+      (_g : Guarantee AGBypass.Witness.Tr)
+      (s : System AGBypass.Witness.Tr AGBypass.Witness.Ch)
+      (causeable : CauseableTransition AGBypass.Witness.Tr)
+      (represents : Represents AGBypass.Witness.Ch AGBypass.Witness.Tr),
+      AGCauseableCoverage A s causeable ∧
+      ¬ EffectRepresentationComplete causeable represents := by
+  let A : AGAssumption := fun _ => True
+
+  let s : System AGBypass.Witness.Tr AGBypass.Witness.Ch :=
+    { interface := fun _ => True
+      interfaceTraces := fun _ _ => True
+      physicalStep := AGBypass.Witness.S2.physicalStep
+      cov := fun _ => True }
+
+  let causeable : CauseableTransition AGBypass.Witness.Tr :=
+    fun s s' => s = AGBypass.Witness.Tr.ok ∧ s' = AGBypass.Witness.Tr.violated
+
+  let represents :
+      Represents AGBypass.Witness.Ch AGBypass.Witness.Tr :=
+    fun _ _ _ => False
+
+  refine ⟨A, AGBypass.Witness.g, s, causeable, represents, ?_, ?_⟩
+
+  · intro s0 s1 hCause e hAdm hA
+    trivial
+
+  · intro hComplete
+    have hRepresents :
+        ∃ a : AGBypass.Witness.Ch, False :=
+      hComplete
+        AGBypass.Witness.Tr.ok
+        AGBypass.Witness.Tr.violated
+        (by
+          constructor <;> rfl)
+    exact hRepresents.elim (fun _ hFalse => hFalse)
+
 end E14AGContractComparison
 end GRBS
