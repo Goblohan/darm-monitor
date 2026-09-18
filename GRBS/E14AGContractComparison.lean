@@ -896,5 +896,254 @@ theorem e13_to_ag_trace_bridge_iff_ag_causeable_coverage_of_domain_alignment :
       A s causeable represents mediated hAlignment
 
 
+/--
+E14-K:
+Transport from E13 mediated causal coverage to R20 semantic mediated causal
+coverage requires an explicit access-to-realization correspondence.
+
+The E13 access representation and the R20 semantic realization share the
+same state space. E13 mediation is not identified with an R20 semantic step;
+that correspondence remains an explicit hypothesis.
+-/
+theorem e13_mediated_coverage_transports_to_r20_mediated_coverage
+    {Access D : Type}
+    (S : SemanticSystem)
+    (causeable : CauseableTransition S.State)
+    (represents : Represents Access S.State)
+    (mediated : AccessMediated Access S.State)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (relevant : SemanticDependency D S.State → Prop)
+    (hCoverage :
+      MediatedCausalCoverage
+        causeable
+        (AccessMediatedTransition represents mediated))
+    (hCorrespondence :
+      ∀ a x y,
+        represents a x y →
+        mediated a x y →
+        ∃ d,
+          relevant (realize d) ∧
+          (realize d).source = x ∧
+          (realize d).target = y ∧
+          BoundaryMediatedStep S B
+            (realize d).source
+            (realize d).target) :
+    GRBS.R20DARMToSemanticCorrespondence.SemanticMediatedCausalCoverage
+      S B realize relevant causeable := by
+  intro x y hCause
+  obtain ⟨a, hRepresents, hMediated⟩ :=
+    hCoverage x y hCause
+  obtain ⟨d, hRelevant, hSource, hTarget, hStep⟩ :=
+    hCorrespondence a x y hRepresents hMediated
+  exact ⟨d, hRelevant, hStep, hSource, hTarget⟩
+
+
+/--
+E14-L:
+Under a bidirectional access-to-realization correspondence, E13 mediated
+causal coverage and R20 semantic mediated causal coverage are equivalent.
+
+The forward direction transports E13 access witnesses into relevant R20
+realizations. The backward direction transports relevant R20 boundary-
+mediated realizations into E13 access witnesses.
+
+No identification between E13 mediation and R20 semantic mediation is made
+without these explicit correspondence hypotheses.
+-/
+theorem e13_mediated_coverage_iff_r20_mediated_coverage_of_bidirectional_correspondence
+    {Access D : Type}
+    (S : SemanticSystem)
+    (causeable : CauseableTransition S.State)
+    (represents : Represents Access S.State)
+    (mediated : AccessMediated Access S.State)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (relevant : SemanticDependency D S.State → Prop)
+    (hForward :
+      ∀ a x y,
+        represents a x y →
+        mediated a x y →
+        ∃ d,
+          relevant (realize d) ∧
+          (realize d).source = x ∧
+          (realize d).target = y ∧
+          BoundaryMediatedStep S B
+            (realize d).source
+            (realize d).target)
+    (hBackward :
+      ∀ d,
+        relevant (realize d) →
+        BoundaryMediatedStep S B
+          (realize d).source
+          (realize d).target →
+        ∃ a,
+          represents a (realize d).source (realize d).target ∧
+          mediated a (realize d).source (realize d).target) :
+    MediatedCausalCoverage
+        causeable
+        (AccessMediatedTransition represents mediated) ↔
+      GRBS.R20DARMToSemanticCorrespondence.SemanticMediatedCausalCoverage
+        S B realize relevant causeable := by
+  constructor
+  · intro hCoverage x y hCause
+    obtain ⟨a, hRepresents, hMediated⟩ :=
+      hCoverage x y hCause
+    obtain ⟨d, hRelevant, hSource, hTarget, hStep⟩ :=
+      hForward a x y hRepresents hMediated
+    exact ⟨d, hRelevant, hStep, hSource, hTarget⟩
+  · intro hCoverage x y hCause
+    obtain ⟨d, hRelevant, hStep, hSource, hTarget⟩ :=
+      hCoverage x y hCause
+    obtain ⟨a, hRepresents, hMediated⟩ :=
+      hBackward d hRelevant hStep
+    exact ⟨a, by simpa [hSource, hTarget] using hRepresents, by simpa [hSource, hTarget] using hMediated⟩
+
+
+/--
+E14-M:
+E13 mediated causal coverage and R20 semantic mediated causal coverage do
+not, by themselves, establish the bidirectional access-to-realization
+correspondence used by E14-L.
+
+The countermodel contains an E13 witness and an R20 witness for the same
+causeable transition, while each domain also contains an additional mediated
+witness with no corresponding witness in the other domain.
+-/
+theorem e14_m_correspondence_is_independent_of_both_coverages :
+    ∃
+      (Access D : Type)
+      (S : SemanticSystem)
+      (causeable : CauseableTransition S.State)
+      (represents : Represents Access S.State)
+      (mediated : AccessMediated Access S.State)
+      (B : SemanticBoundary S)
+      (realize : SemanticRealization D S)
+      (relevant : SemanticDependency D S.State → Prop),
+      MediatedCausalCoverage
+        causeable
+        (AccessMediatedTransition represents mediated) ∧
+      GRBS.R20DARMToSemanticCorrespondence.SemanticMediatedCausalCoverage
+        S B realize relevant causeable ∧
+      ¬
+        (∀ a x y,
+          represents a x y →
+          mediated a x y →
+          ∃ d,
+            relevant (realize d) ∧
+            (realize d).source = x ∧
+            (realize d).target = y ∧
+            BoundaryMediatedStep S B
+              (realize d).source
+              (realize d).target) ∧
+      ¬
+        (∀ d,
+          relevant (realize d) →
+          BoundaryMediatedStep S B
+            (realize d).source
+            (realize d).target →
+          ∃ a,
+            represents a (realize d).source (realize d).target ∧
+            mediated a (realize d).source (realize d).target) := by
+  let S0 : SemanticSystem :=
+    { State := Bool
+      Step := fun x y =>
+        (x = false ∧ y = true) ∨
+        (x = false ∧ y = false) ∨
+        (x = true ∧ y = true) }
+
+  let G0 : SemanticGuarantee S0 :=
+    { property := fun _ => True }
+
+  let B0 : SemanticBoundary S0 :=
+    { mediated := fun x y =>
+        (x = false ∧ y = true) ∨
+        (x = false ∧ y = false) ∨
+        (x = true ∧ y = true) }
+
+  let represents0 : Represents (Bool × Bool) S0.State :=
+    fun a x y =>
+      (a = (false, false) ∧ x = false ∧ y = true) ∨
+      (a = (true, false) ∧ x = false ∧ y = false)
+
+  let mediated0 : AccessMediated (Bool × Bool) S0.State :=
+    fun a x y =>
+      (a = (false, false) ∧ x = false ∧ y = true) ∨
+      (a = (true, false) ∧ x = false ∧ y = false)
+
+  let realize0 : SemanticRealization Bool S0 :=
+    fun d =>
+      { dependency := d
+        source := if d then true else false
+        target := true }
+
+  let relevant0 : SemanticDependency Bool S0.State → Prop :=
+    fun _ => True
+
+  let causeable0 : CauseableTransition S0.State :=
+    fun x y => x = false ∧ y = true
+
+  have hE13 :
+      MediatedCausalCoverage
+        causeable0
+        (AccessMediatedTransition represents0 mediated0) := by
+    intro x y hCause
+    obtain ⟨hx, hy⟩ := hCause
+    subst x
+    subst y
+    refine ⟨(false, false), ?_, ?_⟩
+    · simp [represents0]
+    · simp [mediated0]
+
+  have hR20 :
+      GRBS.R20DARMToSemanticCorrespondence.SemanticMediatedCausalCoverage
+        S0 B0 realize0 relevant0 causeable0 := by
+    intro x y hCause
+    obtain ⟨hx, hy⟩ := hCause
+    subst x
+    subst y
+    refine ⟨false, ?_, ?_, rfl, rfl⟩
+    · trivial
+    · simp [BoundaryMediatedStep, realize0, B0, S0]
+
+  have hNotForward :
+      ¬
+        (∀ a x y,
+          represents0 a x y →
+          mediated0 a x y →
+          ∃ d,
+            relevant0 (realize0 d) ∧
+            (realize0 d).source = x ∧
+            (realize0 d).target = y ∧
+            BoundaryMediatedStep S0 B0
+              (realize0 d).source
+              (realize0 d).target) := by
+    intro h
+    obtain ⟨d, hRelevant, hSource, hTarget, hStep⟩ :=
+      h (true, false) false false
+        (by simp [represents0])
+        (by simp [mediated0])
+    simp [realize0] at hSource hTarget
+
+  have hNotBackward :
+      ¬
+        (∀ d,
+          relevant0 (realize0 d) →
+          BoundaryMediatedStep S0 B0
+            (realize0 d).source
+            (realize0 d).target →
+          ∃ a,
+            represents0 a (realize0 d).source (realize0 d).target ∧
+            mediated0 a (realize0 d).source (realize0 d).target) := by
+    intro h
+    obtain ⟨a, hRep, hMed⟩ :=
+      h true trivial
+        (by
+          simp [BoundaryMediatedStep, realize0, B0, S0])
+    simp [realize0, represents0] at hRep
+
+  exact ⟨Bool × Bool, Bool, S0, causeable0, represents0, mediated0, B0,
+    realize0, relevant0, hE13, hR20, hNotForward, hNotBackward⟩
+
 end E14AGContractComparison
 end GRBS
