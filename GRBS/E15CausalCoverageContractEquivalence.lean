@@ -1242,3 +1242,147 @@ theorem e15_g4a_observation_correspondence_implies_ag_causeable_coverage :
 
 end E15CausalCoverageContractEquivalence
 end GRBS
+
+namespace GRBS
+namespace E15CausalCoverageContractEquivalence
+
+/-
+E15-G4B:
+Test whether the mediated-to-AG observation correspondence is an
+independent obligation.
+
+The countermodel preserves all three E15 obligations while the AG
+system observes false at the relevant endpoint, although the E15
+mediated transition reaches true.
+-/
+
+def g4bTrace : Type := Bool
+def g4bChannel : Type := Unit
+def g4bDependency : Type := Unit
+
+def g4bAssumption : GRBS.AGBypass.AGAssumption :=
+  fun _ => True
+
+def g4bSystem : GRBS.AGBypass.System g4bTrace g4bChannel :=
+  { interface := fun _ => True
+    interfaceTraces := fun _ t => t = false
+    physicalStep := fun _ _ => False
+    cov := fun _ => True }
+
+def g4bCauseable :
+    GRBS.E13CausalSemanticCorrespondence.CauseableTransition g4bTrace :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+def g4bDep : g4bDependency → Prop :=
+  fun _ => True
+
+def g4bCovered : g4bDependency → Prop :=
+  fun _ => True
+
+def g4bRepresents :
+    g4bDependency → g4bTrace → g4bTrace → Prop :=
+  fun _ s0 s1 => s0 = false ∧ s1 = true
+
+def g4bMediated : g4bTrace → g4bTrace → Prop :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+theorem e15_g4b_e15_obligations_hold :
+    R8RichContractSeparation.R8e.ContractCoverage
+        g4bCovered
+        g4bDep ∧
+      ContractDomainComplete
+        g4bCauseable
+        g4bDep
+        g4bRepresents ∧
+      ContractRepresentationSound
+        g4bCovered
+        g4bRepresents
+        g4bMediated := by
+  exact ⟨
+    by
+      intro d hDep
+      trivial,
+    by
+      intro s0 s1 hCause
+      exact ⟨(), trivial, hCause⟩,
+    by
+      intro d hCovered s0 s1 hRepresents
+      exact hRepresents⟩
+
+theorem e15_g4b_observation_correspondence_fails :
+    ¬ MediatedAGObservationCorrespondence
+      g4bAssumption
+      g4bSystem
+      g4bMediated := by
+  intro hObservation
+  have hMediated : g4bMediated false true := by
+    constructor <;> rfl
+  have hTrace :=
+    hObservation
+      false
+      true
+      hMediated
+      (fun _ : GRBS.AGBypass.Action => False)
+      (by
+        intro a h
+        exact False.elim h)
+      trivial
+  have hFalse : (true : Bool) = false := hTrace
+  exact Bool.noConfusion hFalse
+
+theorem e15_g4b_ag_causeable_coverage_fails :
+    ¬ GRBS.E14AGContractComparison.AGCauseableCoverage
+      g4bAssumption
+      g4bSystem
+      g4bCauseable := by
+  intro hCoverage
+  have hCause : g4bCauseable false true := by
+    constructor <;> rfl
+  have hInterface :
+      g4bSystem.interfaceTraces
+        (fun _ : GRBS.AGBypass.Action => False)
+        true := by
+    exact hCoverage
+      false
+      true
+      hCause
+      (fun _ => False)
+      (by
+        intro a h
+        exact False.elim h)
+      trivial
+  have hTrace : (true : Bool) = false := hInterface
+  exact Bool.noConfusion hTrace
+
+theorem e15_g4b_e15_obligations_do_not_imply_observation_correspondence :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g4bChannel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ContractDomainComplete causeable dep represents ∧
+      ContractRepresentationSound covered represents mediated ∧
+      ¬ MediatedAGObservationCorrespondence A s mediated := by
+  exact ⟨
+    g4bDependency,
+    g4bTrace,
+    g4bAssumption,
+    g4bSystem,
+    g4bCauseable,
+    g4bDep,
+    g4bCovered,
+    g4bRepresents,
+    g4bMediated,
+    e15_g4b_e15_obligations_hold.1,
+    e15_g4b_e15_obligations_hold.2.1,
+    e15_g4b_e15_obligations_hold.2.2,
+    e15_g4b_observation_correspondence_fails⟩
+
+end E15CausalCoverageContractEquivalence
+end GRBS
