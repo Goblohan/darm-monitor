@@ -357,4 +357,306 @@ theorem darm_structure_requires_semantic_adequacy :
     · intro h
       exact Bool.noConfusion h
 
+/--
+R20-J1: semantic causal-domain coverage.
+
+A causeable semantic transition is covered when some relevant realized
+dependency has exactly that source and target and is therefore an actual
+boundary-mediated semantic transition.
+
+This isolates causal-domain coverage from realization faithfulness and
+discharge adequacy.
+-/
+abbrev SemanticCauseableTransition (State : Type) :=
+  State → State → Prop
+
+def RelevantRealizationCausalCoverage
+    {D : Type}
+    (S : SemanticSystem)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (relevant : SemanticDependency D S.State → Prop)
+    (causeable : SemanticCauseableTransition S.State) : Prop :=
+  ∀ x y,
+    causeable x y →
+    ∃ d,
+      relevant (realize d) ∧
+      (realize d).source = x ∧
+      (realize d).target = y
+
+def SemanticMediatedCausalCoverage
+    {D : Type}
+    (S : SemanticSystem)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization D S)
+    (relevant : SemanticDependency D S.State → Prop)
+    (causeable : SemanticCauseableTransition S.State) : Prop :=
+  ∀ x y,
+    causeable x y →
+    ∃ d,
+      relevant (realize d) ∧
+      BoundaryMediatedStep S B
+        (realize d).source
+        (realize d).target ∧
+      (realize d).source = x ∧
+      (realize d).target = y
+
+/--
+R20-J1:
+Relevant realization causal-domain coverage plus transition adequacy
+implies causal coverage by boundary-mediated semantic steps.
+-/
+theorem relevant_realization_causal_coverage_plus_transition_adequacy_implies_semantic_mediated_causal_coverage :
+    ∀
+      {D : Type}
+      (S : SemanticSystem)
+      (B : SemanticBoundary S)
+      (realize : SemanticRealization D S)
+      (relevant : SemanticDependency D S.State → Prop)
+      (causeable : SemanticCauseableTransition S.State),
+      RelevantRealizationCausalCoverage
+        S B realize relevant causeable →
+      RelevantRealizationsTransitionAdequate
+        S B realize relevant →
+      SemanticMediatedCausalCoverage
+        S B realize relevant causeable := by
+  intro D S B realize relevant causeable
+  intro hCoverage hTransition
+  intro x y hCause
+  obtain ⟨d, hRelevant, hSource, hTarget⟩ :=
+    hCoverage x y hCause
+  have hStep :
+      BoundaryMediatedStep S B
+        (realize d).source
+        (realize d).target :=
+    hTransition d hRelevant
+  exact ⟨d, hRelevant, hStep, hSource, hTarget⟩
+
+
+/--
+R20-J2 witness:
+semantic realization adequacy does not imply causal-domain coverage.
+
+The model is non-vacuous. A relevant realized dependency exists and is
+transition-adequate, but the causeable domain contains an additional
+source/target transition for which no relevant realization exists.
+-/
+theorem semantic_realization_adequacy_does_not_imply_relevant_realization_causal_coverage :
+    ∃
+      (D State : Type)
+      (S : SemanticSystem)
+      (G : SemanticGuarantee S)
+      (B : SemanticBoundary S)
+      (realize : SemanticRealization D S)
+      (relevant : SemanticDependency D S.State → Prop)
+      (discharge : D → Prop)
+      (causeable : SemanticCauseableTransition S.State),
+      SemanticRealizationAdequate S G B realize relevant discharge ∧
+      ¬ RelevantRealizationCausalCoverage
+        S B realize relevant causeable := by
+  let D : Type := Unit
+  let State : Type := Bool
+
+  let S : SemanticSystem :=
+    { State := State
+      Step := fun x y => x = false ∧ y = false }
+
+  let G : SemanticGuarantee S :=
+    { property := fun _ => True }
+
+  let B : SemanticBoundary S :=
+    { mediated := fun x y => x = false ∧ y = false }
+
+  let realize : SemanticRealization D S :=
+    fun _ =>
+      { dependency := ()
+        source := false
+        target := false }
+
+  let relevant : SemanticDependency D S.State → Prop :=
+    fun d => d.source = false ∧ d.target = false
+
+  let discharge : D → Prop :=
+    fun _ => True
+
+  let causeable : SemanticCauseableTransition S.State :=
+    fun x y => x = false ∧ y = true
+
+  have hFaithful : RealizationFaithful realize := by
+    intro d
+    rfl
+
+  have hTransition :
+      RelevantRealizationsTransitionAdequate
+        S B realize relevant := by
+    intro d hRelevant
+    unfold RealizationTransitionAdequate BoundaryMediatedStep
+    constructor
+    · constructor <;> rfl
+    · constructor <;> rfl
+
+  have hDischarge :
+      RealizationDischargeAdequate S G B realize discharge := by
+    intro d hDischarge hMediated hSource
+    trivial
+
+  have hAdequate :
+      SemanticRealizationAdequate S G B realize relevant discharge :=
+    ⟨hFaithful, hTransition, hDischarge⟩
+
+  have hNotCoverage :
+      ¬ RelevantRealizationCausalCoverage
+        S B realize relevant causeable := by
+    intro hCoverage
+    obtain ⟨d, hRelevant, hSource, hTarget⟩ :=
+      hCoverage false true (by
+        constructor <;> rfl)
+    have hTargetFalse : (realize d).target = false := by
+      rfl
+    have : true = false := by
+      exact hTarget.symm.trans hTargetFalse
+    cases this
+
+  exact ⟨D, State, S, G, B, realize, relevant, discharge, causeable,
+    hAdequate, hNotCoverage⟩
+
+/--
+R20-J3: causal-domain coverage plus semantic discharge adequacy lifts
+semantic source safety to causeable target safety.
+
+The causal-domain coverage obligation identifies a relevant realization for
+each causeable transition. Discharge coverage then ensures that the selected
+realization is actually discharged, while source and target correspondence
+connect the realized transition back to the causeable transition.
+-/
+theorem relevant_causal_coverage_plus_discharge_coverage_implies_causeable_safety :
+    ∀
+      {D : Type}
+      (S : SemanticSystem)
+      (G : SemanticGuarantee S)
+      (B : SemanticBoundary S)
+      (realize : SemanticRealization D S)
+      (relevant : SemanticDependency D S.State → Prop)
+      (discharge : D → Prop)
+      (causeable : SemanticCauseableTransition S.State),
+      RelevantRealizationCausalCoverage
+        S B realize relevant causeable →
+      RelevantRealizationsTransitionAdequate
+        S B realize relevant →
+      RealizationDischargeAdequate
+        S G B realize discharge →
+      (∀ d,
+        relevant (realize d) →
+        discharge d) →
+      ∀ x y,
+        causeable x y →
+        (∀ d,
+          relevant (realize d) →
+          (realize d).source = x →
+          G.property x →
+          G.property (realize d).source) →
+        (∀ d,
+          relevant (realize d) →
+          (realize d).target = y →
+          G.property (realize d).target →
+          G.property y) →
+        G.property x →
+        G.property y := by
+  intro D S G B realize relevant discharge causeable
+  intro hCoverage hTransition hDischarge hDischargeCoverage
+  intro x y hCause hSourceCorrespondence hTargetCorrespondence hSafeSource
+  obtain ⟨d, hRelevant, hSource, hTarget⟩ :=
+    hCoverage x y hCause
+  have hDischargeD : discharge d :=
+    hDischargeCoverage d hRelevant
+  have hRealizedSource : G.property (realize d).source :=
+    hSourceCorrespondence d hRelevant hSource hSafeSource
+  have hMediated :
+      BoundaryMediatedStep S B
+        (realize d).source
+        (realize d).target :=
+    hTransition d hRelevant
+  have hRealizedTarget :
+      G.property (realize d).target :=
+    hDischarge d hDischargeD hMediated hRealizedSource
+  exact hTargetCorrespondence d hRelevant hTarget hRealizedTarget
+
+/--
+R20-J4: causal-domain coverage does not imply semantic realization
+adequacy.
+
+The causeable transition is fully represented by a relevant realization, so
+causal-domain coverage holds. However, the realized transition is not an
+actual boundary-mediated semantic step, so realization adequacy fails.
+-/
+theorem relevant_realization_causal_coverage_does_not_imply_semantic_realization_adequacy :
+    ∃
+      (D State : Type)
+      (S : SemanticSystem)
+      (G : SemanticGuarantee S)
+      (B : SemanticBoundary S)
+      (realize : SemanticRealization D S)
+      (relevant : SemanticDependency D S.State → Prop)
+      (discharge : D → Prop)
+      (causeable : SemanticCauseableTransition S.State),
+      RelevantRealizationCausalCoverage
+        S B realize relevant causeable ∧
+      ¬ SemanticRealizationAdequate
+        S G B realize relevant discharge := by
+  let D : Type := Unit
+  let State : Type := Bool
+
+  let S : SemanticSystem :=
+    { State := State
+      Step := fun _ _ => False }
+
+  let G : SemanticGuarantee S :=
+    { property := fun _ => True }
+
+  let B : SemanticBoundary S :=
+    { mediated := fun x y => x = false ∧ y = true }
+
+  let realize : SemanticRealization D S :=
+    fun _ =>
+      { dependency := ()
+        source := false
+        target := true }
+
+  let relevant : SemanticDependency D S.State → Prop :=
+    fun _ => True
+
+  let discharge : D → Prop :=
+    fun _ => True
+
+  let causeable : SemanticCauseableTransition S.State :=
+    fun x y => x = false ∧ y = true
+
+  have hCoverage :
+      RelevantRealizationCausalCoverage
+        S B realize relevant causeable := by
+    intro x y hCause
+    obtain ⟨hx, hy⟩ := hCause
+    refine ⟨(), ?_, ?_, ?_⟩
+    · trivial
+    · simpa [realize] using hx.symm
+    · simpa [realize] using hy.symm
+
+  have hNotAdequate :
+      ¬ SemanticRealizationAdequate
+        S G B realize relevant discharge := by
+    intro hAdequate
+    rcases hAdequate with ⟨hFaithful, hTransition, hDischarge⟩
+    have hRelevant : relevant (realize ()) := by
+      trivial
+    have hStep :
+        BoundaryMediatedStep S B
+          (realize ()).source
+          (realize ()).target :=
+      hTransition () hRelevant
+    unfold BoundaryMediatedStep at hStep
+    exact hStep.1
+
+  exact ⟨D, State, S, G, B, realize, relevant, discharge,
+    causeable, hCoverage, hNotAdequate⟩
+
 end GRBS.R20DARMToSemanticCorrespondence
