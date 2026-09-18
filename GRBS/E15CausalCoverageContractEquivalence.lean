@@ -1723,5 +1723,131 @@ theorem e15_g5c_obligations_without_representation_soundness_do_not_imply_ag :
     e15_g5c_representation_soundness_fails,
     e15_g5c_ag_causeable_coverage_fails⟩
 
+
+def g5dTrace : Type := Bool
+def g5dChannel : Type := Unit
+def g5dDependency : Type := Unit
+
+def g5dAssumption : GRBS.AGBypass.AGAssumption :=
+  fun _ => True
+
+def g5dSystem : GRBS.AGBypass.System g5dTrace g5dChannel :=
+  { interface := fun _ => True
+    interfaceTraces := fun _ _ => False
+    physicalStep := fun _ _ => False
+    cov := fun _ => True }
+
+def g5dCauseable :
+    GRBS.E13CausalSemanticCorrespondence.CauseableTransition g5dTrace :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+def g5dDep : g5dDependency → Prop :=
+  fun _ => True
+
+def g5dCovered : g5dDependency → Prop :=
+  fun _ => True
+
+def g5dRepresents :
+    g5dDependency → g5dTrace → g5dTrace → Prop :=
+  fun _ s0 s1 => s0 = false ∧ s1 = true
+
+def g5dMediated : g5dTrace → g5dTrace → Prop :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+theorem e15_g5d_contract_coverage :
+    R8RichContractSeparation.R8e.ContractCoverage
+      g5dCovered
+      g5dDep := by
+  intro d hDep
+  trivial
+
+theorem e15_g5d_domain_completeness :
+    ContractDomainComplete
+      g5dCauseable
+      g5dDep
+      g5dRepresents := by
+  intro s0 s1 hCause
+  exact ⟨(), trivial, hCause⟩
+
+theorem e15_g5d_representation_soundness :
+    ContractRepresentationSound
+      g5dCovered
+      g5dRepresents
+      g5dMediated := by
+  intro d hCovered s0 s1 hRepresents
+  exact hRepresents
+
+theorem e15_g5d_observation_correspondence_fails :
+    ¬ MediatedAGObservationCorrespondence
+      g5dAssumption
+      g5dSystem
+      g5dMediated := by
+  intro hObservation
+  have hMediated : g5dMediated false true := by
+    constructor <;> rfl
+  have hTrace :=
+    hObservation
+      false
+      true
+      hMediated
+      (fun _ : GRBS.AGBypass.Action => False)
+      (by
+        intro a h
+        exact False.elim h)
+      trivial
+  simpa [g5dSystem] using hTrace
+
+theorem e15_g5d_ag_causeable_coverage_fails :
+    ¬ GRBS.E14AGContractComparison.AGCauseableCoverage
+      g5dAssumption
+      g5dSystem
+      g5dCauseable := by
+  intro hCoverage
+  have hCause : g5dCauseable false true := by
+    constructor <;> rfl
+  have hTrace :=
+    hCoverage
+      false
+      true
+      hCause
+      (fun _ : GRBS.AGBypass.Action => False)
+      (by
+        intro a h
+        exact False.elim h)
+      trivial
+  simpa [g5dSystem] using hTrace
+
+theorem e15_g5d_obligations_without_observation_correspondence_do_not_imply_ag :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g5dChannel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ContractDomainComplete causeable dep represents ∧
+      ContractRepresentationSound covered represents mediated ∧
+      ¬ MediatedAGObservationCorrespondence A s mediated ∧
+      ¬ GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable := by
+  exact ⟨
+    g5dDependency,
+    g5dTrace,
+    g5dAssumption,
+    g5dSystem,
+    g5dCauseable,
+    g5dDep,
+    g5dCovered,
+    g5dRepresents,
+    g5dMediated,
+    e15_g5d_contract_coverage,
+    e15_g5d_domain_completeness,
+    e15_g5d_representation_soundness,
+    e15_g5d_observation_correspondence_fails,
+    e15_g5d_ag_causeable_coverage_fails⟩
+
 end E15CausalCoverageContractEquivalence
 end GRBS
