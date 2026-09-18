@@ -367,5 +367,61 @@ theorem e15_f2_domain_linkage_does_not_imply_e13_complete_mediation :
     exact Bool.noConfusion hMediated
 
 
+/--
+E15-F3:
+Mediated causal coverage does not by itself imply E15 contract-domain
+completeness.
+
+A causeable transition is mediated, but the contract dependency domain has no
+dependency representing that transition. Thus causal coverage holds while the
+explicit linkage from the causeable domain into the contract representation
+domain fails.
+-/
+theorem e15_f3_causal_coverage_does_not_imply_domain_completeness :
+    ∃
+      (Access State : Type)
+      (causeable : CauseableTransition State)
+      (represents : Represents Access State)
+      (mediated : AccessMediated Access State),
+      MediatedCausalCoverage
+        causeable
+        (AccessMediatedTransition represents mediated) ∧
+      ¬ ContractDomainComplete
+        causeable
+        (fun _ : Access => True)
+        represents := by
+  let Access := Unit
+  let State := Bool
+
+  let represents : Represents Access State :=
+    fun _ s s' =>
+      s = false ∧ s' = false
+
+  let mediated : AccessMediated Access State :=
+    fun _ _ _ => True
+
+  let causeable : CauseableTransition State :=
+    fun s s' =>
+      s = false ∧ s' = true
+
+  refine ⟨Access, State, causeable, represents, mediated, ?_, ?_⟩
+
+  · intro s s' hCause
+    have hFalse : s = false := hCause.1
+    have hTrue : s' = true := hCause.2
+    have hRepresents : represents () false false := by
+      constructor <;> rfl
+    have hMediated : mediated () false false := trivial
+    exact ⟨(), hRepresents, hMediated⟩
+
+  · intro hComplete
+    have hCause : causeable false true := by
+      constructor <;> rfl
+    obtain ⟨d, hDep, hRepresents⟩ :=
+      hComplete false true hCause
+    have hTarget : (true : Bool) = false := hRepresents.2
+    exact Bool.noConfusion hTarget
+
+
 end E15CausalCoverageContractEquivalence
 end GRBS
