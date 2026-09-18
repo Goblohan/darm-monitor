@@ -154,5 +154,127 @@ theorem contract_coverage_plus_domain_linkage_implies_causal_coverage
   rcases hComplete s0 s1 hCause with ⟨d, hDep, hRepresents⟩
   exact hSound d (hCoverage d hDep) s0 s1 hRepresents
 
+
+/--
+E15-D:
+Domain completeness is independently necessary.
+
+Contract coverage and representation soundness can both hold while
+causal coverage fails if an actual causeable transition has no
+corresponding declared dependency.
+-/
+def dDeclaredDependency : Type := Bool
+
+def dDep
+    (d : dDeclaredDependency) : Prop :=
+  d = true
+
+def dCovered
+    (d : dDeclaredDependency) : Prop :=
+  d = true
+
+def dRepresents
+    (d : dDeclaredDependency)
+    (s0 s1 : Bool) : Prop :=
+  d = true ∧ s0 = true ∧ s1 = true
+
+def dCauseable
+    (s0 s1 : Bool) : Prop :=
+  s0 = false ∧ s1 = true
+
+def dMediated
+    (s0 s1 : Bool) : Prop :=
+  s0 = true ∧ s1 = true
+
+theorem e15_d_contract_coverage :
+    R8RichContractSeparation.R8e.ContractCoverage dCovered dDep := by
+  intro d hd
+  exact hd
+
+theorem e15_d_representation_soundness :
+    ContractRepresentationSound dCovered dRepresents dMediated := by
+  intro d hd s0 s1 hRep
+  rcases hRep with ⟨_, hs0, hs1⟩
+  exact ⟨hs0, hs1⟩
+
+theorem e15_d_domain_completeness_fails :
+    ¬ ContractDomainComplete dCauseable dDep dRepresents := by
+  intro h
+  have hComplete := h false true (by constructor <;> rfl)
+  rcases hComplete with ⟨d, hd, hRep⟩
+  rcases hRep with ⟨_, hs0, _⟩
+  exact Bool.noConfusion hs0
+
+theorem e15_d_causal_coverage_fails :
+    ¬ MediatedCausalCoverage dCauseable dMediated := by
+  intro h
+  have hCause : dCauseable false true := by
+    constructor <;> rfl
+  have hMed := h false true hCause
+  rcases hMed with ⟨hs0, _⟩
+  exact Bool.noConfusion hs0
+
+
+/--
+E15-E:
+Representation soundness is independently necessary.
+
+Contract coverage and domain completeness can both hold while causal
+coverage fails if a covered dependency represents a transition that
+is not actually mediated.
+-/
+def eDeclaredDependency : Type := Bool
+
+def eDep
+    (_d : eDeclaredDependency) : Prop :=
+  True
+
+def eCovered
+    (_d : eDeclaredDependency) : Prop :=
+  True
+
+def eRepresents
+    (_d : eDeclaredDependency)
+    (s0 s1 : Bool) : Prop :=
+  s0 = false ∧ s1 = true
+
+def eCauseable
+    (s0 s1 : Bool) : Prop :=
+  s0 = false ∧ s1 = true
+
+def eMediated
+    (s0 s1 : Bool) : Prop :=
+  s0 = true ∧ s1 = true
+
+theorem e15_e_contract_coverage :
+    R8RichContractSeparation.R8e.ContractCoverage eCovered eDep := by
+  intro d hd
+  trivial
+
+theorem e15_e_domain_completeness :
+    ContractDomainComplete eCauseable eDep eRepresents := by
+  intro s0 s1 hCause
+  refine ⟨false, ?_, hCause⟩
+  trivial
+
+theorem e15_e_representation_soundness_fails :
+    ¬ ContractRepresentationSound eCovered eRepresents eMediated := by
+  intro h
+  have hSound := h false trivial false true
+  have hRep : eRepresents false false true := by
+    constructor <;> rfl
+  have hMed := hSound hRep
+  rcases hMed with ⟨hs0, _⟩
+  exact Bool.noConfusion hs0
+
+theorem e15_e_causal_coverage_fails :
+    ¬ MediatedCausalCoverage eCauseable eMediated := by
+  intro h
+  have hCause : eCauseable false true := by
+    constructor <;> rfl
+  have hMed := h false true hCause
+  rcases hMed with ⟨hs0, _⟩
+  exact Bool.noConfusion hs0
+
 end E15CausalCoverageContractEquivalence
 end GRBS
