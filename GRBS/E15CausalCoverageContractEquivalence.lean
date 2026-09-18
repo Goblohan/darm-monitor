@@ -1182,3 +1182,63 @@ theorem e15_g3d_e15_obligations_do_not_imply_ag_causeable_coverage :
 
 end E15CausalCoverageContractEquivalence
 end GRBS
+
+namespace GRBS
+namespace E15CausalCoverageContractEquivalence
+
+/-
+E15-G4A:
+Factor the E15-to-AG trace bridge into an independent observation
+correspondence.
+
+The correspondence says that every mediated transition is observable
+as the corresponding endpoint in the AG trace model, under the AG
+assumption and admissibility conditions.
+
+This separates:
+  E15 contract/domain reasoning
+from:
+  semantic transition-to-observation correspondence.
+-/
+
+def MediatedAGObservationCorrespondence
+    {Trace Channel : Type}
+    (A : GRBS.AGBypass.AGAssumption)
+    (s : GRBS.AGBypass.System Trace Channel)
+    (mediated : Trace → Trace → Prop) : Prop :=
+  ∀ s0 s1,
+    mediated s0 s1 →
+    ∀ e : GRBS.AGBypass.Environment,
+      GRBS.AGBypass.Admissible s e →
+      A e →
+      s.interfaceTraces e s1
+
+theorem e15_g4a_observation_correspondence_implies_ag_causeable_coverage :
+    ∀
+      {Trace Channel D : Type}
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System Trace Channel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition Trace)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → Trace → Trace → Prop)
+      (mediated : Trace → Trace → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep →
+      ContractDomainComplete causeable dep represents →
+      ContractRepresentationSound covered represents mediated →
+      MediatedAGObservationCorrespondence A s mediated →
+      GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable := by
+  intro Trace Channel D A s causeable dep covered represents mediated
+  intro hCoverage hComplete hSound hObservation
+  intro s0 s1 hCause e hAdmissible hA
+  obtain ⟨d, hDep, hRepresents⟩ :=
+    hComplete s0 s1 hCause
+  have hCovered : covered d :=
+    hCoverage d hDep
+  have hMediated : mediated s0 s1 :=
+    hSound d hCovered s0 s1 hRepresents
+  exact hObservation s0 s1 hMediated e hAdmissible hA
+
+end E15CausalCoverageContractEquivalence
+end GRBS
