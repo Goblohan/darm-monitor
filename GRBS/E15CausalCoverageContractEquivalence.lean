@@ -370,17 +370,18 @@ theorem e15_f2_domain_linkage_does_not_imply_e13_complete_mediation :
 /--
 E15-F3:
 Mediated causal coverage does not by itself imply E15 contract-domain
-completeness.
+completeness when the declared dependency predicate is explicit.
 
-A causeable transition is mediated, but the contract dependency domain has no
-dependency representing that transition. Thus causal coverage holds while the
-explicit linkage from the causeable domain into the contract representation
-domain fails.
+A causeable transition has a mediated representation, but the dependency
+representing that transition is not declared by the contract. Thus causal
+coverage holds while the linkage from the actual causeable domain into the
+declared contract dependency domain fails.
 -/
 theorem e15_f3_causal_coverage_does_not_imply_domain_completeness :
     ∃
       (Access State : Type)
       (causeable : CauseableTransition State)
+      (dep : Access → Prop)
       (represents : Represents Access State)
       (mediated : AccessMediated Access State),
       MediatedCausalCoverage
@@ -388,39 +389,49 @@ theorem e15_f3_causal_coverage_does_not_imply_domain_completeness :
         (AccessMediatedTransition represents mediated) ∧
       ¬ ContractDomainComplete
         causeable
-        (fun _ : Access => True)
+        dep
         represents := by
-  let Access := Unit
+  let Access := Bool
   let State := Bool
 
+  let dep : Access → Prop :=
+    fun a => a = false
+
   let represents : Represents Access State :=
-    fun _ s s' =>
-      s = false ∧ s' = false
+    fun a s s' =>
+      a = true ∧ s = false ∧ s' = true
 
   let mediated : AccessMediated Access State :=
-    fun _ _ _ => True
+    fun a _ _ => a = true
 
   let causeable : CauseableTransition State :=
     fun s s' =>
       s = false ∧ s' = true
 
-  refine ⟨Access, State, causeable, represents, mediated, ?_, ?_⟩
+  refine ⟨Access, State, causeable, dep, represents, mediated, ?_, ?_⟩
 
   · intro s s' hCause
-    have hFalse : s = false := hCause.1
-    have hTrue : s' = true := hCause.2
-    have hRepresents : represents () false false := by
-      constructor <;> rfl
-    have hMediated : mediated () false false := trivial
-    exact ⟨(), hRepresents, hMediated⟩
+    obtain ⟨hs, hs'⟩ := hCause
+    subst s
+    subst s'
+    have hRepresents : represents true false true := by
+      constructor
+      · rfl
+      · constructor
+        · rfl
+        · rfl
+    have hMediated : mediated true false true := by
+      rfl
+    exact ⟨true, hRepresents, hMediated⟩
 
   · intro hComplete
     have hCause : causeable false true := by
       constructor <;> rfl
     obtain ⟨d, hDep, hRepresents⟩ :=
       hComplete false true hCause
-    have hTarget : (true : Bool) = false := hRepresents.2
-    exact Bool.noConfusion hTarget
+    have hDepFalse : d = false := hDep
+    have hRepTrue : d = true := hRepresents.1
+    exact Bool.noConfusion (hDepFalse.symm.trans hRepTrue)
 
 
 end E15CausalCoverageContractEquivalence
