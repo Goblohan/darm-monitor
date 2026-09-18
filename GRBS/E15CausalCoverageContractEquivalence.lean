@@ -2045,5 +2045,210 @@ theorem e15_g5_deletion_minimality :
       without_observation_correspondence :=
         e15_g5d_obligations_without_observation_correspondence_do_not_imply_ag }
 
+namespace E15CausalCoverageContractEquivalence
+
+/-
+E15-G6:
+Test whether the four-obligation assurance-transfer structure contains
+a deeper causal-domain correspondence.
+
+Observation correspondence is deliberately excluded from the composite
+condition. It remains an AG-facing semantic obligation.
+-/
+
+def CausalAssuranceCorrespondence
+    {State D : Type}
+    (causeable :
+      GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+    (dep : D → Prop)
+    (covered : D → Prop)
+    (represents : D → State → State → Prop)
+    (mediated : State → State → Prop) : Prop :=
+  ∀ s0 s1,
+    causeable s0 s1 →
+    ∃ d,
+      dep d ∧
+      covered d ∧
+      represents d s0 s1 ∧
+      mediated s0 s1
+
+theorem e15_g6a_contract_obligations_imply_causal_assurance_correspondence :
+    ∀
+      {State D : Type}
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep →
+      ContractDomainComplete causeable dep represents →
+      ContractRepresentationSound covered represents mediated →
+      CausalAssuranceCorrespondence
+        causeable dep covered represents mediated := by
+  intro State D causeable dep covered represents mediated
+  intro hCoverage hComplete hSound
+  intro s0 s1 hCause
+  obtain ⟨d, hDep, hRepresents⟩ :=
+    hComplete s0 s1 hCause
+  have hCovered : covered d :=
+    hCoverage d hDep
+  have hMediated : mediated s0 s1 :=
+    hSound d hCovered s0 s1 hRepresents
+  exact ⟨d, hDep, hCovered, hRepresents, hMediated⟩
+
+/-
+E15-G6B1:
+Causal-assurance correspondence implies domain completeness.
+-/
+
+theorem e15_g6b1_causal_assurance_correspondence_implies_domain_completeness :
+    ∀
+      {State D : Type}
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      CausalAssuranceCorrespondence
+        causeable dep covered represents mediated →
+      ContractDomainComplete causeable dep represents := by
+  intro State D causeable dep covered represents mediated
+  intro hCorrespondence s0 s1 hCause
+  obtain ⟨d, hDep, hCovered, hRepresents, hMediated⟩ :=
+    hCorrespondence s0 s1 hCause
+  exact ⟨d, hDep, hRepresents⟩
+
+/-
+E15-G6B2:
+Causal-assurance correspondence does not imply global contract coverage.
+-/
+
+def g6b2State : Type := Bool
+def g6b2Dependency : Type := Bool
+
+def g6b2Causeable :
+    GRBS.E13CausalSemanticCorrespondence.CauseableTransition g6b2State :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+def g6b2Dep : g6b2Dependency → Prop :=
+  fun _ => True
+
+def g6b2Covered : g6b2Dependency → Prop :=
+  fun d => d = false
+
+def g6b2Represents :
+    g6b2Dependency → g6b2State → g6b2State → Prop :=
+  fun d s0 s1 =>
+    d = false ∧ s0 = false ∧ s1 = true
+
+def g6b2Mediated : g6b2State → g6b2State → Prop :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+theorem e15_g6b2_causal_assurance_correspondence_holds :
+    CausalAssuranceCorrespondence
+      g6b2Causeable
+      g6b2Dep
+      g6b2Covered
+      g6b2Represents
+      g6b2Mediated := by
+  intro s0 s1 hCause
+  rcases hCause with ⟨hs0, hs1⟩
+  refine ⟨false, ?_, ?_, ?_, ?_⟩
+  · trivial
+  · rfl
+  · exact ⟨rfl, hs0, hs1⟩
+  · exact ⟨hs0, hs1⟩
+
+theorem e15_g6b2_contract_coverage_fails :
+    ¬ R8RichContractSeparation.R8e.ContractCoverage
+        g6b2Covered g6b2Dep := by
+  intro hCoverage
+  have hCovered : g6b2Covered true :=
+    hCoverage true trivial
+  exact hCovered.elim
+
+theorem e15_g6b2_causal_assurance_does_not_imply_contract_coverage :
+    CausalAssuranceCorrespondence
+        g6b2Causeable
+        g6b2Dep
+        g6b2Covered
+        g6b2Represents
+        g6b2Mediated ∧
+    ¬ R8RichContractSeparation.R8e.ContractCoverage
+        g6b2Covered g6b2Dep := by
+  exact
+    ⟨e15_g6b2_causal_assurance_correspondence_holds,
+     e15_g6b2_contract_coverage_fails⟩
+
+/-
+E15-G6B3:
+Causal-assurance correspondence does not imply global representation
+soundness.
+-/
+
+def g6b3State : Type := Bool
+def g6b3Dependency : Type := Bool
+
+def g6b3Causeable :
+    GRBS.E13CausalSemanticCorrespondence.CauseableTransition g6b3State :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+def g6b3Dep : g6b3Dependency → Prop :=
+  fun _ => True
+
+def g6b3Covered : g6b3Dependency → Prop :=
+  fun _ => True
+
+def g6b3Represents :
+    g6b3Dependency → g6b3State → g6b3State → Prop :=
+  fun d s0 s1 =>
+    (d = false ∧ s0 = false ∧ s1 = true) ∨
+    (d = true ∧ s0 = false ∧ s1 = false)
+
+def g6b3Mediated : g6b3State → g6b3State → Prop :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+theorem e15_g6b3_causal_assurance_correspondence_holds :
+    CausalAssuranceCorrespondence
+      g6b3Causeable
+      g6b3Dep
+      g6b3Covered
+      g6b3Represents
+      g6b3Mediated := by
+  intro s0 s1 hCause
+  rcases hCause with ⟨hs0, hs1⟩
+  refine ⟨false, ?_, ?_, ?_, ?_⟩
+  · trivial
+  · trivial
+  · exact Or.inl ⟨rfl, hs0, hs1⟩
+  · exact ⟨hs0, hs1⟩
+
+theorem e15_g6b3_representation_soundness_fails :
+    ¬ ContractRepresentationSound
+        g6b3Covered
+        g6b3Represents
+        g6b3Mediated := by
+  intro hSound
+  have hMediated : g6b3Mediated false false :=
+    hSound true trivial false false (Or.inr ⟨rfl, rfl, rfl⟩)
+  exact hMediated.2 rfl
+
+theorem e15_g6b3_causal_assurance_does_not_imply_representation_soundness :
+    CausalAssuranceCorrespondence
+        g6b3Causeable
+        g6b3Dep
+        g6b3Covered
+        g6b3Represents
+        g6b3Mediated ∧
+    ¬ ContractRepresentationSound
+        g6b3Covered
+        g6b3Represents
+        g6b3Mediated := by
+  exact
+    ⟨e15_g6b3_causal_assurance_correspondence_holds,
+     e15_g6b3_representation_soundness_fails⟩
+
 end E15CausalCoverageContractEquivalence
 end GRBS
