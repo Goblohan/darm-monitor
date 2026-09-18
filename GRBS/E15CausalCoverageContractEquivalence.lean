@@ -102,5 +102,57 @@ theorem e15_b_causal_coverage_fails :
   have hMed := h false true hCause
   exact hMed
 
+/--
+E15-C:
+Ordinary contract coverage recovers causal coverage when two additional
+domain-linkage obligations are supplied:
+
+1. every actual causeable transition is represented by a declared
+   dependency; and
+2. every covered declared dependency mediates every transition that it
+   represents.
+
+Thus the missing assurance step is not the coverage predicate itself,
+but the correspondence between the declared dependency domain and the
+actual causeable-effect domain.
+-/
+def ContractDomainComplete
+    {State D : Type}
+    (causeable : CauseableTransition State)
+    (dep : D → Prop)
+    (represents : D → State → State → Prop) : Prop :=
+  ∀ s0 s1,
+    causeable s0 s1 →
+    ∃ d, dep d ∧ represents d s0 s1
+
+def ContractRepresentationSound
+    {State D : Type}
+    (covered : D → Prop)
+    (represents : D → State → State → Prop)
+    (mediated : State → State → Prop) : Prop :=
+  ∀ d,
+    covered d →
+    ∀ s0 s1,
+      represents d s0 s1 →
+      mediated s0 s1
+
+theorem contract_coverage_plus_domain_linkage_implies_causal_coverage
+    {State D : Type}
+    (causeable : CauseableTransition State)
+    (mediated : State → State → Prop)
+    (dep : D → Prop)
+    (covered : D → Prop)
+    (represents : D → State → State → Prop)
+    (hCoverage :
+      R8RichContractSeparation.R8e.ContractCoverage covered dep)
+    (hComplete :
+      ContractDomainComplete causeable dep represents)
+    (hSound :
+      ContractRepresentationSound covered represents mediated) :
+    MediatedCausalCoverage causeable mediated := by
+  intro s0 s1 hCause
+  rcases hComplete s0 s1 hCause with ⟨d, hDep, hRepresents⟩
+  exact hSound d (hCoverage d hDep) s0 s1 hRepresents
+
 end E15CausalCoverageContractEquivalence
 end GRBS
