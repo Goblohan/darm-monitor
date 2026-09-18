@@ -1384,5 +1384,99 @@ theorem e15_g4b_e15_obligations_do_not_imply_observation_correspondence :
     e15_g4b_e15_obligations_hold.2.2,
     e15_g4b_observation_correspondence_fails⟩
 
+/--
+E15-G4C:
+Consolidated assurance-transfer theorem.
+
+The three E15 contract obligations, together with the independent
+mediated-to-AG observation correspondence, jointly imply
+AG causeable coverage.
+
+This packages the preceding G3C/G4A decomposition into a single
+assurance-transfer condition.
+-/
+theorem e15_g4c_consolidated_assurance_transfer :
+    ∀
+      {Trace Channel D : Type}
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System Trace Channel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition Trace)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → Trace → Trace → Prop)
+      (mediated : Trace → Trace → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep →
+      ContractDomainComplete causeable dep represents →
+      ContractRepresentationSound covered represents mediated →
+      MediatedAGObservationCorrespondence A s mediated →
+      GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable := by
+  intro Trace Channel D A s causeable dep covered represents mediated
+  intro hCoverage hComplete hSound hObservation
+  intro s0 s1 hCause e hAdmissible hA
+  obtain ⟨d, hDep, hRepresents⟩ :=
+    hComplete s0 s1 hCause
+  have hCovered : covered d :=
+    hCoverage d hDep
+  have hMediated : mediated s0 s1 :=
+    hSound d hCovered s0 s1 hRepresents
+  exact hObservation s0 s1 hMediated e hAdmissible hA
+
+/--
+E15-ATC:
+Explicit assurance-transfer certificate.
+
+The certificate packages the four obligations identified by E15:
+contract coverage, domain completeness, representation soundness, and
+mediated-to-AG observation correspondence.
+
+It is evidence for an assurance transfer, not itself a safety primitive.
+-/
+structure AssuranceTransferObligations
+    {Trace Channel D : Type}
+    (A : GRBS.AGBypass.AGAssumption)
+    (s : GRBS.AGBypass.System Trace Channel)
+    (causeable :
+      GRBS.E13CausalSemanticCorrespondence.CauseableTransition Trace)
+    (dep : D → Prop)
+    (covered : D → Prop)
+    (represents : D → Trace → Trace → Prop)
+    (mediated : Trace → Trace → Prop) : Prop where
+  contract_coverage :
+    R8RichContractSeparation.R8e.ContractCoverage covered dep
+
+  domain_completeness :
+    ContractDomainComplete causeable dep represents
+
+  representation_soundness :
+    ContractRepresentationSound covered represents mediated
+
+  observation_correspondence :
+    MediatedAGObservationCorrespondence A s mediated
+
+/--
+Consume an explicit assurance-transfer certificate to obtain AG
+causeable coverage.
+-/
+theorem assurance_transfer_of_obligations
+    {Trace Channel D : Type}
+    (A : GRBS.AGBypass.AGAssumption)
+    (s : GRBS.AGBypass.System Trace Channel)
+    (causeable :
+      GRBS.E13CausalSemanticCorrespondence.CauseableTransition Trace)
+    (dep : D → Prop)
+    (covered : D → Prop)
+    (represents : D → Trace → Trace → Prop)
+    (mediated : Trace → Trace → Prop)
+    (h :
+      AssuranceTransferObligations
+        A s causeable dep covered represents mediated) :
+    GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable := by
+  exact e15_g4c_consolidated_assurance_transfer
+    A s causeable dep covered represents mediated
+    h.contract_coverage
+    h.domain_completeness
+    h.representation_soundness
+    h.observation_correspondence
 end E15CausalCoverageContractEquivalence
 end GRBS
