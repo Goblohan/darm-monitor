@@ -434,5 +434,70 @@ theorem e15_f3_causal_coverage_does_not_imply_domain_completeness :
     exact Bool.noConfusion (hDepFalse.symm.trans hRepTrue)
 
 
+/--
+E15-F4:
+Contract representation soundness does not by itself imply causal coverage.
+
+The represented contract dependency is internally sound with respect to its
+mediated transition, but the causeable transition lies outside the represented
+domain. Thus representation soundness holds while domain completeness and
+causal coverage both fail.
+-/
+theorem e15_f4_representation_soundness_does_not_imply_causal_coverage :
+    ∃
+      (Access State : Type)
+      (causeable : CauseableTransition State)
+      (dep : Access → Prop)
+      (represents : Represents Access State)
+      (mediated : AccessMediated Access State),
+      ContractRepresentationSound
+        (fun _ : Access => True)
+        represents
+        (AccessMediatedTransition represents mediated) ∧
+      ¬ ContractDomainComplete
+        causeable
+        dep
+        represents ∧
+      ¬ MediatedCausalCoverage
+        causeable
+        (AccessMediatedTransition represents mediated) := by
+  let Access := Unit
+  let State := Bool
+
+  let dep : Access → Prop :=
+    fun _ => True
+
+  let represents : Represents Access State :=
+    fun _ s s' =>
+      s = false ∧ s' = false
+
+  let mediated : AccessMediated Access State :=
+    fun _ _ _ => True
+
+  let causeable : CauseableTransition State :=
+    fun s s' =>
+      s = false ∧ s' = true
+
+  refine ⟨Access, State, causeable, dep, represents, mediated, ?_⟩
+  constructor
+  · intro d hCovered s s' hRepresents
+    exact ⟨d, hRepresents, trivial⟩
+  · constructor
+    · intro hComplete
+      have hCause : causeable false true := by
+        constructor <;> rfl
+      obtain ⟨d, hDep, hRepresents⟩ :=
+        hComplete false true hCause
+      have hTarget : (true : Bool) = false := hRepresents.2
+      exact Bool.noConfusion hTarget
+    · intro hCoverage
+      have hCause : causeable false true := by
+        constructor <;> rfl
+      obtain ⟨d, hRepresents, hMediated⟩ :=
+        hCoverage false true hCause
+      have hTarget : (true : Bool) = false := hRepresents.2
+      exact Bool.noConfusion hTarget
+
+
 end E15CausalCoverageContractEquivalence
 end GRBS
