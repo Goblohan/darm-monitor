@@ -2167,7 +2167,7 @@ theorem e15_g6b2_contract_coverage_fails :
   intro hCoverage
   have hCovered : g6b2Covered true :=
     hCoverage true trivial
-  exact hCovered.elim
+  exact Bool.noConfusion hCovered
 
 theorem e15_g6b2_causal_assurance_does_not_imply_contract_coverage :
     CausalAssuranceCorrespondence
@@ -2181,6 +2181,24 @@ theorem e15_g6b2_causal_assurance_does_not_imply_contract_coverage :
   exact
     ⟨e15_g6b2_causal_assurance_correspondence_holds,
      e15_g6b2_contract_coverage_fails⟩
+
+/-
+E15-G6C:
+Test whether causal-assurance correspondence plus contract coverage
+and representation-domain closure is sufficient for representation soundness.
+-/
+
+def RepresentationDomainClosure
+    {State D : Type}
+    (causeable :
+      GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+    (covered : D → Prop)
+    (represents : D → State → State → Prop) : Prop :=
+  ∀ d,
+    covered d →
+    ∀ s0 s1,
+      represents d s0 s1 →
+      causeable s0 s1
 
 /-
 E15-G6B3:
@@ -2233,7 +2251,7 @@ theorem e15_g6b3_representation_soundness_fails :
   intro hSound
   have hMediated : g6b3Mediated false false :=
     hSound true trivial false false (Or.inr ⟨rfl, rfl, rfl⟩)
-  exact hMediated.2 rfl
+  exact Bool.noConfusion hMediated.2
 
 theorem e15_g6b3_causal_assurance_does_not_imply_representation_soundness :
     CausalAssuranceCorrespondence
@@ -2250,5 +2268,6 @@ theorem e15_g6b3_causal_assurance_does_not_imply_representation_soundness :
     ⟨e15_g6b3_causal_assurance_correspondence_holds,
      e15_g6b3_representation_soundness_fails⟩
 
+end E15CausalCoverageContractEquivalence
 end E15CausalCoverageContractEquivalence
 end GRBS
