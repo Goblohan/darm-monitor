@@ -1606,6 +1606,123 @@ theorem e15_g5a_obligations_without_contract_coverage_do_not_imply_ag :
     e15_g5a_ag_causeable_coverage_fails⟩
 
 
+def g5bTrace : Type := Bool
+def g5bChannel : Type := Unit
+def g5bDependency : Type := Unit
+
+def g5bAssumption : GRBS.AGBypass.AGAssumption :=
+  fun _ => True
+
+def g5bSystem : GRBS.AGBypass.System g5bTrace g5bChannel :=
+  { interface := fun _ => True
+    interfaceTraces := fun _ t => t = true
+    physicalStep := fun _ _ => False
+    cov := fun _ => True }
+
+def g5bCauseable :
+    GRBS.E13CausalSemanticCorrespondence.CauseableTransition g5bTrace :=
+  fun s0 s1 => s0 = false ∧ s1 = false
+
+def g5bDep : g5bDependency → Prop :=
+  fun _ => True
+
+def g5bCovered : g5bDependency → Prop :=
+  fun _ => True
+
+def g5bRepresents :
+    g5bDependency → g5bTrace → g5bTrace → Prop :=
+  fun _ s0 s1 => s0 = true ∧ s1 = true
+
+def g5bMediated : g5bTrace → g5bTrace → Prop :=
+  fun s0 s1 => s0 = true ∧ s1 = true
+
+theorem e15_g5b_contract_coverage :
+    R8RichContractSeparation.R8e.ContractCoverage
+      g5bCovered
+      g5bDep := by
+  intro d hDep
+  trivial
+
+theorem e15_g5b_representation_soundness :
+    ContractRepresentationSound
+      g5bCovered
+      g5bRepresents
+      g5bMediated := by
+  intro d hCovered s0 s1 hRepresents
+  exact hRepresents
+
+theorem e15_g5b_observation_correspondence :
+    MediatedAGObservationCorrespondence
+      g5bAssumption
+      g5bSystem
+      g5bMediated := by
+  intro s0 s1 hMediated e hAdmissible hA
+  exact hMediated.2
+
+theorem e15_g5b_domain_completeness_fails :
+    ¬ ContractDomainComplete
+      g5bCauseable
+      g5bDep
+      g5bRepresents := by
+  intro hComplete
+  obtain ⟨d, hDep, hRepresents⟩ :=
+    hComplete false false (by
+      constructor <;> rfl)
+  exact Bool.noConfusion hRepresents.1
+
+theorem e15_g5b_ag_causeable_coverage_fails :
+    ¬ GRBS.E14AGContractComparison.AGCauseableCoverage
+      g5bAssumption
+      g5bSystem
+      g5bCauseable := by
+  intro hCoverage
+  have hCause : g5bCauseable false false := by
+    constructor <;> rfl
+  have hTrace :=
+    hCoverage
+      false
+      false
+      hCause
+      (fun _ : GRBS.AGBypass.Action => False)
+      (by
+        intro a h
+        exact False.elim h)
+      trivial
+  simpa [g5bSystem] using hTrace
+
+theorem e15_g5b_e15_obligations_do_not_imply_ag_causeable_coverage :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g5bChannel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ContractRepresentationSound covered represents mediated ∧
+      MediatedAGObservationCorrespondence A s mediated ∧
+      ¬ ContractDomainComplete causeable dep represents ∧
+      ¬ GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable := by
+  exact ⟨
+    g5bDependency,
+    g5bTrace,
+    g5bAssumption,
+    g5bSystem,
+    g5bCauseable,
+    g5bDep,
+    g5bCovered,
+    g5bRepresents,
+    g5bMediated,
+    e15_g5b_contract_coverage,
+    e15_g5b_representation_soundness,
+    e15_g5b_observation_correspondence,
+    e15_g5b_domain_completeness_fails,
+    e15_g5b_ag_causeable_coverage_fails⟩
+
+
 def g5cTrace : Type := Bool
 def g5cChannel : Type := Unit
 def g5cDependency : Type := Unit
@@ -1848,6 +1965,85 @@ theorem e15_g5d_obligations_without_observation_correspondence_do_not_imply_ag :
     e15_g5d_representation_soundness,
     e15_g5d_observation_correspondence_fails,
     e15_g5d_ag_causeable_coverage_fails⟩
+
+
+structure E15DeletionMinimalityWitnesses : Prop where
+  without_contract_coverage :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g5aChannel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      ContractDomainComplete causeable dep represents ∧
+      ContractRepresentationSound covered represents mediated ∧
+      MediatedAGObservationCorrespondence A s mediated ∧
+      ¬ R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ¬ GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable
+  without_domain_completeness :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g5bChannel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ContractRepresentationSound covered represents mediated ∧
+      MediatedAGObservationCorrespondence A s mediated ∧
+      ¬ ContractDomainComplete causeable dep represents ∧
+      ¬ GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable
+  without_representation_soundness :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g5cChannel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ContractDomainComplete causeable dep represents ∧
+      MediatedAGObservationCorrespondence A s mediated ∧
+      ¬ ContractRepresentationSound covered represents mediated ∧
+      ¬ GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable
+  without_observation_correspondence :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g5dChannel)
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ContractDomainComplete causeable dep represents ∧
+      ContractRepresentationSound covered represents mediated ∧
+      ¬ MediatedAGObservationCorrespondence A s mediated ∧
+      ¬ GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable
+
+theorem e15_g5_deletion_minimality :
+    E15DeletionMinimalityWitnesses := by
+  exact
+    { without_contract_coverage :=
+        e15_g5a_obligations_without_contract_coverage_do_not_imply_ag
+      without_domain_completeness :=
+        e15_g5b_e15_obligations_do_not_imply_ag_causeable_coverage
+      without_representation_soundness :=
+        e15_g5c_obligations_without_representation_soundness_do_not_imply_ag
+      without_observation_correspondence :=
+        e15_g5d_obligations_without_observation_correspondence_do_not_imply_ag }
 
 end E15CausalCoverageContractEquivalence
 end GRBS
