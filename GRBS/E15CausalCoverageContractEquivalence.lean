@@ -311,5 +311,61 @@ theorem e15_f1_e13_instantiates_domain_linkage
     exact ⟨a, hRepresents, hComplete a s s' hRepresents⟩
 
 
+/--
+E15-F2:
+E15 domain linkage does not recover E13 representation-level complete
+mediation.
+
+A causeable transition has two representations. One is mediated and one is
+not. E15 representation soundness is nevertheless satisfied because it only
+requires some mediated representation for each covered dependency, whereas
+E13 complete mediation requires every representation to be mediated.
+-/
+theorem e15_f2_domain_linkage_does_not_imply_e13_complete_mediation :
+    ∃
+      (Access State : Type)
+      (causeable : CauseableTransition State)
+      (represents : Represents Access State)
+      (mediated : AccessMediated Access State),
+      ContractDomainComplete
+        causeable
+        (fun _ : Access => True)
+        represents ∧
+      ContractRepresentationSound
+        (fun _ : Access => True)
+        represents
+        (AccessMediatedTransition represents mediated) ∧
+      ¬ RepresentationCompleteMediation represents mediated := by
+  let Access := Bool
+  let State := Bool
+
+  let represents : Represents Access State :=
+    fun _ s s' =>
+      s = false ∧ s' = true
+
+  let mediated : AccessMediated Access State :=
+    fun a _ _ => a = true
+
+  let causeable : CauseableTransition State :=
+    fun s s' =>
+      s = false ∧ s' = true
+
+  refine ⟨Access, State, causeable, represents, mediated, ?_, ?_, ?_⟩
+
+  · intro s s' hCause
+    obtain ⟨hs, hs'⟩ := hCause
+    exact ⟨true, trivial, hs, hs'⟩
+
+  · intro a hCovered s s' hRepresents
+    exact ⟨true, hRepresents, rfl⟩
+
+  · intro hComplete
+    have hRepresents : represents false false true := by
+      constructor <;> rfl
+    have hMediated : mediated false false true :=
+      hComplete false false true hRepresents
+    exact Bool.noConfusion hMediated
+
+
 end E15CausalCoverageContractEquivalence
 end GRBS
