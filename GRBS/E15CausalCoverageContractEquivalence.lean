@@ -276,5 +276,40 @@ theorem e15_e_causal_coverage_fails :
   rcases hMed with ⟨hs0, _⟩
   exact Bool.noConfusion hs0
 
+
+/--
+E15-F1:
+The E13 representation construction can instantiate the E15 domain-linkage
+factorization when every access dependency is declared and covered.
+
+E13 complete mediation supplies E15 representation soundness, while
+E13 effect-representation completeness supplies E15 domain completeness.
+-/
+theorem e15_f1_e13_instantiates_domain_linkage
+    {Access State : Type}
+    (causeable : CauseableTransition State)
+    (represents : Represents Access State)
+    (mediated : AccessMediated Access State)
+    (hComplete :
+      RepresentationCompleteMediation represents mediated)
+    (hRepresentation :
+      EffectRepresentationComplete causeable represents) :
+    ContractDomainComplete
+      causeable
+      (fun _ : Access => True)
+      represents ∧
+    ContractRepresentationSound
+      (fun _ : Access => True)
+      represents
+      (AccessMediatedTransition represents mediated) := by
+  constructor
+  · intro s s' hCause
+    obtain ⟨a, hRepresents⟩ :=
+      hRepresentation s s' hCause
+    exact ⟨a, trivial, hRepresents⟩
+  · intro a hCovered s s' hRepresents
+    exact ⟨a, hRepresents, hComplete a s s' hRepresents⟩
+
+
 end E15CausalCoverageContractEquivalence
 end GRBS
