@@ -963,3 +963,62 @@ theorem e15_g3b_obligations_do_not_imply_reverse_domain_coverage :
       hReverse true true hWitness
 
     exact Bool.noConfusion hCause.1
+
+/-
+E15-G3C:
+Test whether the E15 obligations recover enriched AG causeable coverage
+when an explicit cross-layer trace bridge is supplied.
+
+The bridge states that whenever a declared dependency is covered and its
+representation is mediated, the corresponding endpoint is observable
+through the AG system's interface-trace relation.
+-/
+
+def E15ToAGTraceBridge
+    {Trace Channel D : Type}
+    (A : GRBS.AGBypass.AGAssumption)
+    (s : GRBS.AGBypass.System Trace Channel)
+    (dep : D → Prop)
+    (covered : D → Prop)
+    (represents : D → Trace → Trace → Prop)
+    (mediated : Trace → Trace → Prop) : Prop :=
+  ∀ d,
+    dep d →
+    covered d →
+    ∀ s0 s1,
+      represents d s0 s1 →
+      mediated s0 s1 →
+      ∀ e : GRBS.AGBypass.Environment,
+        GRBS.AGBypass.Admissible s e →
+        A e →
+        s.interfaceTraces e s1
+
+theorem e15_g3c_obligations_plus_ag_trace_bridge_imply_ag_causeable_coverage :
+    ∀
+      {Trace Channel D : Type}
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System Trace Channel)
+      (causeable : GRBS.E13CausalSemanticCorrespondence.CauseableTransition Trace)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → Trace → Trace → Prop)
+      (mediated : Trace → Trace → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep →
+      ContractDomainComplete causeable dep represents →
+      ContractRepresentationSound covered represents mediated →
+      E15ToAGTraceBridge A s dep covered represents mediated →
+      GRBS.E14AGContractComparison.AGCauseableCoverage A s causeable := by
+  intro Trace Channel D A s causeable dep covered represents mediated
+  intro hCoverage hComplete hSound hBridge
+  intro s0 s1 hCause e hAdmissible hA
+  obtain ⟨d, hDep, hRepresents⟩ :=
+    hComplete s0 s1 hCause
+  have hCovered : covered d :=
+    hCoverage d hDep
+  have hMediated : mediated s0 s1 :=
+    hSound d hCovered s0 s1 hRepresents
+  exact hBridge d hDep hCovered s0 s1 hRepresents hMediated
+    e hAdmissible hA
+
+end E15CausalCoverageContractEquivalence
+end GRBS
