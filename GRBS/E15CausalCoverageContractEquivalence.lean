@@ -1020,5 +1020,165 @@ theorem e15_g3c_obligations_plus_ag_trace_bridge_imply_ag_causeable_coverage :
   exact hBridge d hDep hCovered s0 s1 hRepresents hMediated
     e hAdmissible hA
 
+
+/-
+E15-G3D:
+Test whether the E15-to-AG trace bridge is necessary for recovering
+AG causeable coverage.
+
+The countermodel keeps all three E15 contract obligations true while
+AGCauseableCoverage fails because the mediated transition is not
+represented in the AG interface-trace observation relation.
+-/
+
+def g3dTrace : Type := Bool
+def g3dChannel : Type := Unit
+def g3dDependency : Type := Unit
+
+def g3dAssumption : GRBS.AGBypass.AGAssumption :=
+  fun _ => True
+
+def g3dSystem : GRBS.AGBypass.System g3dTrace g3dChannel :=
+  { interface := fun _ => True
+    interfaceTraces := fun _ t => t = false
+    physicalStep := fun _ _ => False
+    cov := fun _ => True }
+
+def g3dCauseable :
+    GRBS.E13CausalSemanticCorrespondence.CauseableTransition g3dTrace :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+def g3dDep : g3dDependency → Prop :=
+  fun _ => True
+
+def g3dCovered : g3dDependency → Prop :=
+  fun _ => True
+
+def g3dRepresents :
+    g3dDependency → g3dTrace → g3dTrace → Prop :=
+  fun _ s0 s1 => s0 = false ∧ s1 = true
+
+def g3dMediated : g3dTrace → g3dTrace → Prop :=
+  fun s0 s1 => s0 = false ∧ s1 = true
+
+
+theorem e15_g3d_e15_obligations_hold :
+    R8RichContractSeparation.R8e.ContractCoverage
+        g3dCovered
+        g3dDep ∧
+      ContractDomainComplete
+        g3dCauseable
+        g3dDep
+        g3dRepresents ∧
+      ContractRepresentationSound
+        g3dCovered
+        g3dRepresents
+        g3dMediated := by
+  exact ⟨
+    by
+      intro d hDep
+      trivial,
+    by
+      intro s0 s1 hCause
+      exact ⟨(), trivial, hCause⟩,
+    by
+      intro d hCovered s0 s1 hRepresents
+      exact hRepresents⟩
+
+theorem e15_g3d_ag_causeable_coverage_fails :
+    ¬ GRBS.E14AGContractComparison.AGCauseableCoverage
+      g3dAssumption
+      g3dSystem
+      g3dCauseable := by
+  intro hCoverage
+  have hCause : g3dCauseable false true := by
+    constructor <;> rfl
+  have hInterface :
+      g3dSystem.interfaceTraces
+        (fun _ : GRBS.AGBypass.Action => False)
+        true := by
+    exact hCoverage
+      false
+      true
+      hCause
+      (fun _ => False)
+      (by
+        intro a h
+        exact False.elim h)
+      trivial
+  have hTrace : (true : Bool) = false := hInterface
+  exact Bool.noConfusion hTrace
+
+theorem e15_g3d_bridge_fails :
+    ¬ E15ToAGTraceBridge
+      g3dAssumption
+      g3dSystem
+      g3dDep
+      g3dCovered
+      g3dRepresents
+      g3dMediated := by
+  intro hBridge
+  have hRepresents :
+      g3dRepresents () false true := by
+    constructor <;> rfl
+  have hMediated :
+      g3dMediated false true := hRepresents
+  have hTrace :=
+    hBridge
+      ()
+      trivial
+      trivial
+      false
+      true
+      hRepresents
+      hMediated
+      (fun _ : GRBS.AGBypass.Action => False)
+      (by
+        intro a h
+        exact False.elim h)
+      trivial
+  have hFalse : (true : Bool) = false := hTrace
+  exact Bool.noConfusion hFalse
+
+theorem e15_g3d_e15_obligations_do_not_imply_ag_causeable_coverage :
+    ∃
+      (D State : Type)
+      (A : GRBS.AGBypass.AGAssumption)
+      (s : GRBS.AGBypass.System State g3dChannel)
+      (causeable : GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep ∧
+      ContractDomainComplete causeable dep represents ∧
+      ContractRepresentationSound covered represents mediated ∧
+      ¬ E15ToAGTraceBridge
+        A
+        s
+        dep
+        covered
+        represents
+        mediated ∧
+      ¬ GRBS.E14AGContractComparison.AGCauseableCoverage
+        A
+        s
+        causeable := by
+  exact ⟨
+    g3dDependency,
+    g3dTrace,
+    g3dAssumption,
+    g3dSystem,
+    g3dCauseable,
+    g3dDep,
+    g3dCovered,
+    g3dRepresents,
+    g3dMediated,
+    e15_g3d_e15_obligations_hold.1,
+    e15_g3d_e15_obligations_hold.2.1,
+    e15_g3d_e15_obligations_hold.2.2,
+    e15_g3d_bridge_fails,
+    e15_g3d_ag_causeable_coverage_fails⟩
+
 end E15CausalCoverageContractEquivalence
 end GRBS
