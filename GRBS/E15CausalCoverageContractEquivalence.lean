@@ -2268,6 +2268,301 @@ theorem e15_g6b3_causal_assurance_does_not_imply_representation_soundness :
     ⟨e15_g6b3_causal_assurance_correspondence_holds,
      e15_g6b3_representation_soundness_fails⟩
 
+/-
+E15-G6D:
+Causal-assurance correspondence is equivalent to mediated causal coverage
+once the declared dependency domain is complete for actual causeable
+transitions.
+
+The forward direction extracts mediated causal coverage from the witness
+carried by causal-assurance correspondence.
+
+The reverse direction uses domain completeness to obtain a dependency
+representation witness for each causeable transition, then uses mediated
+causal coverage to discharge the final mediated conjunct.
+
+Thus CAC is a representation-witness refinement of causal coverage rather
+than an independent causal-safety property.
+-/
+
+theorem e15_g6d_causal_assurance_implies_mediated_causal_coverage :
+    ∀
+      {State D : Type}
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      CausalAssuranceCorrespondence
+        causeable dep covered represents mediated →
+      GRBS.E13CausalSemanticCorrespondence.MediatedCausalCoverage
+        causeable mediated := by
+  intro State D causeable dep covered represents mediated
+  intro hCorrespondence s0 s1 hCause
+  obtain ⟨d, hDep, hCovered, hRepresents, hMediated⟩ :=
+    hCorrespondence s0 s1 hCause
+  exact hMediated
+
+theorem e15_g6d_domain_complete_plus_mediated_causal_coverage_implies_causal_assurance :
+    ∀
+      {State D : Type}
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep →
+      ContractDomainComplete causeable dep represents →
+      GRBS.E13CausalSemanticCorrespondence.MediatedCausalCoverage
+        causeable mediated →
+      CausalAssuranceCorrespondence
+        causeable dep covered represents mediated := by
+  intro State D causeable dep covered represents mediated
+  intro hCoverage hComplete hCausalCoverage
+  intro s0 s1 hCause
+  obtain ⟨d, hDep, hRepresents⟩ :=
+    hComplete s0 s1 hCause
+  have hCovered : covered d :=
+    hCoverage d hDep
+  have hMediated : mediated s0 s1 :=
+    hCausalCoverage s0 s1 hCause
+  exact ⟨d, hDep, hCovered, hRepresents, hMediated⟩
+
+theorem e15_g6d_under_domain_completeness_cac_iff_mediated_causal_coverage :
+    ∀
+      {State D : Type}
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (dep : D → Prop)
+      (covered : D → Prop)
+      (represents : D → State → State → Prop)
+      (mediated : State → State → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage covered dep →
+      ContractDomainComplete causeable dep represents →
+      (CausalAssuranceCorrespondence
+          causeable dep covered represents mediated ↔
+        GRBS.E13CausalSemanticCorrespondence.MediatedCausalCoverage
+          causeable mediated) := by
+  intro State D causeable dep covered represents mediated
+  intro hCoverage hComplete
+  constructor
+  · exact
+      e15_g6d_causal_assurance_implies_mediated_causal_coverage
+        causeable dep covered represents mediated
+  · intro hCausalCoverage
+    exact
+      e15_g6d_domain_complete_plus_mediated_causal_coverage_implies_causal_assurance
+        causeable dep covered represents mediated
+        hCoverage
+        hComplete
+        hCausalCoverage
+
+/-
+E15-G6E:
+E13 representation completeness and complete mediation construct the
+E15 causal-assurance witness, provided the represented access domain is
+covered by the contract.
+
+The witness is the access channel supplied by E13
+EffectRepresentationComplete. E13 RepresentationCompleteMediation then
+establishes the corresponding mediated transition.
+-/
+
+theorem e15_g6e_e13_representation_obligations_plus_contract_coverage_imply_causal_assurance :
+    ∀
+      {Access State : Type}
+      (causeable :
+        GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (represents :
+        GRBS.E13CausalSemanticCorrespondence.Represents Access State)
+      (mediated :
+        GRBS.E13CausalSemanticCorrespondence.AccessMediated Access State)
+      (covered : Access → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage
+        covered
+        (fun _ : Access => True) →
+      GRBS.E13CausalSemanticCorrespondence.EffectRepresentationComplete
+        causeable represents →
+      GRBS.E13CausalSemanticCorrespondence.RepresentationCompleteMediation
+        represents mediated →
+      CausalAssuranceCorrespondence
+        causeable
+        (fun _ : Access => True)
+        covered
+        represents
+        (GRBS.E13CausalSemanticCorrespondence.AccessMediatedTransition
+          represents mediated) := by
+  intro Access State causeable represents mediated covered
+  intro hCoverage hRepresentation hComplete
+  intro s0 s1 hCause
+  obtain ⟨a, hRepresents⟩ :=
+    hRepresentation s0 s1 hCause
+  have hCovered : covered a :=
+    hCoverage a trivial
+  have hAccessMediated : mediated a s0 s1 :=
+    hComplete a s0 s1 hRepresents
+  have hMediated :
+      GRBS.E13CausalSemanticCorrespondence.AccessMediatedTransition
+        represents mediated s0 s1 := by
+    exact ⟨a, hRepresents, hAccessMediated⟩
+  exact ⟨a, trivial, hCovered, hRepresents, hMediated⟩
+
+/-
+E15-G6F:
+Specialize the G6 causal-assurance correspondence to the E13
+step/authorization representation.
+
+This makes explicit that the E13 causal witness can be enriched with
+the E15 contract witness without changing the underlying mediated
+causal transition.
+-/
+
+theorem e15_g6f_e13_specialization_constructs_causal_assurance :
+    ∀
+      {State Action : Type}
+      (causeable : GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (step : State → Action → State → Prop)
+      (authorized : State → Action → State → Prop)
+      (covered : Action → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage
+        covered
+        (fun _ : Action => True) →
+      GRBS.E13CausalSemanticCorrespondence.EffectRepresentationComplete
+        causeable
+        (fun a s0 s1 => step s0 a s1) →
+      GRBS.E13CausalSemanticCorrespondence.RepresentationCompleteMediation
+        (fun a s0 s1 => step s0 a s1)
+        (fun a s0 s1 => authorized s0 a s1) →
+      CausalAssuranceCorrespondence
+        causeable
+        (fun _ : Action => True)
+        covered
+        (fun a s0 s1 => step s0 a s1)
+        (fun s0 s1 =>
+          ∃ a,
+            step s0 a s1 ∧
+              authorized s0 a s1) := by
+  intro State Action causeable step authorized covered
+  intro hCoverage hRepresentation hComplete
+  intro s0 s1 hCause
+  obtain ⟨a, hStep⟩ :=
+    hRepresentation s0 s1 hCause
+  have hCovered : covered a :=
+    hCoverage a trivial
+  have hAuthorized : authorized s0 a s1 :=
+    hComplete a s0 s1 hStep
+  have hMediated :
+      (∃ a,
+        step s0 a s1 ∧
+          authorized s0 a s1) := by
+    exact ⟨a, hStep, hAuthorized⟩
+  exact ⟨a, trivial, hCovered, hStep, hMediated⟩
+
+/-
+E15-G6G:
+The E13-specialized causal-assurance correspondence recovers the exact
+E13 mediated causal coverage relation.
+
+This is a specialization of G6-D, not a converse to E13's
+representation-level complete-mediation condition.
+-/
+
+theorem e15_g6g_e13_specialized_causal_assurance_implies_e13_causal_coverage :
+    ∀
+      {State Action : Type}
+      (causeable : GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (step : State → Action → State → Prop)
+      (authorized : State → Action → State → Prop)
+      (covered : Action → Prop),
+      CausalAssuranceCorrespondence
+        causeable
+        (fun _ : Action => True)
+        covered
+        (fun a s0 s1 => step s0 a s1)
+        (fun s0 s1 =>
+          ∃ a,
+            step s0 a s1 ∧
+              authorized s0 a s1) →
+      GRBS.E13CausalSemanticCorrespondence.MediatedCausalCoverage
+        causeable
+        (fun s0 s1 =>
+          ∃ a,
+            step s0 a s1 ∧
+              authorized s0 a s1) := by
+  intro State Action causeable step authorized covered
+  intro hCAC
+  exact
+    e15_g6d_causal_assurance_implies_mediated_causal_coverage
+      causeable
+      (fun _ : Action => True)
+      covered
+      (fun a s0 s1 => step s0 a s1)
+      (fun s0 s1 =>
+        ∃ a,
+          step s0 a s1 ∧
+            authorized s0 a s1)
+      hCAC
+
+/-
+E15-G6H:
+Under the E13 representation obligations and E15 contract coverage,
+the E15 causal-assurance correspondence is equivalent to the exact
+E13 mediated causal-coverage relation.
+
+The reverse direction uses E13 representation completeness and complete
+mediation to construct CAC through G6-F. The theorem therefore does not
+claim that causal coverage alone reconstructs the representation-level
+E13 obligations.
+-/
+
+theorem e15_g6h_e13_e15_causal_coverage_round_trip :
+    ∀
+      {State Action : Type}
+      (causeable : GRBS.E13CausalSemanticCorrespondence.CauseableTransition State)
+      (step : State → Action → State → Prop)
+      (authorized : State → Action → State → Prop)
+      (covered : Action → Prop),
+      R8RichContractSeparation.R8e.ContractCoverage
+        covered
+        (fun _ : Action => True) →
+      GRBS.E13CausalSemanticCorrespondence.EffectRepresentationComplete
+        causeable
+        (fun a s0 s1 => step s0 a s1) →
+      GRBS.E13CausalSemanticCorrespondence.RepresentationCompleteMediation
+        (fun a s0 s1 => step s0 a s1)
+        (fun a s0 s1 => authorized s0 a s1) →
+      (CausalAssuranceCorrespondence
+          causeable
+          (fun _ : Action => True)
+          covered
+          (fun a s0 s1 => step s0 a s1)
+          (fun s0 s1 =>
+            ∃ a,
+              step s0 a s1 ∧
+                authorized s0 a s1) ↔
+        GRBS.E13CausalSemanticCorrespondence.MediatedCausalCoverage
+          causeable
+          (fun s0 s1 =>
+            ∃ a,
+              step s0 a s1 ∧
+                authorized s0 a s1)) := by
+  intro State Action causeable step authorized covered
+  intro hCoverage hRepresentation hComplete
+  constructor
+  · intro hCAC
+    exact
+      e15_g6g_e13_specialized_causal_assurance_implies_e13_causal_coverage
+        causeable step authorized covered hCAC
+  · intro hCausalCoverage
+    exact
+      e15_g6f_e13_specialization_constructs_causal_assurance
+        causeable step authorized covered
+        hCoverage
+        hRepresentation
+        hComplete
+
 end E15CausalCoverageContractEquivalence
 end E15CausalCoverageContractEquivalence
 end GRBS
