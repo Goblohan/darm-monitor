@@ -21,6 +21,7 @@ lean_lib GRBS where
     `AGBypass,
     `DARMCoreCalculus,
     `IC1AbstractionGap,
+    `IC1RuntimeSemantics,
     `IC1RuntimeSemanticRepresentation,
     `IC1SemanticDeltaRepresentation,
     `IC1R20CausalCoverage,
@@ -32,6 +33,7 @@ lean_lib GRBS where
     `R21RepairAdequacy_minimality,
     `R22RuntimeSemanticCorrespondence,
     `R22PositiveRepair,
+    `R22RuntimeImplementationCorrespondence,
   ]
 
 /-

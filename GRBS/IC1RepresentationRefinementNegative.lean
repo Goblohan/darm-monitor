@@ -28,7 +28,7 @@ theorem bad_refined_realize_is_faithful :
   rfl
 
 theorem representation_refinement_does_not_imply_causal_coverage :
-    _root_.GRBS.IC1R20CausalCoverageRefinement.RepresentationRefines
+    _root_.GRBS.R21RepairAdequacy.RepresentationRefines
         (fun r : SemanticRequest => r.tool)
         _root_.GRBS.IC1R20CausalCoverageRefinement.refinedDependency
         _root_.GRBS.IC1R20CausalCoverageRefinement.projectRuntimeDependency ∧
