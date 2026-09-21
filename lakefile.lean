@@ -15,7 +15,22 @@ lean_lib DarmMonitor where
 
 lean_lib GRBS where
   srcDir := "GRBS"
-  roots := #[`GRBS, `SeL4GRBS, `AGBypass, `DARMCoreCalculus]
+  roots := #[
+    `GRBS,
+    `SeL4GRBS,
+    `AGBypass,
+    `DARMCoreCalculus,
+    `IC1AbstractionGap,
+    `IC1RuntimeSemanticRepresentation,
+    `IC1SemanticDeltaRepresentation,
+    `IC1R20CausalCoverage,
+    `IC1R20CausalCoverage_refinement,
+    `R19BoundaryMediatedTransferSemantics,
+    `R19bSemanticDependencyBridge,
+    `R20DARMToSemanticCorrespondence,
+    `R21RepairAdequacy,
+    `R21RepairAdequacy_minimality,
+  ]
 
 /-
   The demo executable links the hand-built static library `c/libdarm_native.a`,
