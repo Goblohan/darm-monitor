@@ -31,6 +31,7 @@ lean_lib GRBS where
     `R21RepairAdequacy,
     `R21RepairAdequacy_minimality,
     `R22RuntimeSemanticCorrespondence,
+    `R22PositiveRepair,
   ]
 
 /-
