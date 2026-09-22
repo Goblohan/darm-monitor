@@ -251,6 +251,82 @@ theorem darm_delta_realizations_preserve_guarantee
 
 
 /--
+Minimal semantic guarantee form of the R20 correspondence theorem.
+
+The target-guarantee conclusion requires only transition adequacy and discharge
+adequacy for the relevant realized dependencies. Realization faithfulness is
+part of the stronger `SemanticRealizationAdequate` certificate, but is not
+used by this particular preservation result.
+
+The three delta-linkage obligations remain explicit:
+1. structural delta properties establish semantic source safety;
+2. structural delta dependencies are relevant realizations;
+3. structural delta dependencies are discharged.
+-/
+theorem darm_delta_realizations_preserve_guarantee_minimal
+    (F : Frame)
+    (g : F.Guarantee)
+    (s : F.System)
+    (b : F.Boundary)
+    (l : F.Locus)
+    (c : DARMCoreCalculus.TransferCandidate F.Dependency)
+    (S : SemanticSystem)
+    (G : SemanticGuarantee S)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization F.Dependency S)
+    (relevant : SemanticDependency F.Dependency S.State → Prop)
+    (discharge : F.Dependency → Prop)
+    (hAdmissible :
+      DARMCoreCalculus.DARMTransferAdmissible F g s b l c)
+    (hTransition :
+      RelevantRealizationsTransitionAdequate
+        S B realize relevant)
+    (hDischarge :
+      RealizationDischargeAdequate
+        S G B realize discharge)
+    (hDeltaSource :
+      ∀ d,
+        GRBS.R5AssuranceConservation.Delta
+          F.Dependency c.source c.target d →
+        c.property d →
+        G.property (realize d).source)
+    (hDeltaRelevant :
+      ∀ d,
+        GRBS.R5AssuranceConservation.Delta
+          F.Dependency c.source c.target d →
+        relevant (realize d))
+    (hDeltaDischarge :
+      ∀ d,
+        GRBS.R5AssuranceConservation.Delta
+          F.Dependency c.source c.target d →
+        discharge d) :
+    ∀ d,
+      GRBS.R5AssuranceConservation.Delta
+        F.Dependency c.source c.target d →
+      G.property (realize d).target := by
+  have hDeltaObligation :
+      GRBS.R5AssuranceConservation.DeltaObligation
+        F.Dependency c.source c.target c.property :=
+    DARMCoreCalculus.darm_admissibility_discharges_delta
+      F g s b l c hAdmissible
+  intro d hDelta
+  have hStructuralProperty : c.property d :=
+    hDeltaObligation d hDelta
+  have hSemanticSource : G.property (realize d).source :=
+    hDeltaSource d hDelta hStructuralProperty
+  have hStep :
+      BoundaryMediatedStep S B
+        (realize d).source
+        (realize d).target :=
+    hTransition d (hDeltaRelevant d hDelta)
+  exact
+    hDischarge d
+      (hDeltaDischarge d hDelta)
+      hStep
+      hSemanticSource
+
+
+/--
 Structural DARM coverage does not itself provide semantic realization
 adequacy.
 
