@@ -2,7 +2,7 @@
 
 **A machine-checked theory of bounded causal authority and admissible assurance transfer for autonomous systems.**
 
-146 Lean 4 modules · 24,000+ lines · zero `sorry` · zero `sorryAx` · CI-green
+190 Lean 4 modules · 36,000+ lines · 1,141 theorems · zero `sorry` · zero `sorryAx` · CI-green
 
 **Olusanya Gbolahan V**
 **PerceptraAI Lab · Lagos**
@@ -148,7 +148,7 @@ All results depend only on standard Lean 4 foundational axioms. No result depend
 ```
 darm-monitor/
 │
-├── DarmMonitor/              90 modules — verified governance core
+├── DarmMonitor/              91 modules — verified governance core
 │   ├── Basic.lean                Authorization, capability confinement
 │   ├── Fixed64*.lean             Fixed-point proof tower
 │   ├── Boundary*.lean            Boundary-indexed guarantee system
@@ -158,7 +158,7 @@ darm-monitor/
 │   ├── LLMToolCall.lean          Agent tool-authorization instantiation
 │   └── ...                       Minimality, interference, trajectory safety
 │
-├── GRBS/                     56 modules — assurance-transfer theory
+├── GRBS/                     99 modules — assurance-transfer theory
 │   ├── GRBS.lean                 R1: Frame, Transfer, GRBS, Exploitability
 │   ├── R1bSufficiency.lean       Transfer ↔ GRBS biconditional
 │   ├── AGBypass.lean             Below-interface structural isolation
@@ -258,6 +258,7 @@ The formal results are conditional on their stated definitions, assumptions, and
 | `v1.0.0` | Governance core |
 | `v0.9`–`v0.13.6` | Empirical lab + formal adequacy |
 | `v2.0.0` | Theoretical core complete |
+| `v2.1.0` | Runtime correspondence (IC1, R21, R22), TMC refinement (E23), R4e/R19b/R20 interop |
 
 ---
 

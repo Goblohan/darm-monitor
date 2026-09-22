@@ -13,3 +13,5 @@ setup_git.sh
 
 # Generated CMake/build artifacts
 /build/
+__pycache__/
+*.pyc
