@@ -366,10 +366,10 @@ admitted by the refined representation satisfies the semantic
 authorization predicate.
 -/
 def RefinedRuntimeSemanticSound
-    (admit : Nat × Nat → Prop)
+    (admitDecision : Nat × Nat → Prop)
     (semanticAuthorized : RuntimeInvocation → Prop) : Prop :=
   ∀ r,
-    admit (refinedRuntimeRepresentation r) →
+    admitDecision (refinedRuntimeRepresentation r) →
       semanticAuthorized r
 
 /--
