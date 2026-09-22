@@ -1,0 +1,39 @@
+name: Kernel Release
+
+on:
+  push:
+    tags: ['kernel-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+
+      - name: Build decision kernel (K1 + K2, no Mathlib)
+        run: lake build darmkernel
+
+      - name: Test the built binary
+        run: python3 tests/kernel_server_test.py
+
+      - name: Package with SHA-256
+        run: |
+          cp .lake/build/bin/darmkernel darmkernel-linux-x86_64
+          sha256sum darmkernel-linux-x86_64 > darmkernel-linux-x86_64.sha256
+          cat darmkernel-linux-x86_64.sha256
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            darmkernel-linux-x86_64
+            darmkernel-linux-x86_64.sha256
