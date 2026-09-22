@@ -26,6 +26,11 @@ jobs:
       - name: Test the built binary
         run: python3 tests/kernel_server_test.py
 
+      - name: Certify 1,000 binary answers against Lean's kernel
+        run: |
+          python3 tests/differential_certificates.py
+          lake env lean tests/generated/binary_certificates.lean
+
       - name: Package with SHA-256
         run: |
           cp .lake/build/bin/darmkernel darmkernel-linux-x86_64
