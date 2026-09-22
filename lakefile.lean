@@ -36,6 +36,7 @@ lean_lib GRBS where
     `R22RuntimeSemanticCorrespondence,
     `R22PositiveRepair,
     `R22RuntimeImplementationCorrespondence,
+    `K1DecisionKernel,
   ]
 
 /-
@@ -54,3 +55,7 @@ lean_lib GRBS where
 lean_exe darmdemo where
   root := `Main
   moreLinkArgs := #["-L./c", "-ldarm_native"]
+
+lean_exe darmkernel where
+  srcDir := "GRBS"
+  root := `K2DecisionServer
