@@ -162,6 +162,33 @@ def R4eTargetDomain : Dependency → Prop :=
 def R4eProperty : Dependency → Prop :=
   CovAB
 
+
+theorem r4e_delta_obligation_iff_boundary_composition_obligation :
+    DeltaObligation
+        Dependency
+        R4eSourceDomain
+        R4eTargetDomain
+        R4eProperty
+      ↔
+    BoundaryCompositionObligation := by
+  constructor
+  · intro h d hTarget hNew
+    apply h d
+    constructor
+    · exact hTarget
+    · intro hSource
+      rcases hSource with hA | hB
+      · exact hNew.1 hA
+      · exact hNew.2 hB
+  · intro h d hDelta
+    apply h d hDelta.1
+    constructor
+    · intro hA
+      exact hDelta.2 (Or.inl hA)
+    · intro hB
+      exact hDelta.2 (Or.inr hB)
+
+
 /-
   The interaction dependency is introduced by composition and is not
   present in either local dependency domain.
