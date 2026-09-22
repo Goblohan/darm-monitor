@@ -251,6 +251,43 @@ theorem darm_delta_realizations_preserve_guarantee
 
 
 /--
+The explicit linkage obligations connecting a structural DARM delta to its
+semantic realization.
+
+The three fields are intentionally separate:
+1. structural delta properties establish semantic source safety;
+2. structural delta dependencies are relevant realized dependencies;
+3. structural delta dependencies are discharged.
+
+This structure packages existing proof obligations without adding a new
+semantic assumption.
+-/
+structure SemanticDeltaLinkage
+    (F : Frame)
+    (c : DARMCoreCalculus.TransferCandidate F.Dependency)
+    (S : SemanticSystem)
+    (G : SemanticGuarantee S)
+    (realize : SemanticRealization F.Dependency S)
+    (relevant : SemanticDependency F.Dependency S.State → Prop)
+    (discharge : F.Dependency → Prop) : Prop where
+  source :
+    ∀ d,
+      GRBS.R5AssuranceConservation.Delta
+        F.Dependency c.source c.target d →
+      c.property d →
+      G.property (realize d).source
+  relevant :
+    ∀ d,
+      GRBS.R5AssuranceConservation.Delta
+        F.Dependency c.source c.target d →
+      relevant (realize d)
+  discharge :
+    ∀ d,
+      GRBS.R5AssuranceConservation.Delta
+        F.Dependency c.source c.target d →
+      discharge d
+
+/--
 Minimal semantic guarantee form of the R20 correspondence theorem.
 
 The target-guarantee conclusion requires only transition adequacy and discharge
@@ -324,6 +361,49 @@ theorem darm_delta_realizations_preserve_guarantee_minimal
       (hDeltaDischarge d hDelta)
       hStep
       hSemanticSource
+
+
+/--
+Convenience form of the minimal R20 semantic guarantee theorem using the
+structured `SemanticDeltaLinkage` interface.
+-/
+theorem semantic_delta_linkage_implies_guarantee
+    (F : Frame)
+    (g : F.Guarantee)
+    (s : F.System)
+    (b : F.Boundary)
+    (l : F.Locus)
+    (c : DARMCoreCalculus.TransferCandidate F.Dependency)
+    (S : SemanticSystem)
+    (G : SemanticGuarantee S)
+    (B : SemanticBoundary S)
+    (realize : SemanticRealization F.Dependency S)
+    (relevant : SemanticDependency F.Dependency S.State → Prop)
+    (discharge : F.Dependency → Prop)
+    (hAdmissible :
+      DARMCoreCalculus.DARMTransferAdmissible F g s b l c)
+    (hTransition :
+      RelevantRealizationsTransitionAdequate
+        S B realize relevant)
+    (hDischarge :
+      RealizationDischargeAdequate
+        S G B realize discharge)
+    (hLinkage :
+      SemanticDeltaLinkage
+        F c S G realize relevant discharge) :
+    ∀ d,
+      GRBS.R5AssuranceConservation.Delta
+        F.Dependency c.source c.target d →
+      G.property (realize d).target := by
+  exact
+    darm_delta_realizations_preserve_guarantee_minimal
+      F g s b l c S G B realize relevant discharge
+      hAdmissible
+      hTransition
+      hDischarge
+      hLinkage.source
+      hLinkage.relevant
+      hLinkage.discharge
 
 
 /--
