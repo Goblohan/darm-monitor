@@ -47,6 +47,7 @@ lean_lib GRBS where
     `B1BrokerModel,
     `K4RoleKernel,
     `B3BrokerModel,
+    `E24EpistemicPremiseTransfer,
     `B2aDerivedProvenance,
     `K3aKernelCorrespondence,
     `K3bKernelR22,
