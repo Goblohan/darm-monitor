@@ -36,7 +36,17 @@ lean_lib GRBS where
     `R22RuntimeSemanticCorrespondence,
     `R22PositiveRepair,
     `R22RuntimeImplementationCorrespondence,
+    `R8RichContractSeparation,
+    `E13CausalSemanticCorrespondence,
+    `E14AGContractComparison,
+    `E15CausalCoverageContractEquivalence,
+    `E16TemporalFreshness,
+    `E17ProposalAuthoritySeparation,
+    `E18AssuranceFailureWitness,
     `K1DecisionKernel,
+    `B1BrokerModel,
+    `K3aKernelCorrespondence,
+    `K3bKernelR22,
   ]
 
 /-
