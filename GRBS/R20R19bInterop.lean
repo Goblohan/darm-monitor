@@ -1,5 +1,5 @@
-import GRBS.R20DARMToSemanticCorrespondence
-import GRBS.R19bSemanticDependencyBridge
+import R20DARMToSemanticCorrespondence
+import R19bSemanticDependencyBridge
 
 namespace GRBS.R20R19bAdapter
 

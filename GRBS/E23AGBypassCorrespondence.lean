@@ -1,5 +1,5 @@
-import GRBS.E23TMCPhysicalComposition
-import GRBS.AGBypass
+import E23TMCPhysicalComposition
+import AGBypass
 
 namespace GRBS.E23AGBypassCorrespondence
 

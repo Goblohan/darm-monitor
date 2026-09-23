@@ -13,8 +13,8 @@
   hardware. That correspondence remains an explicit external premise.
 -/
 
-import GRBS.E16aFiniteCausalDomain
-import GRBS.E18AssuranceFailureWitness
+import E16aFiniteCausalDomain
+import E18AssuranceFailureWitness
 
 namespace GRBS.E19ExecutableCoverageToFailureClassifier
 

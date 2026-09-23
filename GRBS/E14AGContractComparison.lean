@@ -1,7 +1,7 @@
 import GRBS
 import AGBypass
-import GRBS.E13CausalSemanticCorrespondence
-import GRBS.R20DARMToSemanticCorrespondence
+import E13CausalSemanticCorrespondence
+import R20DARMToSemanticCorrespondence
 
 namespace GRBS
 namespace E14AGContractComparison

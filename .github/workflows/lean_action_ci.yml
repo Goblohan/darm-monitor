@@ -66,8 +66,8 @@ jobs:
       #
       # DARM modules outside the current integrated closure are discovered
       # dynamically from the build trace, so this does not hard-code a module
-      # list. GRBS is separately elaborated file-by-file because its library
-      # declares only its four root modules as Lake roots.
+      # list. GRBS is separately elaborated file-by-file because not every
+      # GRBS module is a Lake root (every module imported by another is).
       - name: Complete corpus elaboration (tier 3)
         run: |
           : > /tmp/corpus.log

@@ -17,7 +17,7 @@
   hence on TMC. The kernel does not and cannot refine it.
 -/
 import K1DecisionKernel
-import GRBS.E18AssuranceFailureWitness
+import E18AssuranceFailureWitness
 
 namespace GRBS.K3aKernelCorrespondence
 

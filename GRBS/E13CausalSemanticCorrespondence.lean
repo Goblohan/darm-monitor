@@ -1,7 +1,7 @@
 import GRBS
 import AGBypass
-import GRBS.R20DARMToSemanticCorrespondence
-import GRBS.R19BoundaryMediatedTransferSemantics
+import R20DARMToSemanticCorrespondence
+import R19BoundaryMediatedTransferSemantics
 
 namespace GRBS
 namespace E13CausalSemanticCorrespondence

@@ -1,4 +1,4 @@
-import GRBS.E23TMCRefinement
+import E23TMCRefinement
 
 namespace GRBS.E23TMCPhysicalComposition
 

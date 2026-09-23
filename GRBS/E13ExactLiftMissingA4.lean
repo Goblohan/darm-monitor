@@ -1,6 +1,6 @@
 import GRBS
-import GRBS.E13CausalSemanticCorrespondence
-import GRBS.R20DARMToSemanticCorrespondence
+import E13CausalSemanticCorrespondence
+import R20DARMToSemanticCorrespondence
 
 namespace GRBS
 namespace E13ExactLiftMissingA4

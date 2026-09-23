@@ -1,7 +1,7 @@
 import GRBS
-import GRBS.R8RichContractSeparation
-import GRBS.E13CausalSemanticCorrespondence
-import GRBS.E14AGContractComparison
+import R8RichContractSeparation
+import E13CausalSemanticCorrespondence
+import E14AGContractComparison
 
 namespace GRBS
 namespace E15CausalCoverageContractEquivalence

@@ -22,9 +22,9 @@
   correspondence.
 -/
 
-import GRBS.E16aFiniteCausalDomain
-import GRBS.E16TemporalFreshness
-import GRBS.E20TemporalFreshnessCertificateBridge
+import E16aFiniteCausalDomain
+import E16TemporalFreshness
+import E20TemporalFreshnessCertificateBridge
 
 namespace GRBS.E21ExecutableObligationBridge
 

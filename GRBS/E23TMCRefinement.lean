@@ -1,4 +1,4 @@
-import GRBS.E17ProposalAuthoritySeparation
+import E17ProposalAuthoritySeparation
 
 namespace GRBS.E23TMCRefinement
 

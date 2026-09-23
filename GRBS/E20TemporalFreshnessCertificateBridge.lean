@@ -22,8 +22,8 @@
   remains an explicit external premise.
 -/
 
-import GRBS.E16TemporalFreshness
-import GRBS.E18AssuranceFailureWitness
+import E16TemporalFreshness
+import E18AssuranceFailureWitness
 
 namespace GRBS.E20TemporalFreshnessCertificateBridge
 

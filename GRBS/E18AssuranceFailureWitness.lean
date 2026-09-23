@@ -9,9 +9,9 @@
   not runtime telemetry.
 -/
 
-import GRBS.E15CausalCoverageContractEquivalence
-import GRBS.E16TemporalFreshness
-import GRBS.E17ProposalAuthoritySeparation
+import E15CausalCoverageContractEquivalence
+import E16TemporalFreshness
+import E17ProposalAuthoritySeparation
 
 namespace GRBS.E18AssuranceFailureWitness
 
