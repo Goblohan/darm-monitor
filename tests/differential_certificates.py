@@ -28,13 +28,20 @@ def sample(rng, xs, lo, hi):
     return rng.sample(xs, rng.randint(lo, min(hi, len(xs))))
 
 
+def mk_rule(rng, k):
+    """Payload rules are free-form content (any value), as in practice;
+    selector rules keep their exact values and prefixes."""
+    if rng.random() < 0.4:
+        return {"key": k, "allowedValues": [], "allowedPrefixes": [""], "payload": True}
+    return {"key": k, "allowedValues": sample(rng, EXACT, 0, 2),
+            "allowedPrefixes": sample(rng, PREFIXES, 0, 2), "payload": False}
+
+
 def gen(rng):
     tools = []
     for t in TOOLS:
         if rng.random() < 0.8:
-            rules = [{"key": k, "allowedValues": sample(rng, EXACT, 0, 2),
-                      "allowedPrefixes": sample(rng, PREFIXES, 0, 2)}
-                     for k in sample(rng, KEYS, 0, 2)]
+            rules = [mk_rule(rng, k) for k in sample(rng, KEYS, 0, 2)]
             tools.append({"tool": t, "rules": rules})
     cred = {"tools": sample(rng, TOOLS, 1, 3), "expired": rng.random() < 0.15}
     tool = rng.choice(TOOLS) if rng.random() < 0.85 else "unknown"
@@ -59,11 +66,12 @@ def lst(xs, f):
 
 def lean_policy(p):
     def rule(r):
-        return "{ key := %s, allowedValues := %s, allowedPrefixes := %s }" % (
-            s(r["key"]), lst(r["allowedValues"], s), lst(r["allowedPrefixes"], s))
+        return "{ key := %s, allowedValues := %s, allowedPrefixes := %s, payload := %s }" % (
+            s(r["key"]), lst(r["allowedValues"], s), lst(r["allowedPrefixes"], s),
+            "true" if r.get("payload") else "false")
     def tp(t):
         return "{ tool := %s, rules := %s }" % (s(t["tool"]), lst(t["rules"], rule))
-    return "({ tools := %s } : Policy)" % lst(p["tools"], tp)
+    return "({ tools := %s } : DARM.Kernel4.Policy)" % lst(p["tools"], tp)
 
 
 def lean_cred(c):
@@ -93,22 +101,26 @@ def main():
     if len(answers) != N:
         sys.exit(f"expected {N} answers, got {len(answers)}")
     tally = Counter()
-    lines = ["import K1DecisionKernel", "", "open DARM.Kernel", "",
+    lines = ["import K4RoleKernel", "",
+             "open DARM.Kernel (Provenance Credential Invocation Decision Failure)", "",
              f"-- {N} darmkernel answers (seed {SEED}), each certified by decide +kernel.", ""]
     for i, (r, a) in enumerate(zip(reqs, answers)):
         if "error" in a or a.get("decision") not in ("admit", "reject"):
             sys.exit(f"case {i}: binary returned an error: {a}")
         tally["admit" if a["decision"] == "admit" else a["failure"]] += 1
-        lines += [f"example : kernelDecide {lean_policy(r['policy'])}",
+        if a["decision"] == "admit" and any(x["prov"] == "untrusted"
+                                            for x in r["invocation"]["args"]):
+            tally["admit_untrusted_payload"] += 1
+        lines += [f"example : DARM.Kernel4.kernelDecide {lean_policy(r['policy'])}",
                   f"    {lean_cred(r['credential'])}",
                   f"    {lean_inv(r['invocation'])} = {lean_decision(a)} := by",
                   "  decide +kernel", ""]
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, "w").write("\n".join(lines))
     print(f"wrote {N} certificates to {OUT}")
-    for k in OUTCOMES:
+    for k in OUTCOMES + ["admit_untrusted_payload"]:
         print(f"  {k:12s} {tally[k]}")
-    missing = [k for k in OUTCOMES if tally[k] < MIN]
+    missing = [k for k in OUTCOMES + ["admit_untrusted_payload"] if tally[k] < MIN]
     if missing:
         sys.exit(f"coverage gap, fewer than {MIN} cases for: {missing}")
 

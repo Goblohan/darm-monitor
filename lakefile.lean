@@ -45,6 +45,7 @@ lean_lib GRBS where
     `E18AssuranceFailureWitness,
     `K1DecisionKernel,
     `B1BrokerModel,
+    `K4RoleKernel,
     `K3aKernelCorrespondence,
     `K3bKernelR22,
     `E13ExactLiftMissingA1,
@@ -91,4 +92,4 @@ lean_exe darmdemo where
 
 lean_exe darmkernel where
   srcDir := "GRBS"
-  root := `K2DecisionServer
+  root := `K4DecisionServer
