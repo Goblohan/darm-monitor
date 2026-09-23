@@ -9,10 +9,12 @@
       in agreement with R22's semanticAuthorized.
     * No function of the tool name alone reproduces the kernel's decisions.
 
-  Scope: proved on R22's canonical witnesses. The embedding labels
-  R22 arguments as authoritative (R22 has no provenance). A version for
-  every numeric argument needs a Nat-to-string injectivity lemma and is
-  deferred. E15's causal lift is out of scope (rests on TMC).
+  Scope: the general refinement (K3b-G, below) holds for every tool and
+  every numeric argument, via Mathlib's Nat.repr_inj. R22's predicate
+  ignores the tool, so the biconditional holds only on the governed tool;
+  elsewhere the kernel is strictly more conservative (false rejects only).
+  The embedding labels R22 arguments as authoritative (R22 has no
+  provenance). E15's causal lift is out of scope (rests on TMC).
 -/
 import K1DecisionKernel
 import R22RuntimeImplementationCorrespondence
@@ -80,3 +82,68 @@ end GRBS.K3bKernelR22
 
 #print axioms GRBS.K3bKernelR22.kernel_separates_r22_collapsed_pair
 #print axioms GRBS.K3bKernelR22.kernel_not_tool_name_factorizable
+
+/-! ## K3b-G: the general refinement, for every tool and every argument -/
+
+namespace GRBS.K3bKernelR22
+
+open DARM.Kernel
+open GRBS.R22RuntimeImplementationCorrespondence (RuntimeInvocation semanticAuthorized)
+
+/-- The kernel admits embed(tool, arg) exactly when tool = "demo" and arg = 0. -/
+theorem kernel_embed_admit_iff (tool : String) (arg : Nat) :
+    kernelDecide r22Policy r22Cred (embed ⟨tool, arg⟩) = Decision.admit ↔
+      tool = "demo" ∧ arg = 0 := by
+  rw [kernel_admit_iff]
+  by_cases ht : tool = "demo"
+  · subst ht
+    simp [admissible, toolKnown, findTool, argsAllowed, argsTrusted, argAllowed,
+          ruleAllows, embed, r22Policy, r22Cred]
+    constructor
+    · intro h
+      have h0 : arg.repr = (0 : Nat).repr := h.trans (by decide +kernel)
+      exact Nat.repr_inj.mp h0
+    · intro h
+      subst h
+      decide +kernel
+  · simp [admissible, toolKnown, findTool, argsAllowed, argsTrusted,
+          embed, r22Policy, r22Cred, ht, Ne.symm ht]
+
+/-- Soundness, for every invocation: kernel admission implies R22 authorization. -/
+theorem k3b_sound (r : RuntimeInvocation)
+    (h : kernelDecide r22Policy r22Cred (embed r) = Decision.admit) :
+    semanticAuthorized r := by
+  rcases r with ⟨tool, arg⟩
+  exact ((kernel_embed_admit_iff tool arg).mp h).2
+
+/-- Completeness on the governed tool. -/
+theorem k3b_complete_on_governed_tool (r : RuntimeInvocation)
+    (ht : r.tool = "demo") (hs : semanticAuthorized r) :
+    kernelDecide r22Policy r22Cred (embed r) = Decision.admit := by
+  rcases r with ⟨tool, arg⟩
+  exact (kernel_embed_admit_iff tool arg).mpr ⟨ht, hs⟩
+
+/-- The kernel never admits anything R22 forbids. -/
+theorem k3b_no_false_admits :
+    ¬ ∃ r : RuntimeInvocation,
+        kernelDecide r22Policy r22Cred (embed r) = Decision.admit ∧
+        ¬ semanticAuthorized r := by
+  rintro ⟨r, hAdmit, hNot⟩
+  exact hNot (k3b_sound r hAdmit)
+
+def rOther : RuntimeInvocation := { tool := "other", argument := 0 }
+
+/-- Where they diverge, the kernel is more conservative: R22 authorizes
+    other(0), the kernel rejects an ungoverned tool. -/
+theorem k3b_divergence_is_conservative :
+    semanticAuthorized rOther ∧
+    kernelDecide r22Policy r22Cred (embed rOther) = Decision.reject Failure.observation := by
+  constructor
+  · rfl
+  · decide +kernel
+
+end GRBS.K3bKernelR22
+
+#print axioms GRBS.K3bKernelR22.kernel_embed_admit_iff
+#print axioms GRBS.K3bKernelR22.k3b_no_false_admits
+#print axioms GRBS.K3bKernelR22.k3b_divergence_is_conservative
