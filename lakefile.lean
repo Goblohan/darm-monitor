@@ -46,6 +46,8 @@ lean_lib GRBS where
     `K1DecisionKernel,
     `B1BrokerModel,
     `K4RoleKernel,
+    `B3BrokerModel,
+    `B2aDerivedProvenance,
     `K3aKernelCorrespondence,
     `K3bKernelR22,
     `E13ExactLiftMissingA1,
