@@ -12,6 +12,7 @@ proof of the Python code. Proposals the broker rejects before the kernel
 """
 import json, os, random, sys
 from collections import Counter
+from datetime import datetime
 
 sys.path.insert(0, os.path.expanduser(os.environ.get("DARM_GUARD_SRC", "~/darm-guard")))
 from darm_guard.broker import Broker, BrokerConfig
@@ -51,15 +52,15 @@ def lst(xs, f):
     return "[" + ", ".join(f(x) for x in xs) + "]"
 
 
-def lean_cfg(pol, cred, reg):
+def lean_cfg(pol, cred, reg, expired=False):
     def rule(r):
         return "{ key := %s, allowedValues := %s, allowedPrefixes := %s }" % (
             s(r["key"]), lst(r["allowedValues"], s), lst(r["allowedPrefixes"], s))
     def tp(t):
         return "{ tool := %s, rules := %s }" % (s(t["tool"]), lst(t["rules"], rule))
-    return ("({ policy := { tools := %s }, credential := { tools := %s, expired := false }, "
+    return ("({ policy := { tools := %s }, credential := { tools := %s, expired := %s }, "
             "registry := { values := %s } } : Config)") % (
-        lst(pol["tools"], tp), lst(cred, s), lst(reg, s))
+        lst(pol["tools"], tp), lst(cred, s), "true" if expired else "false", lst(reg, s))
 
 
 def lean_prop(prop):
@@ -75,13 +76,16 @@ def main():
     tally = Counter()
     for i in range(N):
         pol, cred, reg, prop = gen(rng)
-        cfg = BrokerConfig(pol, tuple(cred), frozenset(reg), "/nonexistent")
+        expired = rng.random() < 0.15
+        cfg = BrokerConfig(pol, tuple(cred), frozenset(reg), "/nonexistent",
+                           datetime(2000, 1, 1) if expired else None,
+                           1 if expired else None)
         inv, _, resp = Broker(cfg, kernel, None).decide(prop)
         if inv is None or (resp["decision"] == "reject" and resp.get("error")):
             sys.exit(f"case {i}: no kernel decision ({resp}); refusing to certify")
         admitted = resp["decision"] == "admit"
         tally["admit" if admitted else resp["failure"]] += 1
-        C, P = lean_cfg(pol, cred, reg), lean_prop(prop)
+        C, P = lean_cfg(pol, cred, reg, expired), lean_prop(prop)
         provs = "[" + ", ".join(f"Provenance.{a['prov']}" for a in inv["args"]) + "]"
         lines += [f"example : (brokerStep {C}",
                   f"    {P}).isSome = {'true' if admitted else 'false'} := by",
@@ -94,7 +98,7 @@ def main():
     print(f"wrote {2 * N} certificates ({N} cases) to {OUT}")
     for k in ["admit", "temporal", "observation", "authority", "semantic", "provenance"]:
         print(f"  {k:12s} {tally[k]}")
-    short = [k for k in ("admit", "provenance") if tally[k] < MIN]
+    short = [k for k in ("admit", "provenance", "temporal") if tally[k] < MIN]
     if short:
         sys.exit(f"coverage gap, fewer than {MIN} cases for: {short}")
 
