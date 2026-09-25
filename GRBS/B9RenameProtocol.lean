@@ -142,6 +142,47 @@ theorem late_occupation_recovers :
 theorem late_occupation_honest :
     ∀ s ∈ lateTrace, s.src ≠ some (Val.mine Att.new) := by decide
 
+/-! ## Recovery from ANY state (after tests/rename_recovery_edges.py)
+
+The theorems above cover the protocol's own traces. These cover all 64
+states of the three slots. Found necessary when the implementation was
+shown to diverge from B9 in two places: a blocked roll-back changed the
+attestation (B9: all or nothing), and recovery stamped our attestation on
+foreign content (B9 cannot express this: foreign content has no
+attestation field here, so that fix rests on the runtime test). -/
+
+def vals : List (Option Val) := [none, some (Val.mine Att.old), some (Val.mine Att.new), some Val.foreign]
+
+def cross (xs : List (Option Val)) (f : Option Val → List FS) : List FS :=
+  match xs with
+  | [] => []
+  | x :: rest => f x ++ cross rest f
+
+def allStates : List FS :=
+  cross vals (fun a => cross vals (fun b => vals.map (fun c => ⟨a, b, c⟩)))
+
+theorem all_states_count : allStates.length = 64 := by decide
+
+/-- Our file, present exactly once, is never lost or duplicated by recovery. -/
+theorem recover_conserves_ours :
+    ∀ s ∈ allStates, mineCount s = 1 → mineCount (recover s) = 1 := by decide
+
+/-- Foreign content is never lost or duplicated by recovery. -/
+theorem recover_conserves_foreign :
+    ∀ s ∈ allStates, foreignCount (recover s) = foreignCount s := by decide
+
+/-- All or nothing: if recovery leaves the private name occupied, it changed nothing. -/
+theorem recover_all_or_nothing :
+    ∀ s ∈ allStates, (recover s).priv ≠ none → recover s = s := by decide
+
+/-- Unresolved, defined: the private name stays occupied only when the source is. -/
+theorem recover_stuck_only_if_source_occupied :
+    ∀ s ∈ allStates, (recover s).priv = none ∨ s.src ≠ none := by decide
+
+/-- Recovery can be re-run safely. -/
+theorem recover_idempotent :
+    ∀ s ∈ allStates, recover (recover s) = recover s := by decide
+
 end DARM.RenameProtocol
 
 #print axioms DARM.RenameProtocol.normal_ends_placed
@@ -152,3 +193,6 @@ end DARM.RenameProtocol
 #print axioms DARM.RenameProtocol.new_attestation_never_at_source
 #print axioms DARM.RenameProtocol.late_occupation_restores
 #print axioms DARM.RenameProtocol.late_occupation_recovers
+#print axioms DARM.RenameProtocol.recover_conserves_ours
+#print axioms DARM.RenameProtocol.recover_all_or_nothing
+#print axioms DARM.RenameProtocol.recover_idempotent
