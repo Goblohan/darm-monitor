@@ -52,6 +52,7 @@ lean_lib GRBS where
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
     `R23DARMGuardCausalCoverage,
+    `B8TypedEffectLog,
     `B2aDerivedProvenance,
     `K3aKernelCorrespondence,
     `K3bKernelR22,
