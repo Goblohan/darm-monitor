@@ -64,8 +64,16 @@ structure Deployment where
 def A1 (d : Deployment) : Prop := d.fileBypass = false
 def A2 (d : Deployment) : Prop := d.evidenceBypass = false
 
-/-- A write to a governed file that does not go through the broker. -/
-def directWrite (w w' : World) : Prop := ∃ t d', w' = tamper w t d'
+/-- Creating a governed file outside the broker: content, no attestation. -/
+def create (w : World) (t d : String) : World :=
+  { w with files := fun x => if x = t then some { digest := d, att := none } else w.files x }
+
+/-- A write to a governed file that does not go through the broker: modifying
+    an existing file in place (keeping its attestation), or creating an absent
+    one. Creation was added after tests/r23_conflict.py (Case B) showed that
+    the first version of R23 under-approximated the real adversary. -/
+def directWrite (w w' : World) : Prop :=
+  (∃ t d', w' = tamper w t d') ∨ (∃ t d, w.files t = none ∧ w' = create w t d)
 
 /-- An edit to the audit log that does not go through the broker. -/
 def evidenceEdit (w w' : World) : Prop :=
@@ -112,7 +120,7 @@ theorem a1_failure_witness (d : Deployment) (h : ¬ A1 d) :
     ∃ w w', causeable d w w' ∧ ¬ governed w w' := by
   have hf : d.fileBypass = true := by
     cases hb : d.fileBypass <;> simp_all [A1]
-  exact ⟨w0, tamper w0 "t" "x", Or.inr (Or.inl ⟨hf, "t", "x", rfl⟩), direct_not_governed _ _ _⟩
+  exact ⟨w0, tamper w0 "t" "x", Or.inr (Or.inl ⟨hf, Or.inl ⟨"t", "x", rfl⟩⟩), direct_not_governed _ _ _⟩
 
 /-- A2 fails: a causeable transition that is not governed. -/
 theorem a2_failure_witness (d : Deployment) (h : ¬ A2 d) :
@@ -166,7 +174,7 @@ theorem uncovered_direct_write_detected (w : World) (t : String) (f : File) (r :
     causeable ⟨true, false⟩ w (tamper w t d') ∧
     ¬ governed w (tamper w t d') ∧
     flagged (tamper w t d') t = true :=
-  ⟨Or.inr (Or.inl ⟨rfl, t, d', rfl⟩), direct_not_governed w t d',
+  ⟨Or.inr (Or.inl ⟨rfl, Or.inl ⟨t, d', rfl⟩⟩), direct_not_governed w t d',
    tamper_detected w t f r dg d' hf ha hne⟩
 
 /-- A2 fails, and an evidence edit drops the entry of a surviving attested
@@ -187,6 +195,35 @@ theorem uncovered_evidence_edit_detected (w : World) (log' : List (Nat × String
   intro h
   exact hlen (by simpa using brokerStep_log_grows h)
 
+/-! ## R23-D: a coverage failure B6's verification cannot see -/
+
+theorem create_not_governed (w : World) (t d : String) : ¬ governed w (create w t d) := by
+  intro h
+  have hl := brokerStep_log_grows h
+  have hlog : (create w t d).log = w.log := rfl
+  rw [hlog] at hl
+  exact Nat.succ_ne_self _ hl.symm
+
+/-- A1 fails and a governed file is created outside the broker: the transition
+    is causeable and not governed, yet it preserves Honest and B6's
+    verification does not flag it. Coverage fails undetectably. -/
+theorem uncovered_creation_undetected (w : World) (t d : String)
+    (hnone : w.files t = none) (hw : Honest w) :
+    causeable ⟨true, false⟩ w (create w t d) ∧
+    ¬ governed w (create w t d) ∧
+    Honest (create w t d) ∧
+    flagged (create w t d) t = false := by
+  refine ⟨Or.inr (Or.inl ⟨rfl, Or.inr ⟨t, d, hnone, rfl⟩⟩), create_not_governed w t d, ?_, ?_⟩
+  · intro x f hx r dd ha
+    by_cases hxt : x = t
+    · subst hxt
+      simp [create] at hx
+      subst hx
+      simp at ha
+    · simp [create, hxt] at hx
+      exact hw x f hx r dd ha
+  · simp [flagged, create]
+
 end DARM.R23
 
 #print axioms DARM.R23.broker_write_representable
@@ -194,3 +231,4 @@ end DARM.R23
 #print axioms DARM.R23.assumption_failure_breaks_coverage
 #print axioms DARM.R23.uncovered_direct_write_detected
 #print axioms DARM.R23.uncovered_evidence_edit_detected
+#print axioms DARM.R23.uncovered_creation_undetected
