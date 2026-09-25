@@ -42,6 +42,36 @@ theorem cas_retry_idempotent (cur expected : Option String) (new : String) :
     (cas (cas cur expected new).1 expected new).1 = (cas cur expected new).1 := by
   by_cases h : cur = expected <;> by_cases h2 : some new = expected <;> simp_all [cas]
 
+/-! ## Part 1b: compare-and-swap with deletion (delete_file) -/
+
+/-- Compare-and-swap whose new state may be absence: a deletion is new = none. -/
+def casOpt (cur expected new : Option String) : Option String × Bool :=
+  if cur = expected then (new, true) else (cur, false)
+
+/-- A write is exactly the special case whose new state is present. -/
+theorem cas_eq_casOpt (cur expected : Option String) (new : String) :
+    cas cur expected new = casOpt cur expected (some new) := rfl
+
+/-- A write or a delete applies exactly when the target is in the recorded state. -/
+theorem casOpt_applies_iff (cur expected new : Option String) :
+    (casOpt cur expected new).2 = true ↔ cur = expected := by
+  unfold casOpt
+  split <;> simp_all
+
+/-- On conflict, the foreign state is left exactly as it was. -/
+theorem casOpt_conflict_preserves (cur expected new : Option String) (h : cur ≠ expected) :
+    (casOpt cur expected new).1 = cur := by
+  simp [casOpt, h]
+
+/-- A delete removes nothing but the recorded content: if the target is absent
+    afterwards, it held the recorded content or was already absent. -/
+theorem delete_only_from_recorded (cur : Option String) (d : String)
+    (h : (casOpt cur (some d) none).1 = none) : cur = some d ∨ cur = none := by
+  by_cases hc : cur = some d
+  · exact Or.inl hc
+  · right
+    simpa [casOpt, hc] using h
+
 /-! ## Part 2: attestation -/
 
 structure File where
@@ -145,3 +175,7 @@ end DARM.EffectIntegrity
 #print axioms DARM.EffectIntegrity.honest_nothing_flagged
 #print axioms DARM.EffectIntegrity.tamper_detected
 #print axioms DARM.EffectIntegrity.truncation_detected
+#print axioms DARM.EffectIntegrity.cas_eq_casOpt
+#print axioms DARM.EffectIntegrity.casOpt_applies_iff
+#print axioms DARM.EffectIntegrity.casOpt_conflict_preserves
+#print axioms DARM.EffectIntegrity.delete_only_from_recorded
