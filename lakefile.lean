@@ -53,6 +53,7 @@ lean_lib GRBS where
     `B7IdempotencyKeys,
     `R23DARMGuardCausalCoverage,
     `B8TypedEffectLog,
+    `B9RenameProtocol,
     `B2aDerivedProvenance,
     `K3aKernelCorrespondence,
     `K3bKernelR22,

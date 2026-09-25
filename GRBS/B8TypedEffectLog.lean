@@ -14,6 +14,12 @@
   latest entry is a write is flagged; creating an unlogged, unattested file
   is still not flagged (the R23-D gap, carried over and stated).
 
+  Rename (Part 2): one atomic step over two targets: a delete entry for the
+  source and a write entry for the destination under one request, the source
+  removed, the destination re-attested. Not modelled: the implementation's
+  crash window between moving and re-attesting, and evidence naming two
+  targets (B4's prepared record and B5's reconciliation name one).
+
   Representation: the model's log is newest-first (the real audit log is
   chronological; the model is its reverse). Not re-proved here: truncation
   detection (B6, for write-only logs).
@@ -54,6 +60,13 @@ def brokerWrite (w : World) (rid : Nat) (t d : String) : World :=
 def brokerDelete (w : World) (rid : Nat) (t : String) : World :=
   { log := ⟨rid, t, Op.del⟩ :: w.log,
     files := fun x => if x = t then none else w.files x }
+
+/-- A rename: the source's delete and the destination's write, one request,
+    one step; the moved content is re-attested under the new request. -/
+def brokerRename (w : World) (rid : Nat) (src dst d : String) : World :=
+  { log := ⟨rid, dst, Op.write d⟩ :: ⟨rid, src, Op.del⟩ :: w.log,
+    files := fun x => if x = dst then some ⟨d, some (rid, d)⟩
+                      else if x = src then none else w.files x }
 
 /-- What the latest log entry for a target requires of the file. -/
 def expected (log : List Entry) (t : String) (actual : Option File) : Prop :=
@@ -108,13 +121,35 @@ theorem delete_preserves (w : World) (rid : Nat) (t : String) (h : Consistent w)
     rw [h1, h2]
     exact h x
 
+theorem rename_preserves (w : World) (rid : Nat) (src dst d : String) (h : Consistent w) :
+    Consistent (brokerRename w rid src dst d) := by
+  intro x
+  by_cases hd : x = dst
+  · subst hd
+    simp [expected, brokerRename, latest]
+  · by_cases hs : x = src
+    · subst hs
+      have hne : ¬ dst = x := fun e => hd e.symm
+      simp [expected, brokerRename, latest, hne, hd]
+    · have hne1 : ¬ dst = x := fun e => hd e.symm
+      have hne2 : ¬ src = x := fun e => hs e.symm
+      have h1 : latest (brokerRename w rid src dst d).log x = latest w.log x := by
+        simp [brokerRename, latest, hne1, hne2]
+      have h2 : (brokerRename w rid src dst d).files x = w.files x := by
+        simp [brokerRename, hd, hs]
+      unfold expected
+      rw [h1, h2]
+      exact h x
+
 inductive BrokerOp where
   | wr (rid : Nat) (t d : String)
   | dl (rid : Nat) (t : String)
+  | mv (rid : Nat) (src dst d : String)
 
 def apply (w : World) : BrokerOp → World
   | BrokerOp.wr r t d => brokerWrite w r t d
   | BrokerOp.dl r t => brokerDelete w r t
+  | BrokerOp.mv r s t d => brokerRename w r s t d
 
 def run (w : World) : List BrokerOp → World
   | [] => w
@@ -129,6 +164,7 @@ theorem run_consistent (w : World) (ops : List BrokerOp) (h : Consistent w) :
     cases op with
     | wr r t d => exact write_preserves w r t d h
     | dl r t => exact delete_preserves w r t h
+    | mv r s t d => exact rename_preserves w r s t d h
 
 theorem nothing_flagged (w : World) (h : Consistent w) (t : String) : flagged w t = false := by
   have ht := h t
@@ -179,6 +215,25 @@ theorem foreign_tamper_detected (w : World) (t : String) (r : Nat) (d d' : Strin
     exact ht
   simp [flagged, tamper, hl, hf, hne]
 
+def foreignMove (w : World) (src dst : String) : World :=
+  { w with files := fun x => if x = dst then w.files src else if x = src then none else w.files x }
+
+/-- A move outside the broker is flagged at both paths: the source no longer
+    holds its logged write, and the destination holds an attested file that
+    the log never placed there. -/
+theorem foreign_move_detected (w : World) (src dst : String) (r : Nat) (d : String)
+    (h : Consistent w) (hne : src ≠ dst)
+    (hl : latest w.log src = some ⟨r, src, Op.write d⟩) (hd : latest w.log dst = none) :
+    flagged (foreignMove w src dst) src = true ∧ flagged (foreignMove w src dst) dst = true := by
+  have hf : w.files src = some ⟨d, some (r, d)⟩ := by
+    have ht := h src
+    unfold expected at ht
+    rw [hl] at ht
+    exact ht
+  constructor
+  · simp [flagged, foreignMove, hl, hne]
+  · simp [flagged, foreignMove, hd, hf]
+
 /-- The R23-D gap, carried over: an unlogged, unattested creation is not flagged. -/
 theorem foreign_creation_undetected (w : World) (t d : String) (hl : latest w.log t = none) :
     flagged (create w t d) t = false := by
@@ -190,3 +245,5 @@ end DARM.EffectIntegrity2
 #print axioms DARM.EffectIntegrity2.foreign_delete_detected
 #print axioms DARM.EffectIntegrity2.foreign_tamper_detected
 #print axioms DARM.EffectIntegrity2.foreign_creation_undetected
+#print axioms DARM.EffectIntegrity2.rename_preserves
+#print axioms DARM.EffectIntegrity2.foreign_move_detected
