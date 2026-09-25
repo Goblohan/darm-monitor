@@ -84,7 +84,12 @@ def recover (s : FS) : FS :=
   match s.priv with
   | some (Val.mine Att.new) => if s.dst = none then place s else rollback s
   | some _ => rollback s
-  | none => s
+  | none =>
+    -- repair: a crash inside recovery's roll-back (moved back, not yet
+    -- restored) leaves our file at the source with the new attestation
+    match s.src with
+    | some (Val.mine Att.new) => { s with src := some (Val.mine Att.old) }
+    | _ => s
 
 def start : FS := ⟨some (Val.mine Att.old), none, none⟩
 def final : FS := ⟨none, none, some (Val.mine Att.new)⟩
@@ -179,9 +184,30 @@ theorem recover_all_or_nothing :
 theorem recover_stuck_only_if_source_occupied :
     ∀ s ∈ allStates, (recover s).priv = none ∨ s.src ≠ none := by decide
 
-/-- Recovery can be re-run safely. -/
+/-- Recovery can be re-run safely, from any state holding our file exactly once. -/
 theorem recover_idempotent :
-    ∀ s ∈ allStates, recover (recover s) = recover s := by decide
+    ∀ s ∈ allStates, mineCount s = 1 → recover (recover s) = recover s := by decide
+
+/-- Why the premise: with our file in two places (unreachable, since recovery
+    conserves a single copy), roll-forward leaves the source's copy with the new
+    attestation, and the repair rule then changes it on a second recovery.
+    Found when the repair rule was added and the unconditional statement failed. -/
+theorem idempotence_needs_single_copy :
+    let s : FS := ⟨some (Val.mine Att.new), some (Val.mine Att.new), none⟩
+    mineCount s = 2 ∧ recover (recover s) ≠ recover s := by decide
+
+/-- Roll-back's move without its restore: the state a crash inside recovery
+    leaves, since the implementation moves first and restores second. -/
+def moveBack (s : FS) : FS :=
+  match s.priv, s.src with
+  | some v, none => { s with priv := none, src := some v }
+  | _, _ => s
+
+/-- A crash between recovery's move and its restore is harmless: recovering
+    again reaches exactly what an uninterrupted recovery reaches. -/
+theorem recovery_crash_window_harmless :
+    ∀ s ∈ allStates, (s.priv ≠ some (Val.mine Att.new) ∨ s.dst ≠ none) →
+      recover (moveBack s) = recover s := by decide
 
 end DARM.RenameProtocol
 
@@ -196,3 +222,5 @@ end DARM.RenameProtocol
 #print axioms DARM.RenameProtocol.recover_conserves_ours
 #print axioms DARM.RenameProtocol.recover_all_or_nothing
 #print axioms DARM.RenameProtocol.recover_idempotent
+#print axioms DARM.RenameProtocol.recovery_crash_window_harmless
+#print axioms DARM.RenameProtocol.idempotence_needs_single_copy
