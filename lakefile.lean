@@ -56,6 +56,7 @@ lean_lib GRBS where
     `R23DARMGuardCausalCoverage,
     `B8TypedEffectLog,
     `B9RenameProtocol,
+    `B6cCompoundRename,
     `B9RecoveryCheck,
     `B9RecoveryTrace,
     `B9RecoveryTraceBad,
