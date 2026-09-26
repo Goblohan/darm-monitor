@@ -1,0 +1,23 @@
+name: GRBS library (every root, built by name)
+
+# The default `lake build` target is DarmMonitor and does not include the
+# GRBS library, which holds B5 through B9, R23 and the Lean-checked traces.
+# Lean Action CI #259 passed on 1e91cfe although two GRBS files did not
+# compile. This workflow builds GRBS by name and fails on any error.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  grbs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+      - name: Build GRBS by name (scripts/gate.sh)
+        run: ./scripts/gate.sh

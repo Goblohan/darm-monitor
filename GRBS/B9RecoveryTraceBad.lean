@@ -8,20 +8,20 @@ namespace DARM.RecoveryTraceBad
 open DARM.RenameProtocol DARM.RecoveryCheck
 
 def observations : List Obs := [
-  Obs.full (FS.mk none some (Val.mine Att.old) none) (FS.mk some (Val.mine Att.old) none none),
-  Obs.full (FS.mk none some (Val.mine Att.old) some Val.foreign) (FS.mk some (Val.mine Att.old) none some Val.foreign),
-  Obs.full (FS.mk some Val.foreign some (Val.mine Att.old) none) (FS.mk some Val.foreign some (Val.mine Att.old) none),
-  Obs.full (FS.mk some Val.foreign some (Val.mine Att.old) some Val.foreign) (FS.mk some Val.foreign some (Val.mine Att.old) some Val.foreign),
-  Obs.full (FS.mk none some (Val.mine Att.new) none) (FS.mk none none some (Val.mine Att.new)),
-  Obs.full (FS.mk none some (Val.mine Att.new) some Val.foreign) (FS.mk some (Val.mine Att.old) none some Val.foreign),
-  Obs.full (FS.mk some Val.foreign some (Val.mine Att.new) none) (FS.mk some Val.foreign none some (Val.mine Att.new)),
-  Obs.full (FS.mk some Val.foreign some (Val.mine Att.new) some Val.foreign) (FS.mk some Val.foreign some (Val.mine Att.new) some Val.foreign),
-  Obs.full (FS.mk none none some (Val.mine Att.new)) (FS.mk none none some (Val.mine Att.new)),
-  Obs.full (FS.mk none none some Val.foreign) (FS.mk none none some Val.foreign),
-  Obs.full (FS.mk some Val.foreign none some (Val.mine Att.new)) (FS.mk some Val.foreign none some (Val.mine Att.new)),
-  Obs.full (FS.mk some Val.foreign none some Val.foreign) (FS.mk some Val.foreign none some Val.foreign),
-  Obs.interrupted (FS.mk none some (Val.mine Att.new) some Val.foreign) (FS.mk some (Val.mine Att.new) none some Val.foreign),
-  Obs.full (FS.mk some (Val.mine Att.new) none some Val.foreign) (FS.mk some (Val.mine Att.old) none none)
+  Obs.full (FS.mk (none) (some (Val.mine Att.old)) (none)) (FS.mk (some (Val.mine Att.old)) (none) (none)),
+  Obs.full (FS.mk (none) (some (Val.mine Att.old)) (some Val.foreign)) (FS.mk (some (Val.mine Att.old)) (none) (some Val.foreign)),
+  Obs.full (FS.mk (some Val.foreign) (some (Val.mine Att.old)) (none)) (FS.mk (some Val.foreign) (some (Val.mine Att.old)) (none)),
+  Obs.full (FS.mk (some Val.foreign) (some (Val.mine Att.old)) (some Val.foreign)) (FS.mk (some Val.foreign) (some (Val.mine Att.old)) (some Val.foreign)),
+  Obs.full (FS.mk (none) (some (Val.mine Att.new)) (none)) (FS.mk (none) (none) (some (Val.mine Att.new))),
+  Obs.full (FS.mk (none) (some (Val.mine Att.new)) (some Val.foreign)) (FS.mk (some (Val.mine Att.old)) (none) (some Val.foreign)),
+  Obs.full (FS.mk (some Val.foreign) (some (Val.mine Att.new)) (none)) (FS.mk (some Val.foreign) (none) (some (Val.mine Att.new))),
+  Obs.full (FS.mk (some Val.foreign) (some (Val.mine Att.new)) (some Val.foreign)) (FS.mk (some Val.foreign) (some (Val.mine Att.new)) (some Val.foreign)),
+  Obs.full (FS.mk (none) (none) (some (Val.mine Att.new))) (FS.mk (none) (none) (some (Val.mine Att.new))),
+  Obs.full (FS.mk (none) (none) (some Val.foreign)) (FS.mk (none) (none) (some Val.foreign)),
+  Obs.full (FS.mk (some Val.foreign) (none) (some (Val.mine Att.new))) (FS.mk (some Val.foreign) (none) (some (Val.mine Att.new))),
+  Obs.full (FS.mk (some Val.foreign) (none) (some Val.foreign)) (FS.mk (some Val.foreign) (none) (some Val.foreign)),
+  Obs.interrupted (FS.mk (none) (some (Val.mine Att.new)) (some Val.foreign)) (FS.mk (some (Val.mine Att.new)) (none) (some Val.foreign)),
+  Obs.full (FS.mk (some (Val.mine Att.new)) (none) (some Val.foreign)) (FS.mk (some (Val.mine Att.old)) (none) (none))
 ]
 
 theorem recovery_rejected : checkObs observations = false := by decide
