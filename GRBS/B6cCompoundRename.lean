@@ -22,8 +22,9 @@
   transition on the source and destination.
 
   NOT claimed: the private slot is outside casMove (B9 proves it is empty at
-  the end of both runs); the bridges are shown on B9's witness states, not for
-  all states.
+  the end of both runs); the witness bridges are shown on B9's witness states; the general bridges
+  (run_realizes_casMove, every_crash_recovers_atomically) hold for every
+  attestation on our source file and every destination content.
 -/
 import B6EffectIntegrity
 import B9RenameProtocol
@@ -31,7 +32,7 @@ import B9RenameProtocol
 namespace DARM.CompoundRename
 
 open DARM.EffectIntegrity (casOpt)
-open DARM.RenameProtocol (FS Val claim reattest place recover start blocked)
+open DARM.RenameProtocol (FS Val Att claim reattest place rollback protocol recover start blocked)
 
 /-- Move `v` from `src` to an absent `dst`, or change nothing. -/
 def casMove {α : Type} [DecidableEq α] (src dst : Option α) (v : α) :
@@ -101,6 +102,31 @@ theorem occupied_recovery_realizes_conflict :
     proj (recover (claim blocked)) = (casMove (erase blocked.src) (erase blocked.dst) "mine").1 := by
   decide +kernel
 
+/-! ## General bridges: every source attestation, every destination, every crash -/
+
+/-- The state the broker's run ends in. -/
+def runEnd (s : FS) : Option FS := (protocol s).getLast?
+
+/-- For ANY attestation on our source file and ANY destination content, with
+    the private slot empty, B9's run ends exactly in casMove's result, and the
+    private slot ends empty. -/
+theorem run_realizes_casMove (a : Att) (d : Option Val) :
+    (runEnd ⟨some (Val.mine a), none, d⟩).map proj = some (casMove (some "mine") (erase d) "mine").1 ∧
+    (runEnd ⟨some (Val.mine a), none, d⟩).map FS.priv = some none := by
+  cases a <;> rcases d with _ | ⟨_ | _⟩ <;>
+    simp [runEnd, protocol, claim, reattest, place, rollback, proj, erase, casMove]
+
+/-- Every crash is atomic: for EVERY state the run passes through and ANY
+    destination content, recovery ends either before the rename or at
+    casMove's result, never in between, with the private slot empty. -/
+theorem every_crash_recovers_atomically (a : Att) (d : Option Val) :
+    ∀ t ∈ protocol ⟨some (Val.mine a), none, d⟩,
+      (proj (recover t) = (some "mine", erase d) ∨
+       proj (recover t) = (casMove (some "mine") (erase d) "mine").1) ∧
+      (recover t).priv = none := by
+  cases a <;> rcases d with _ | ⟨_ | _⟩ <;>
+    simp [protocol, claim, reattest, place, rollback, recover, proj, erase, casMove]
+
 end DARM.CompoundRename
 
 #print axioms DARM.CompoundRename.casMove_applies_iff
@@ -110,3 +136,5 @@ end DARM.CompoundRename
 #print axioms DARM.CompoundRename.independent_pair_can_lose
 #print axioms DARM.CompoundRename.normal_run_realizes_casMove
 #print axioms DARM.CompoundRename.occupied_recovery_realizes_conflict
+#print axioms DARM.CompoundRename.run_realizes_casMove
+#print axioms DARM.CompoundRename.every_crash_recovers_atomically
