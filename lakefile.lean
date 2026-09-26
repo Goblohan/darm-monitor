@@ -48,6 +48,7 @@ lean_lib GRBS where
     `K4RoleKernel,
     `B3BrokerModel,
     `E24EpistemicPremiseTransfer,
+    `E24bResourceIntents,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
