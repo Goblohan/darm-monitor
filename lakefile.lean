@@ -50,6 +50,7 @@ lean_lib GRBS where
     `E24EpistemicPremiseTransfer,
     `E24bResourceIntents,
     `E24cRevocation,
+    `E24dRedemption,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
