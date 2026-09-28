@@ -396,6 +396,57 @@ theorem pinned_registry_executes_only_principal_effect (p : Proposal)
   complete_under_b3_execute_only_acceptable _ _ _ p c e
     (by intro i hi; simp at hi; subst hi; exact pinned_complete_under_b3) h
 
+/-! ## Part 7: Deny-by-default is necessary for completeness (deletion witness) -/
+
+/-- `writeCfg` with deny-by-default lifted for one dimension: its policy also
+    rules a `mode` argument, as payload with any value. Credential and registry
+    are unchanged. The deletion is at the policy level (a rule for one more key),
+    not in K4's admission algorithm. -/
+def permissiveCfg : DARM.Broker3.Config :=
+  { DARM.Broker3.writeCfg with
+    policy := { DARM.Kernel4.writePolicy with
+      tools := DARM.Kernel4.writePolicy.tools.map (fun t =>
+        { t with rules := t.rules ++
+          [{ key := "mode", allowedValues := [], allowedPrefixes := [""], payload := true }] }) } }
+
+/-- The principal's own report, plus an argument the intent does not mention. -/
+def reportAppend : Proposal :=
+  { tool := "write_file", args := DARM.Broker3.agentWritesReport.args ++ [("mode", "append")] }
+
+theorem report_append_fits_pinned : pinnedReport.fits reportAppend = true := by
+  decide +kernel
+
+/-- The real configuration refuses it: deny-by-default. -/
+theorem writeCfg_refuses_report_append :
+    (DARM.Broker3.brokerStep DARM.Broker3.writeCfg reportAppend).isNone = true := by
+  decide +kernel
+
+/-- The permissive configuration admits it. -/
+theorem permissive_admits_report_append :
+    (DARM.Broker3.brokerStep permissiveCfg reportAppend).isSome = true := by
+  decide +kernel
+
+theorem report_append_not_acceptable :
+    ¬ WritesExactly "/workspace/reports/q3.md" "Q3 summary" reportAppend := by
+  intro ⟨_, hall, _, _⟩
+  have := hall ("mode", "append") (by simp [reportAppend, DARM.Broker3.agentWritesReport])
+  simp at this
+
+/-- Deletion witness: without deny-by-default for one extra dimension, the
+    pinned intent is no longer complete. With pinned_complete_under_b3, the same
+    intent is complete or not depending only on whether the policy excludes the
+    extra key, so the kernel's contribution to completeness is necessary. -/
+theorem pinned_incomplete_without_deny_by_default :
+    ¬ CompleteUnder permissiveCfg (WritesExactly "/workspace/reports/q3.md" "Q3 summary") pinnedReport := by
+  intro h
+  cases hb : DARM.Broker3.brokerStep permissiveCfg reportAppend with
+  | none =>
+    have := permissive_admits_report_append
+    rw [hb] at this
+    simp at this
+  | some e =>
+    exact report_append_not_acceptable (h reportAppend e report_append_fits_pinned hb)
+
 end DARM.E24d
 
 #print axioms DARM.E24d.p13_attacker_first_executes
@@ -415,3 +466,7 @@ end DARM.E24d
 #print axioms DARM.E24d.complete_under_b3_execute_only_acceptable
 #print axioms DARM.E24d.pinned_complete_under_b3
 #print axioms DARM.E24d.pinned_registry_executes_only_principal_effect
+#print axioms DARM.E24d.writeCfg_refuses_report_append
+#print axioms DARM.E24d.permissive_admits_report_append
+#print axioms DARM.E24d.report_append_not_acceptable
+#print axioms DARM.E24d.pinned_incomplete_without_deny_by_default
