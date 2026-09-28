@@ -51,6 +51,7 @@ lean_lib GRBS where
     `E24bResourceIntents,
     `E24cRevocation,
     `E24dRedemption,
+    `E24dRegistryPremises,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
