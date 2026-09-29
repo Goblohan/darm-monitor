@@ -3,11 +3,17 @@
 # (DarmMonitor) does not include GRBS, so a bare `lake build` never
 # compiles GRBS roots; that gap let 1e91cfe through with broken files.
 set -o pipefail
+# Locally (not in CI), default to one Lean thread: a full build with Lean's
+# default parallelism can exhaust a small machine's memory (3.8 GB under WSL).
+if [ -z "$CI" ] && [ -z "$LEAN_NUM_THREADS" ]; then export LEAN_NUM_THREADS=1; fi
 lake build GRBS > /tmp/gate_grbs.txt 2>&1
 code=$?
 if [ "$code" -ne 0 ]; then
   echo "GATE FAILED: lake build GRBS exited $code"
   grep -E "^error|error:" /tmp/gate_grbs.txt | head -10
+  if grep -q "not enough memory\|resource exhausted" /tmp/gate_grbs.txt; then
+    echo "(out of memory: this is not a proof failure; free memory or set LEAN_NUM_THREADS=1 and retry)"
+  fi
   exit 1
 fi
 echo "GATE PASSED: $(tail -1 /tmp/gate_grbs.txt)"
