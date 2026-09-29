@@ -61,6 +61,7 @@ lean_lib GRBS where
     `E2PhysicalBoundary,
     `E25AuthorizationContractSeparation,
     `E27ExecutionIdentity,
+    `E27bOperationIdentity,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
