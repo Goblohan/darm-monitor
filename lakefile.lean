@@ -56,6 +56,7 @@ lean_lib GRBS where
     `E24eLineage,
     `CompositionLayers,
     `E26InvocationExecutionCorrespondence,
+    `E26_6Composition,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
