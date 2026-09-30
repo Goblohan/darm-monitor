@@ -67,37 +67,108 @@ the model and what realizes it (`E2PhysicalBoundary.preservation_transfers`).
 
 ## 5. Execution identity, by two complementary mechanisms
 
-Through the log: a consistently attested file identifies the logged write
-(`E27ExecutionIdentity.attested_identifies_write`, propext only), which
-corresponds to the authorized invocation (`E27ExecutionIdentity.logged_write_corresponds`),
-and was appended by a broker operation in the actual history
-(`E27bOperationIdentity.log_provenance`,
-`E27bOperationIdentity.attested_file_was_placed_by_broker`, propext only).
+Authorization decides what may happen, and the audit log records what the
+broker did. Neither, on its own, answers the question an auditor actually
+faces: this file holds this content; was it put there by the operation that was
+authorized, or by something else? We call this execution identity. The broker
+leaves two independent kinds of evidence for every write, an entry in its audit
+log and an attestation carried with the file itself (a signature over the
+request, the target and the content digest, stored in an extended attribute).
+We show that each yields execution identity under its own assumptions, and that
+each catches an attack the other cannot.
 
-Through a path-bound attestation, without the log: every attestation present was
-minted by a broker operation (`B8pPathBoundAttestation.evolve_inv`), so a file
-whose attestation names its location was placed there under that request
-(`B8pPathBoundAttestation.attested_at_location_was_placed`, propext only). The
-earlier model is this one with the path forgotten (`B8pPathBoundAttestation.proj_write`).
+### 5.1 Identity through the log
 
-Neither is redundant. A foreign move defeats an attestation without a path
-(`E27ExecutionIdentity.attestation_alone_does_not_bind_location`) and is caught
-by the path (`B8pPathBoundAttestation.moved_file_names_its_origin`); a replay
-passes the attestation and is caught by the log
-(`B8pPathBoundAttestation.replay_accepted_by_attestation_caught_by_log`).
-Runtime: each mechanism has a test that isolates it, and removing either check
-is caught (mutation gate).
+In the typed effect-log model, a path is consistent with the log when its
+latest entry determines the file there: after a write under request r with
+content d, exactly that content attested (r, d); after a delete, nothing; with
+no entry at all, only unattested files. From these definitions alone, an
+attested file at a consistent path forces the log's latest entry for that path
+to be the write under that request, with that content
+(`E27ExecutionIdentity.attested_identifies_write`, which rests on propositional
+extensionality only). For a write carrying a pinned payload, the logged write
+corresponds to the invocation that carried it
+(`E27ExecutionIdentity.logged_write_corresponds`).
 
-### 5.1 The chain as one theorem
+The log is only as good as its provenance, so we model the world's history
+explicitly, as any interleaving of broker operations and foreign actions
+(deletion, tampering, creation, moving). Each broker operation appends exactly
+its own entries, and no foreign action appends any, so every entry in the final
+log was appended by a broker operation that occurs in the history
+(`E27bOperationIdentity.log_provenance`). It follows that, from the empty world
+and in any history, a consistently attested file was placed by a broker write
+or rename under its request identifier
+(`E27bOperationIdentity.attested_file_was_placed_by_broker`, again resting on
+propositional extensionality only).
 
-For any path and content: if a proposal fits the pinned intent, B3 admits it as
-an invocation, the history executed that invocation under a request, and the
-world is consistent with the file carrying that request's attestation, then the
-file holds exactly the authorized content, placed by a write in the history that
-corresponds to the invocation (`E28AuthorizedEffectIdentity.authorized_effect_to_attested_state`).
-Along the way, E26's bridge holds for any path and content
-(`E28AuthorizedEffectIdentity.invocation_writes_exactly_of_proposal`). The request
-link is an explicit hypothesis: each request is minted for one invocation.
+In this model the attestation names a request and a digest but no path. That
+is not enough on its own: after a broker write and a foreign move, the moved
+file carries an attestation that looks valid, and only the log shows that no
+write ever placed it there
+(`E27ExecutionIdentity.attestation_alone_does_not_bind_location`).
+
+### 5.2 Identity through the attestation
+
+The implementation signs the target as well, and verification rejects an
+attestation whose target is not the file's location. We model that attestation
+directly, together with a stronger adversary who may also copy a file with its
+attributes. Unforgeability is stated as a property of the foreign actions:
+they may move, copy or keep attestations, never mint them. Under it, every
+attestation present anywhere was minted by a broker operation in the history,
+with exactly that request, target and digest
+(`B8pPathBoundAttestation.evolve_inv`). A file whose attestation names its own
+location was therefore placed there by a broker write or rename under that
+request (`B8pPathBoundAttestation.attested_at_location_was_placed`), without
+consulting the log. The log model is exactly this model with the path forgotten
+(`B8pPathBoundAttestation.proj_write`), so every result about the log model
+holds of an abstraction of this one.
+
+### 5.3 Neither mechanism is redundant
+
+The two mechanisms bind different things. A foreign move leaves an attestation
+that names the file's original location, so the path check rejects it without
+the log (`B8pPathBoundAttestation.moved_file_names_its_origin`). A replay (a
+file copied aside, deleted by the broker, then copied back) carries an
+attestation that names its location and was genuinely minted, so the
+attestation accepts it; the log's latest entry for that path is the deletion,
+so the log does not
+(`B8pPathBoundAttestation.replay_accepted_by_attestation_caught_by_log`). The
+attestation binds origin and location; the log binds freshness and order.
+
+The implementation behaves as the models predict. One runtime test moves an
+attested file onto a path whose log entry expects the same content, so that
+only the signed path can catch it; another replays a deleted file, so that only
+the log can. Removing the path check from the broker is caught by the first
+test alone; removing the log's freshness checks is caught by the second, and
+also by an earlier test of the typed log.
+
+### 5.4 The chain as one theorem
+
+The results of Sections 2, 4 and 5 compose. For any path and content: if a
+proposal fits the intent pinning them, the kernel admits it as an invocation,
+the history executed that invocation under a request, and the world is
+consistent with the file carrying that request's attestation, then the file
+holds exactly the authorized content, placed by a write in the history that
+corresponds to the invocation
+(`E28AuthorizedEffectIdentity.authorized_effect_to_attested_state`). On the
+way, the correspondence of Section 4 is generalized from one path and content
+to all of them (`E28AuthorizedEffectIdentity.invocation_writes_exactly_of_proposal`).
+
+The theorem has one hypothesis about the broker itself, stated rather than
+assumed silently: each request identifier belongs to one invocation. A runtime
+test checks it directly, over a burst of writes, and follows each attested file
+back through its identifier to the invocation that intended exactly its
+content. Deriving identifiers from the target instead of minting them fresh
+breaks the hypothesis, and the test catches it; notably, the traceback alone
+still succeeds under that fault, because a later write overwrites the earlier
+one's record. The conclusion, observed at runtime, does not imply the
+hypothesis, which is why the theorem states it separately.
+
+Limits of this section: the chain covers pinned writes (deletes and renames are
+not yet authorized effects in the correspondence); the implementation's
+agreement with the models is tested, not proved; unforgeability is assumed; and
+identity holds at verification time, so a later foreign change is detected at
+the next verification, not prevented.
 
 ## 6. Composition with other defenses
 
