@@ -16,7 +16,8 @@ if [ "$code" -ne 0 ]; then
   fi
   exit 1
 fi
-echo "GATE PASSED: $(tail -1 /tmp/gate_grbs.txt)"
+echo "build ok: $(tail -1 /tmp/gate_grbs.txt)"
 if [ -f paper/check_citations.py ]; then
   python3 paper/check_citations.py > /tmp/gate_paper.txt 2>&1 || { echo "GATE FAILED: the paper cites theorems that do not exist"; grep MISSING /tmp/gate_paper.txt | head -10; exit 1; }
 fi
+echo "GATE PASSED: every GRBS root builds, and every theorem the paper cites exists"
