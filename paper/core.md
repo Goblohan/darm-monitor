@@ -88,6 +88,17 @@ passes the attestation and is caught by the log
 Runtime: each mechanism has a test that isolates it, and removing either check
 is caught (mutation gate).
 
+### 5.1 The chain as one theorem
+
+For any path and content: if a proposal fits the pinned intent, B3 admits it as
+an invocation, the history executed that invocation under a request, and the
+world is consistent with the file carrying that request's attestation, then the
+file holds exactly the authorized content, placed by a write in the history that
+corresponds to the invocation (`E28AuthorizedEffectIdentity.authorized_effect_to_attested_state`).
+Along the way, E26's bridge holds for any path and content
+(`E28AuthorizedEffectIdentity.invocation_writes_exactly_of_proposal`). The request
+link is an explicit hypothesis: each request is minted for one invocation.
+
 ## 6. Composition with other defenses
 
 A layer backs another up only in a dimension it also checks, from an independent
