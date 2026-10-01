@@ -6,14 +6,34 @@ cited here.
 
 ## 1. Setting
 
-An agent proposes tool invocations; a reference monitor (the broker) decides,
-executes, and records. The boundary observes the proposal's arguments and the
-world the broker reads, nothing else. Guarantees are stated relative to explicit
-assumptions (complete mediation, key secrecy, an external checkpoint sink).
-Kernel admission has no false admits (`K3bKernelR22.k3b_no_false_admits`);
-every effect is preceded by durable evidence, under faults
-(`B4BrokerLifecycle.step_preserves`); reconciliation reports correspondence,
-never causation (`B5EffectReconciliation.success_is_state_confirmation`).
+An agent proposes tool invocations; a reference monitor, the broker, decides
+each one, executes what it admits, and records what happened. The threat is a
+compromised agent: one whose proposals may be chosen by an attacker, for
+example through injected instructions. The broker, its decision kernel and the
+principal who issues authority are trusted; the agent is not. The boundary
+observes the proposal's arguments and the world the broker reads, and nothing
+else, which Section 3 shows is exactly what limits what any authorization can
+guarantee. Guarantees are stated relative to explicit assumptions: complete
+mediation (every governed effect passes through the broker), the secrecy of
+the broker's signing key, and an external sink for audit checkpoints.
+
+Three properties of the decision and execution path are used throughout. The
+kernel decides on a canonical invocation; for the policy that motivated it, in
+which policies that name tools alone collapse invocations with different
+authority, it never admits an invocation that the policy's semantics forbids
+(`K3bKernelR22.k3b_no_false_admits`). In the broker's lifecycle model, the
+invariant that durable evidence precedes every effect is preserved by every
+step, under any combination of the modeled faults
+(`B4BrokerLifecycle.step_preserves`). And reconciliation makes a state claim,
+not a causal one: an outcome is confirmed as a success exactly when the
+observed state is the intended one (`B5EffectReconciliation.success_is_state_confirmation`).
+
+Section 2 develops authorization completeness as a calculus, Section 3 shows
+exactly what it can and cannot reach, Section 4 follows an authorized payload
+to the world, Section 5 establishes execution identity and composes the whole
+chain into one theorem, Section 6 treats composition with other defenses,
+Section 7 describes the reference implementation and the discipline that ties
+its guarantees to their evidence, and Section 8 collects the limits.
 
 ## 2. Authorization completeness, as a calculus
 
