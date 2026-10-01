@@ -36,19 +36,74 @@ never spends its intent (`E24dRedemption.no_burn`, `E24dRedemption.unknown_holds
 
 ## 3. What completeness can reach
 
-Completeness is possible exactly when acceptance is determined by what the
-boundary observes (`E24eLineage.complete_intent_exists_iff`, no axioms); two
-admitted look-alikes that differ in acceptability admit no complete intent
-(`E24eLineage.no_complete_intent_for_hidden_acceptance`). Lineage with a
-boundary-evaluated derivation reduces to pinning (`E24eLineage.derived_complete`).
+Section 2 shows that an intent pinning its content is complete: whatever fits
+it and is admitted is exactly the authorized effect. But a principal often
+cannot pin content in advance. A report computed from a data file, a summary of
+a document, a reply to a message: the principal knows what an acceptable result
+would be, not its exact bytes. How far can completeness reach?
 
-Completeness constrains outputs, not inputs: a complete intent admits a proposal
-built from an undeclared input (`E25AuthorizationContractSeparation.complete_yet_inputs_uncovered`),
-and when inputs are unobservable, no intent can enforce their coverage
-(`E25AuthorizationContractSeparation.input_coverage_not_enforceable`).
+### 3.1 The characterization
 
-Limit: the faithfulness of generated content is not observable at the boundary;
-no intent is complete for it.
+An intent can constrain a proposal only through what the boundary observes:
+the proposal's arguments, and the world the broker reads. Two proposals that
+look identical to the boundary are fitted by exactly the same intents. Call
+them look-alikes. It follows that a complete intent for a target proposal
+exists if and only if every admitted look-alike of that proposal is acceptable
+(`E24eLineage.complete_intent_exists_iff`). The theorem is generic in the
+kinds of authorization, proposal and observation, and it is proved from no
+axioms at all. Its sharp edge is the contrapositive: if two admitted
+look-alikes differ in acceptability, no intent fitting them is complete
+(`E24eLineage.no_complete_intent_for_hidden_acceptance`).
+
+The characterization turns a design question into a test. To decide whether
+any authorization mechanism can make a given acceptance judgment enforceable,
+ask whether that judgment is determined by what the boundary observes.
+
+### 3.2 What lies within reach
+
+Known content is within reach: it appears in the proposal, so pinning it makes
+the look-alikes of the target exactly the target, as Section 2 shows. So is
+content that is a function the broker can evaluate on a source it reads (a
+total computed from a data file, a format conversion). The broker reads the
+source and evaluates the function at the decision, so the intent pins the
+result; such lineage reduces to pinning, computed at redemption
+(`E24eLineage.derived_complete`). Both cases share the condition the
+characterization names: acceptance is determined by what the boundary
+observes.
+
+### 3.3 What lies beyond it
+
+The faithfulness of generated content is not within reach. A faithful summary
+of a document and an unfaithful one can be byte-for-byte identical proposals
+as far as the boundary can tell, since what distinguishes them is how they were
+produced, which the boundary does not observe. By the characterization, no
+intent is complete for faithfulness. This is not a gap in this system's
+engineering: it bounds every mechanism that decides on what the boundary
+observes, including provenance labels, which record where data came from but
+not whether a transformation of it was faithful. Closing it would require a
+component that makes the generating process observable, and that component's
+correctness would then be an assumption of the guarantee, not a consequence of
+it.
+
+### 3.4 Outputs, not inputs
+
+Completeness constrains what an action produces, not what the agent drew on.
+In one model with both notions, an intent that pins content is complete, yet
+it admits a proposal produced from an input that no contract declared
+(`E25AuthorizationContractSeparation.complete_yet_inputs_uncovered`). And
+where the boundary does not observe an agent's inputs, as it does not here (the
+agent reads before it proposes, and its reads never appear in the proposal), no
+intent can enforce coverage of them
+(`E25AuthorizationContractSeparation.input_coverage_not_enforceable`), by the
+same argument: two proposals with identical content and different inputs are
+look-alikes. Governing inputs would mean mediating reads, which would enlarge
+what the boundary observes; the characterization would then apply to the
+enlarged observation.
+
+Limits of this section: the characterization speaks of intent languages that
+see proposals only through the boundary's observation and can express exact
+look-alike sets; derived content requires a function the broker can evaluate
+and a source it can read, and the source may change after the decision.
 
 ## 4. From authorization to effect
 
