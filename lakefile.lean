@@ -65,6 +65,7 @@ lean_lib GRBS where
     `B8pPathBoundAttestation,
     `E28AuthorizedEffectIdentity,
     `E28aUnderAttack,
+    `E29FaithfulRename,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
