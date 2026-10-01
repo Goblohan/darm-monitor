@@ -16,12 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Tier 1: placeholder search. Excludes comment lines so header text
-      # like "no `sorry`" does not self-trigger. Matches the tactic forms
-      # `sorry` and `admit`, not the substring inside other identifiers.
+      # Tier 1: placeholder search. Matches literal standalone `sorry` and
+      # `admit` tactic lines. The exact-token check avoids false positives
+      # from identifiers such as `admit₁` and `admit₂`.
       - name: Placeholder search (tier 1)
         run: |
-          if grep -rnE '^\s*(sorry|admit)\b' DarmMonitor/*.lean GRBS/*.lean; then
+          if grep -rnE '^[[:space:]]*(sorry|admit)([[:space:]]|$)' DarmMonitor/*.lean GRBS/*.lean; then
             echo "::error::literal sorry/admit found outside comments"
             exit 1
           fi
