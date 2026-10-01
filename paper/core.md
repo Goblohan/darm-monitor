@@ -355,16 +355,48 @@ scenarios and a paired payload variant. [withheld pending disclosure]
 
 ## 7. The reference implementation, and the evidence discipline
 
-Every guarantee in the threat model names a claim; every claim cites its
-theorems at a pinned commit, its gated runtime tests, and its limit; both
-directions are checked mechanically. Each load-bearing check is shown guarded by
-removing it (nine mutations, all caught); the gate found checks that no test
-asserted, each fixed by asserting the exact failure class. Metrics from the
-graph: claims with both a theorem and runtime evidence, over all claims.
+The system has a reference implementation: a broker and a kernel that enforce
+the guarantees of Sections 1 to 5 on a real filesystem. Its central design
+choice is that every guarantee it states is tied, mechanically, to its
+evidence. The threat model lists 23 guarantees. Each names a claim in an
+assurance graph; each of the graph's 25 claims cites the theorems that prove
+it, at a pinned commit of the proof corpus, the runtime tests that exercise it,
+the implementation that enforces it, and the limit that bounds it. A checker
+verifies both directions on every build: a guarantee without a claim, a claim
+that no guarantee states, a cited theorem or function that does not exist, or a
+cited test that the build does not run, each fails it. Of the 25 claims, 21
+have both a theorem and gated runtime evidence; the remaining 4 are named for
+what they are, tested but not modelled (signatures, checkpoints, availability
+under bursts, and race-free path resolution).
+
+Tests can pass for the wrong reason, so each load-bearing check is shown to be
+guarded by removing it. A mutation gate disables one check at a time in a
+throwaway copy of the broker and requires the full test suite to fail. Ten
+mutations, covering every dimension of the kernel's decision, intents,
+premises, the attestation's path check, the log's freshness checks, and the
+request link of Section 5.4, are all caught. The gate found real gaps: a test
+named for credential expiry that never asserted it, a test of deny-by-default
+that passed because a different check refused, no test at all of the
+credential check, and a runtime check of the attestation's path tested only by
+a stale file that the build never ran. Each was fixed by asserting the exact
+failure class, and each fix was confirmed by rerunning its mutation.
+
+The same discipline applies to this paper: every theorem it cites is checked to
+exist on every build of the proof corpus.
 
 ## 8. Limits
 
-Stated, not hidden: the redemption race when premises hold; generated content's
-faithfulness; inputs; kernel correspondence by certification, not refinement;
-cryptographic unforgeability assumed; availability under bursts beyond the
-backlog; hard links; one effect class (the filesystem) studied in depth.
+Stated, not hidden. The redemption race when premises hold and content is
+unpinned (Section 2.3). The faithfulness of generated content, which no intent
+can make complete (Section 3.3), and the coverage of an agent's inputs, which
+no intent can enforce while inputs are unobserved (Section 3.4). The chain of
+Section 5.4 covers pinned writes; deletes and renames are not yet authorized
+effects in the correspondence. The implementation's agreement with the models
+is tested, not proved, and the kernel's binary is certified on sampled answers
+rather than shown to refine its model. Cryptographic unforgeability and the
+secrecy of the signing key are assumed. Identity holds at verification time:
+a later foreign change is detected at the next verification, not prevented.
+Availability under bursts larger than the listen backlog is a stated limit,
+not a guarantee; hard links lie outside the model; and one effect class, the
+filesystem, has been studied in depth.
+
