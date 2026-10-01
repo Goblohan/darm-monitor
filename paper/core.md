@@ -17,22 +17,75 @@ never causation (`B5EffectReconciliation.success_is_state_confirmation`).
 
 ## 2. Authorization completeness, as a calculus
 
-An authorization is complete for an acceptance judgment if every proposal that
-fits it and is admitted is acceptable. A mediated mechanism whose authorizations
-are all complete executes only acceptable proposals, whoever proposed them
-(`CompletenessCalculus.safety`, proved from no axioms). Completeness survives
-revocation and consumption (`CompletenessCalculus.revocation_preserves_completeness`,
-`CompletenessCalculus.consumption_preserves_completeness`); pinning through an
-injective digest is pinning the value (`CompletenessCalculus.pin_by_injective`).
+A principal grants an agent authority by issuing intents, which the broker
+redeems when a proposal fits them. Consider an intent to write the quarterly
+report. Bound to the tool and the path, it is redeemed by whichever fitting
+proposal arrives first, and a hijacked agent's write to that path, with
+different content, fits it too. Authorization that names only which tool may
+act on which resource admits effects the principal never wanted. What is needed
+is a notion of authorization that constrains the effect itself.
 
-Pinned intents are complete (`E24eLineage.pinned_complete_general`), jointly with
-deny-by-default, which is necessary (`E24dRedemption.pinned_incomplete_without_deny_by_default`).
-No rule over proposals alone closes the redemption race
-(`E24dRedemption.no_exact_rule`); premises close it while false, and the residual
-race when they hold is proved (`E24dRedemption.residual_race_when_premise_true`),
-for registries as the broker implements them
-(`E24dRegistryPremises.no_redemption_without_a_usable_intent`). A failed effect
-never spends its intent (`E24dRedemption.no_burn`, `E24dRedemption.unknown_holds`).
+### 2.1 Completeness, and the calculus
+
+An authorization is complete for an acceptance judgment, relative to a
+boundary, if every proposal that fits it and is admitted by the boundary is
+acceptable. A mechanism is mediated if whatever it executes is fitted by some
+authorization in its registry and admitted by the boundary. Then a mediated
+mechanism whose authorizations are all complete executes only acceptable
+proposals, whoever proposed them, in any order (`CompletenessCalculus.safety`).
+The theorem is proved from no axioms: the guarantee is a matter of logic once
+mediation and completeness hold, and everything particular to a broker enters
+only through the mediation property.
+
+Completeness is an invariant, not a property of a single step. A registry that
+only shrinks keeps it, so revocation and consumption both preserve it
+(`CompletenessCalculus.revocation_preserves_completeness`,
+`CompletenessCalculus.consumption_preserves_completeness`).
+
+### 2.2 Pinning, and why it is joint
+
+An intent that pins both the path and the content is complete for writing
+exactly that content, for any path and content
+(`E24eLineage.pinned_complete_general`). Completeness here is joint: it holds
+only together with the kernel's refusal of arguments the policy does not rule.
+Lift that refusal for a single extra argument, and the same pinned intent
+admits a proposal it should not
+(`E24dRedemption.pinned_incomplete_without_deny_by_default`). Content can also
+be pinned by digest, which is the same constraint exactly when the digest is
+injective on the contents involved (`CompletenessCalculus.pin_by_injective`);
+for a real hash, that is the assumption of collision resistance.
+
+### 2.3 The redemption race
+
+Could a smarter rule close the race without pinning? No rule can, even one
+that sees the world's state as well as the proposal: a principal's write and a
+hijacked agent's identical write, in the same state, receive the same answer
+from any rule, so none admits the first and refuses the second
+(`E24dRedemption.no_exact_rule`). Premises do not separate them either. What
+they do is withhold redemption from everyone until the world reaches a state
+the principal named. An intent may carry premises the broker
+observes itself (a file present, absent, or with a given digest), never read
+from the proposal; while every fitting intent has a false premise, nothing
+executes and nothing is spent, whoever proposes, as the broker implements it
+over a registry of several intents
+(`E24dRegistryPremises.no_redemption_without_a_usable_intent`). When the
+premise holds and the content is unpinned, the first fitting proposal still
+wins; this residual race is proved rather than hidden
+(`E24dRedemption.residual_race_when_premise_true`).
+
+### 2.4 Failures do not spend authority
+
+An intent is reserved when a proposal is admitted and settled only once the
+outcome is durable: a confirmed effect spends it, a proven non-effect returns
+it, and an unresolved outcome keeps it reserved (`E24dRedemption.no_burn`,
+`E24dRedemption.unknown_holds`). A write that fails therefore leaves the
+principal's authority intact, and a write whose outcome is unknown is never
+counted as either.
+
+Limits of this section: completeness for unpinned content is the subject of
+Section 3; the residual race when premises hold is a stated limit; digest
+pinning rests on collision resistance; premises hold at the decision, not
+throughout the effect.
 
 ## 3. What completeness can reach
 
@@ -77,7 +130,8 @@ The faithfulness of generated content is not within reach. A faithful summary
 of a document and an unfaithful one can be byte-for-byte identical proposals
 as far as the boundary can tell, since what distinguishes them is how they were
 produced, which the boundary does not observe. By the characterization, no
-intent is complete for faithfulness. This is not a gap in this system's
+intent is complete for faithfulness
+(`E24eLineage.hidden_process_admits_no_complete_intent`). This is not a gap in this system's
 engineering: it bounds every mechanism that decides on what the boundary
 observes, including provenance labels, which record where data came from but
 not whether a transformation of it was faithful. Closing it would require a
