@@ -161,18 +161,61 @@ and a source it can read, and the source may change after the decision.
 
 ## 4. From authorization to effect
 
-The authorized payload survives canonicalization and reaches the executed
-invocation (`E26InvocationExecutionCorrespondence.canonicalize_projection`,
-`E26InvocationExecutionCorrespondence.pinned_execution_reaches_invocation`), with
-a unique write semantics (`E26InvocationExecutionCorrespondence.correspondence_same_write_semantics`).
-Every mediated transition is logged (`E26_6Composition.apply_log_strictly_grows`),
-so the mediated domain excludes external creation
-(`E26_6Composition.external_creation_not_represented`,
-`E26_6Composition.represented_domain_incomplete`): the boundary of mediation is
-drawn by evidence.
+Section 2 constrains proposals. Effects, though, happen through other
+representations: the invocation the kernel decides on, the operation the broker
+performs, and the transition the world undergoes. An authorization that held of
+the proposal is only worth as much as its survival through each change of
+representation. This section follows the authorized payload from the proposal
+to the world, and shows where the domain of what is governed ends.
 
-Transfer across layers requires a stated assumption, a commuting square between
-the model and what realizes it (`E2PhysicalBoundary.preservation_transfers`).
+### 4.1 Through canonicalization
+
+The broker never executes the agent's proposal as written. It canonicalizes it
+into an invocation, assigning provenance to each argument from the principal's
+registry. Canonicalization keeps the tool and every key and value of the
+proposal, adding only provenance, for any configuration and any proposal
+(`E26InvocationExecutionCorrespondence.canonicalize_projection`). For the
+pinned write studied there, completeness therefore reaches the invocation that
+is actually executed, not only the proposal
+(`E26InvocationExecutionCorrespondence.pinned_execution_reaches_invocation`),
+and any two broker operations corresponding to that invocation have the same
+write semantics, whatever their execution identifiers
+(`E26InvocationExecutionCorrespondence.correspondence_same_write_semantics`).
+Two qualifications keep this honest: the correspondence relates two models (the
+kernel's invocations and the effect model's operations), and a corresponding
+operation exists by construction. Section 5.4 generalizes the payload result
+from one path and content to all of them.
+
+### 4.2 The mediated domain is drawn by evidence
+
+Every broker operation appends to the audit log
+(`E26_6Composition.apply_log_strictly_grows`). An external creation appends
+nothing, so no invocation represents it
+(`E26_6Composition.external_creation_not_represented`), and the domain of
+mediated transitions is incomplete over any domain of possible transitions that
+includes creation (`E26_6Composition.represented_domain_incomplete`). The point
+is not that mediation fails, but where its boundary lies: what the reference
+monitor governs is defined by what it records. A change that leaves no record
+is, by that fact, outside the mediated domain, and the question becomes whether
+verification detects it, which Section 5 answers for moves and replays.
+
+### 4.3 Crossing into the physical
+
+A guarantee proved about a model holds of the world only through an assumption
+that the world realizes the model. We state that assumption exactly, in a small
+setting: a realization map from model states to physical states, and actuator
+correctness, a commuting square (running the actuator on the realized state
+gives the realization of what the model computed). Under it, preservation in
+the model implies preservation in the physical layer, for every meaning, action
+and state (`E2PhysicalBoundary.preservation_transfers`); an actuator that
+violates it gives the counterexample. For this system, the effect model is the
+model layer, and the real filesystem's agreement with it is that assumption,
+which the implementation's trace checks test rather than prove.
+
+Limits of this section: the canonicalization result is general, but the
+correspondence to effect operations covers writes; the corresponding operation
+exists by construction; the physical transfer is an assumption, tested in this
+system, not proved.
 
 ## 5. Execution identity, by two complementary mechanisms
 
