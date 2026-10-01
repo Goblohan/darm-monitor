@@ -336,11 +336,61 @@ still succeeds under that fault, because a later write overwrites the earlier
 one's record. The conclusion, observed at runtime, does not imply the
 hypothesis, which is why the theorem states it separately.
 
-Limits of this section: the chain covers pinned writes (deletes and renames are
-not yet authorized effects in the correspondence); the implementation's
-agreement with the models is tested, not proved; unforgeability is assumed; and
-identity holds at verification time, so a later foreign change is detected at
-the next verification, not prevented.
+### 5.5 Renames: origin, laundering, and lineage
+
+We froze the chain of Section 5.4 and attacked it. Its hypotheses hold
+together in a concrete instance, so it is not vacuous
+(`E28aUnderAttack.e28_hypotheses_satisfiable`), and every attack we aimed at it
+(request or invocation substitution, shared identifiers, reordering, tampering,
+replay, deletion and recreation) is stopped by one of its stated hypotheses.
+The attack did find a fault in the effect model itself: its rename placed
+content at the destination whatever the source held, so a single rename from an
+empty world yields a consistent, attested file that no write produced
+(`E28aUnderAttack.rename_mints_content`).
+
+Requiring a rename to move only what its source holds is not enough. Content
+created outside the broker and then renamed by it is re-attested under the
+rename's request, giving a consistent world with an attested file that no
+authorized write produced (`E29FaithfulRename.rename_launders_foreign_content`).
+Requiring instead that the source carry an attestation for the content it
+moves is enough: every attestation present then names content that some write
+in the history produced, through any chain of renames
+(`E29FaithfulRename.attested_content_has_write_origin`). The model predicted
+that the implementation laundered, and it did (Section 7).
+
+Under that condition, attribution extends to renames. Every attestation has a
+lineage, a chain of requests back to the write that produced its content; a
+file placed by a rename is attributed to the rename invocation that moved it,
+from its path to its destination, with a lineage ending at a write
+(`E30RenameAttribution.rename_placed_lineage`), and if that write was executed
+for the authorized write invocation, the renamed file holds exactly the
+authorized content (`E30RenameAttribution.rename_placed_content_authorized`).
+A runtime test follows a renamed file's attestation back, through the
+attestation the rename recorded from its source, to the write.
+
+### 5.6 Beyond the filesystem
+
+To test whether the theory depends on the filesystem, we modeled a remote
+service whose state the broker cannot observe. With a service that records the
+request's identifier in the state it creates, every such record was produced by
+the broker's delivered request under that identifier, whatever other clients
+did (`E31RemoteEffects.echoed_record_attributed`). Without one, a request whose
+response was lost and a request that was dropped while another client sent the
+identical one reach the identical world, so nothing observable attributes the
+effect (`E31RemoteEffects.no_attribution_without_echo`); and from the broker's
+own record after a timeout, no retry decision is exactly-once
+(`E31RemoteEffects.no_exactly_once_from_own_record`). The authorization results
+transfer unchanged, since they concern proposals; what breaks is what rested
+on observing the target. As Section 3 predicts, attribution and exactly-once
+hold precisely when the remote state carries the request's identity.
+
+Limits of this section: the chain covers pinned writes, and renames under
+attestation-faithful renaming; deletes are not attributed, since an absence
+carries no attestation; the implementation's agreement with the models is
+tested, not proved; unforgeability is assumed; and identity holds at
+verification time, so a later foreign change is detected at the next
+verification, not prevented.
+
 
 ## 6. Composition with other defenses
 
@@ -358,28 +408,37 @@ scenarios and a paired payload variant. [withheld pending disclosure]
 The system has a reference implementation: a broker and a kernel that enforce
 the guarantees of Sections 1 to 5 on a real filesystem. Its central design
 choice is that every guarantee it states is tied, mechanically, to its
-evidence. The threat model lists 23 guarantees. Each names a claim in an
-assurance graph; each of the graph's 25 claims cites the theorems that prove
+evidence. The threat model lists 25 guarantees. Each names a claim in an
+assurance graph; each of the graph's 27 claims cites the theorems that prove
 it, at a pinned commit of the proof corpus, the runtime tests that exercise it,
 the implementation that enforces it, and the limit that bounds it. A checker
 verifies both directions on every build: a guarantee without a claim, a claim
 that no guarantee states, a cited theorem or function that does not exist, or a
-cited test that the build does not run, each fails it. Of the 25 claims, 21
-have both a theorem and gated runtime evidence; the remaining 4 are named for
+cited test that the build does not run, each fails it. Of the 27 claims, 23 have both a theorem and gated runtime evidence; the remaining 4 are named for
 what they are, tested but not modelled (signatures, checkpoints, availability
 under bursts, and race-free path resolution).
 
 Tests can pass for the wrong reason, so each load-bearing check is shown to be
 guarded by removing it. A mutation gate disables one check at a time in a
-throwaway copy of the broker and requires the full test suite to fail. Ten
-mutations, covering every dimension of the kernel's decision, intents,
-premises, the attestation's path check, the log's freshness checks, and the
-request link of Section 5.4, are all caught. The gate found real gaps: a test
+throwaway copy of the broker and requires the full test suite to fail. Eleven mutations, covering every dimension of the kernel's decision, intents,
+premises, the attestation's path check, the log's freshness checks, the request
+link of Section 5.4, and the rename's source check of Section 5.5, are all
+caught. The gate found real gaps: a test
 named for credential expiry that never asserted it, a test of deny-by-default
 that passed because a different check refused, no test at all of the
 credential check, and a runtime check of the attestation's path tested only by
 a stale file that the build never ran. Each was fixed by asserting the exact
 failure class, and each fix was confirmed by rerunning its mutation.
+
+The clearest evidence for the method came from the model. Attacking the chain
+of Section 5.4 showed that renames in the effect model could mint content;
+asking what condition prevents it showed that requiring a rename to move only
+what its source holds still launders foreign content. A probe then confirmed
+that the implementation did exactly that: a file created outside the broker,
+renamed through it, came out attested, and verification reported nothing. The
+model's condition became the fix, the refusal is recorded like every other, a
+test exercises each way to launder, and a mutation that removes the check is
+caught by that test alone.
 
 The same discipline applies to this paper: every theorem it cites is checked to
 exist on every build of the proof corpus.
@@ -389,9 +448,10 @@ exist on every build of the proof corpus.
 Stated, not hidden. The redemption race when premises hold and content is
 unpinned (Section 2.3). The faithfulness of generated content, which no intent
 can make complete (Section 3.3), and the coverage of an agent's inputs, which
-no intent can enforce while inputs are unobserved (Section 3.4). The chain of
-Section 5.4 covers pinned writes; deletes and renames are not yet authorized
-effects in the correspondence. The implementation's agreement with the models
+no intent can enforce while inputs are unobserved (Section 3.4). The chain of Section 5.4 covers pinned writes, and renames are attributed through
+two requests (Section 5.5); deletes are not attributed, since an absence
+carries no attestation. Beyond the filesystem, attribution and exactly-once
+require the remote state to carry the request's identity (Section 5.6). The implementation's agreement with the models
 is tested, not proved, and the kernel's binary is certified on sampled answers
 rather than shown to refine its model. Cryptographic unforgeability and the
 secrecy of the signing key are assumed. Identity holds at verification time:
