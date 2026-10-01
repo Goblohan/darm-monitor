@@ -70,6 +70,7 @@ lean_lib GRBS where
     `E31RemoteEffects,
     `E32AuthorizationTransformation,
     `E32CoverageCountermodel,
+`E32Canonicalization,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
