@@ -408,27 +408,50 @@ scenarios and a paired payload variant. [withheld pending disclosure]
 The system has a reference implementation: a broker and a kernel that enforce
 the guarantees of Sections 1 to 5 on a real filesystem. Its central design
 choice is that every guarantee it states is tied, mechanically, to its
-evidence. The threat model lists 25 guarantees. Each names a claim in an
-assurance graph; each of the graph's 27 claims cites the theorems that prove
+evidence. The threat model lists 27 guarantees. Each names a claim in an
+assurance graph; each of the graph's 29 claims cites the theorems that prove
 it, at a pinned commit of the proof corpus, the runtime tests that exercise it,
 the implementation that enforces it, and the limit that bounds it. A checker
 verifies both directions on every build: a guarantee without a claim, a claim
 that no guarantee states, a cited theorem or function that does not exist, or a
-cited test that the build does not run, each fails it. Of the 27 claims, 23 have both a theorem and gated runtime evidence; the remaining 4 are named for
+cited test that the build does not run, each fails it. Of the 29 claims, 25 have both a theorem and gated runtime evidence; the remaining 4 are named for
 what they are, tested but not modelled (signatures, checkpoints, availability
 under bursts, and race-free path resolution).
 
 Tests can pass for the wrong reason, so each load-bearing check is shown to be
 guarded by removing it. A mutation gate disables one check at a time in a
-throwaway copy of the broker and requires the full test suite to fail. Eleven mutations, covering every dimension of the kernel's decision, intents,
+throwaway copy of the broker and requires the full test suite to fail. Fifteen mutations, covering every dimension of the kernel's decision, intents,
 premises, the attestation's path check, the log's freshness checks, the request
-link of Section 5.4, and the rename's source check of Section 5.5, are all
-caught. The gate found real gaps: a test
+link of Section 5.4, the rename's source check of Section 5.5, read freshness,
+the normal form of a rename's destination, the handling of a stop signal, and
+the cross-check of canonicalization, are all caught. The gate found real gaps: a test
 named for credential expiry that never asserted it, a test of deny-by-default
 that passed because a different check refused, no test at all of the
 credential check, and a runtime check of the attestation's path tested only by
 a stale file that the build never ran. Each was fixed by asserting the exact
 failure class, and each fix was confirmed by rerunning its mutation.
+
+Every claim also states how its theorems reach the running code, and the build
+counts the answers. The decision path is the model itself, compiled: the kernel
+executable decides with the definition the proofs are about, and it computes
+well-formedness and canonicalization from the raw proposal as well, admitting
+exactly the canonical invocation (`K6KernelCanonicalization.k6_admits_canonical`).
+What travels between the kernel and the broker is covered by theorems about the
+shipped server code: if the broker reads an admission, the line parsed into a
+request that the proved kernel admitted, in either request form
+(`K5WireContract.admit_only_by_kernel`, `K6DecisionServer.admit_only_by_kernel6`),
+and the broker executes the invocation the kernel returned. The trusted base
+that remains is named: the Lean compiler and runtime, the JSON parser and the
+derived instances, the server's input loop, Python's JSON decoder, and the
+broker's decoding of the reply, which is checked against the proved decoder on
+every class of reply and by hash on execution, not proved. Everything after the
+decision rests on models and tests, and the build reports the ratio: one claim
+by construction, one proved, twenty-seven tested. Writing these bridges down
+exactly found four discrepancies no earlier test had: a decoder that raised
+instead of rejecting, a rename destination admitted by the kernel and refused
+only at execution, the same gap in the broker model the code had been
+certified against (`K6KernelCanonicalization.b3_admits_escaping_destination`),
+and a stop signal that could kill the broker without a final record.
 
 The clearest evidence for the method came from the model. Attacking the chain
 of Section 5.4 showed that renames in the effect model could mint content;
@@ -452,8 +475,9 @@ no intent can enforce while inputs are unobserved (Section 3.4). The chain of Se
 two requests (Section 5.5); deletes are not attributed, since an absence
 carries no attestation. Beyond the filesystem, attribution and exactly-once
 require the remote state to carry the request's identity (Section 5.6). The implementation's agreement with the models
-is tested, not proved, and the kernel's binary is certified on sampled answers
-rather than shown to refine its model. Cryptographic unforgeability and the
+is tested, not proved, except on the decision path, where the kernel is the model
+compiled and its replies are covered by theorems about the server code, trusting
+the Lean compiler, the JSON parser and the broker's decoding of the reply. Cryptographic unforgeability and the
 secrecy of the signing key are assumed. Identity holds at verification time:
 a later foreign change is detected at the next verification, not prevented.
 Availability under bursts larger than the listen backlog is a stated limit,
