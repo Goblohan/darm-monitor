@@ -76,6 +76,7 @@ lean_lib GRBS where
     `E32cSequentialComposition,
     `E33AttestedChannels,
     `E33bPrincipalVouching,
+    `E32dRoleBoundary,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
