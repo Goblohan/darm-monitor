@@ -241,12 +241,16 @@ domains carries a sound authorization to a sound one when it is a morphism,
 reflecting fitting and admission back to the source, preserving acceptability,
 and covering every target proposal that fits the transformed authorization and is admitted (`E32bAttributionComposition.transfer`),
 and such morphisms compose (`E32bAttributionComposition.compose_transfer`).
-The conditions are not decorative. In one witness every condition but coverage
-holds, an unacceptable target proposal has no preimage, and soundness is lost
-(`E32bAttributionComposition.coverage_necessary`); in another every condition
-but admission reflection holds, the target boundary admits what the source
-refused, and soundness is lost again
-(`E32bAttributionComposition.admitReflect_necessary`). Running two sound
+Each condition is necessary: for each, a witness keeps the other three, starts
+from a sound authorization, and loses soundness. Without fit reflection, the
+target authorization fits a proposal the source did not
+(`E32bAttributionComposition.fitReflect_necessary`); without admission
+reflection, the target boundary admits what the source refused
+(`E32bAttributionComposition.admitReflect_necessary`); without preserved
+acceptability, the target principal accepts less than the source
+(`E32bAttributionComposition.accPreserve_necessary`); and without coverage, an
+unacceptable target proposal has no source
+(`E32bAttributionComposition.coverage_necessary`). Running two sound
 domains side by side is sound only when joint acceptability is determined by
 acceptability in each (`E32bAttributionComposition.separability_necessary`).
 The redemption race of Section 2.3 reappears here as a failure of coverage, at
