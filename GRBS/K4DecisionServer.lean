@@ -65,5 +65,5 @@ partial def serveLoop4 (stdin stdout : IO.FS.Stream) : IO Unit := do
     stdout.flush
   serveLoop4 stdin stdout
 
-def main : IO Unit := do
-  serveLoop4 (← IO.getStdin) (← IO.getStdout)
+-- main lives in K6DecisionServer, the root of darmkernel since kernel-v0.3.0;
+-- it serves this file's request form as well as K6's.
