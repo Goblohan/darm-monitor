@@ -232,6 +232,39 @@ violates it gives the counterexample. For this system, the effect model is the
 model layer, and the real filesystem's agreement with it is that assumption,
 which the implementation's trace checks test rather than prove.
 
+### 4.4 Through transformations, and the role boundary
+
+Authorization is decided in one representation and often carried into
+another: a proposal canonicalized, an invocation rewritten, a pipeline's effect
+restated in another domain. An abstract transformation between authorization
+domains carries a sound authorization to a sound one when it is a morphism,
+reflecting fitting and admission back to the source, preserving acceptability,
+and covering every target proposal that fits the transformed authorization and is admitted (`E32bAttributionComposition.transfer`),
+and such morphisms compose (`E32bAttributionComposition.compose_transfer`).
+The conditions are not decorative. In one witness every condition but coverage
+holds, an unacceptable target proposal has no preimage, and soundness is lost
+(`E32bAttributionComposition.coverage_necessary`); in another every condition
+but admission reflection holds, the target boundary admits what the source
+refused, and soundness is lost again
+(`E32bAttributionComposition.admitReflect_necessary`). Running two sound
+domains side by side is sound only when joint acceptability is determined by
+acceptability in each (`E32bAttributionComposition.separability_necessary`).
+The redemption race of Section 2.3 reappears here as a failure of coverage, at
+the attacker's write (`E32bAttributionComposition.p13_is_coverage_failure`).
+
+Admission reflection has a concrete edge in the kernel, because the role of a
+value is decided by the tool's rules. With identical rules for two tools and a
+credential naming one of them, changing only the tool turns an admission into
+a refusal for authority
+(`E32dRoleBoundary.tool_identity_alone_changes_admission`). With the same keys
+and allowed values, but rules that make a value a payload under one tool and a
+selector under the other, the arguments are allowed alike, the trust required
+of selectors differs, and the transformed invocation is refused
+(`E32dRoleBoundary.role_is_tool_relative`). A transformation that changes no
+argument can therefore move an untrusted value across the boundary between
+payload and selector, and an argument that authorization survives a
+transformation must account for roles, not only for values.
+
 Limits of this section: the canonicalization result is general, but the
 correspondence to effect operations covers writes; the corresponding operation
 exists by construction; the physical transfer is an assumption, tested in this
@@ -383,6 +416,57 @@ own record after a timeout, no retry decision is exactly-once
 transfer unchanged, since they concern proposals; what breaks is what rested
 on observing the target. As Section 3 predicts, attribution and exactly-once
 hold precisely when the remote state carries the request's identity.
+
+### 5.7 Channels between stages, and reading what is current
+
+A pipeline in which one stage writes what another reads is attributable as a
+whole when four conditions hold: the upstream authorization is sound; what it
+may write lands, through the channel between the stages, inside the set of
+inputs the downstream authorization was made sound for; the downstream is
+sound on that set; and the pipeline's acceptability is determined by its
+stages' (`E32cSequentialComposition.seq_sound`). Each is needed, with the
+others intact: an upstream that may write outside that set
+(`E32cSequentialComposition.rely_necessary`), a channel that rewrites between
+the write and the read (`E32cSequentialComposition.channel_necessary`), and a
+sequence that is unacceptable although each step is acceptable
+(`E32cSequentialComposition.seqSeparability_necessary`). In the running example,
+the pinned intent of Section 2 does not make the pipeline attributable if the
+file can change between the write and the run
+(`E32cSequentialComposition.tamper_breaks_pipeline`).
+
+The channel's integrity need not be assumed. If the channel is faithful (every
+read carrying an attestation was produced), the produced values lie inside the
+downstream's set, the downstream is sound on that set, and it admits only
+attested reads, then every admitted downstream action is acceptable and its
+input was produced, whatever else happened to the world
+(`E33AttestedChannels.gated_downstream_sound`). Both halves matter: a reader
+that does not require attestation consumes a foreign value from a faithful
+channel (`E33AttestedChannels.gate_necessary`), and a gate on an unfaithful
+channel admits a forged attestation (`E33AttestedChannels.faithfulness_necessary`).
+The gate must compare content, not presence: in an attestation-faithful
+history, a gate that checks only that an attestation exists admits tampered
+content that no write produced
+(`E33AttestedChannels.presence_gate_defeated_by_tamper`). Where the channel
+carries no identity, as with a remote service that does not echo it
+(Section 5.6), the gate admits nothing, and downstream attribution cannot be
+discharged this way (`E33AttestedChannels.e31_no_echo_no_attested_read`).
+External inputs enter through the principal: in attestation-faithful
+histories, a channel that attributes a read either to a broker write or to a
+manifest the principal holds is faithful to what was written or vouched for
+(`E33bPrincipalVouching.two_source_faithful`); vouching is exact to the content
+(`E33bPrincipalVouching.vouch_is_content_exact`), and a manifest the agent can
+extend launders foreign content into an attributed read
+(`E33bPrincipalVouching.agent_manifest_launders`).
+
+Faithfulness in these models means that the content was produced at some
+point, not that it is current. The implementation's gate adds the log: a read
+is attributed only if its attestation verifies, names the path, matches the
+bytes read, and is the path's latest logged write, so content restored with its
+genuine attestation after the broker replaced or deleted it is refused, which
+the attestation alone would accept
+(`B8pPathBoundAttestation.replay_accepted_by_attestation_caught_by_log`). The
+attestation is read from the same open file as the content, and refusal of
+unattributed reads is enforced when the deployment asks for it.
 
 Limits of this section: the chain covers pinned writes, and renames under
 attestation-faithful renaming; deletes are not attributed, since an absence
