@@ -16,7 +16,7 @@ well as the proposal, separates a principal's proposal from an attacker's
 identical one, so any intent system that leaves content unpinned faces a race.
 We establish execution identity by two complementary mechanisms, each catching
 an attack the other cannot, and compose the chain from authorized proposal to
-attested state into a single theorem. [Results of a composition experiment with
+attested state into a single theorem. Reasoning from the model found a real gap in the deployed system, a rename that laundered foreign content into an attested state, and the model's condition became the fix. The decision path is the proved kernel, compiled, with theorems about the code that carries its verdict; what remains trusted is named and counted. [Results of a composition experiment with
 a deployed defense withheld pending disclosure.]
 
 ## Introduction
@@ -62,6 +62,24 @@ Contributions:
    cites its theorems and tests, both directions are checked on every build,
    and ten mutations show each load-bearing check is guarded; the process
    found checks no test asserted (Section 7).
+
+6. **A model finding that was a real gap.** Asking which condition makes
+   renames attributable showed that moving only content the source holds still
+   launders foreign content
+   (`E29FaithfulRename.rename_launders_foreign_content`); the deployed broker did
+   exactly that, and the model's condition became the fix (Sections 5.5, 7).
+7. **Remote effects and pipelines.** Attribution of a remote effect is possible
+   exactly when the remote state carries the request's identity
+   (`E31RemoteEffects.echoed_record_attributed`,
+   `E31RemoteEffects.no_attribution_without_echo`); between stages, an attested
+   read discharges the channel's integrity, provided the gate compares content (`E33AttestedChannels.gated_downstream_sound`), with freshness bound by the log in the implementation (Section 5.7)
+   (Sections 5.6, 5.7).
+8. **An explicit bridge from model to code.** The decision path is the proved
+   kernel, compiled, computing canonicalization from the raw proposal
+   (`K6KernelCanonicalization.k6_admits_canonical`); what crosses to the broker
+   is covered by theorems about the server's code
+   (`K6DecisionServer.admit_only_by_kernel6`); the remaining trusted base is
+   named, and the build counts what is still tested (Section 7).
 
 ## Section order
 

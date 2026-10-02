@@ -14,7 +14,7 @@ log, derive execution identity in two independent ways, through the log and
 through a path-bound attestation whose abstraction is the log model, and
 compose the whole chain into one theorem. A reference implementation ties every
 guarantee to a theorem at a pinned commit, a runtime test, and a mutation
-showing the test guards it.
+showing the test guards it. The decision path is the model compiled: the kernel computes canonicalization and the decision itself, and theorems about the server's code connect the broker's reading of a reply to the kernel's decision.
 
 ## Introduction
 
@@ -50,6 +50,23 @@ Contributions:
 6. **A case study in evidence.** The implementation's guarantees are checked
    against the corpus in both directions on every build, and a mutation gate
    shows each load-bearing check is guarded (Section 7).
+
+7. **Faithful renames and lineage.** Under renames that move only attested
+   content, every attested content was produced by a write
+   (`E29FaithfulRename.attested_content_has_write_origin`, propositional
+   extensionality only), and a renamed file is attributed through two requests
+   (`E30RenameAttribution.rename_placed_content_authorized`) (Section 5.5).
+8. **Transfer and composition.** Soundness transfers along morphisms and
+   composes, with each of four conditions necessary
+   (`E32bAttributionComposition.transfer`); sequential composition across a
+   channel (`E32cSequentialComposition.seq_sound`), with the channel's integrity
+   discharged by attested reads (`E33AttestedChannels.gated_downstream_sound`)
+   (Sections 4.4, 5.7).
+9. **A verified decision path.** The kernel executable is the model compiled,
+   and theorems about its server code connect what the broker reads to what the
+   kernel decided, from the raw proposal
+   (`K5WireContract.admit_only_by_kernel`, `K6DecisionServer.admit6_returns_canonical`)
+   (Section 7).
 
 ## Section order
 
