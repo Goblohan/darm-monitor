@@ -79,6 +79,7 @@ lean_lib GRBS where
     `E33bPrincipalVouching,
     `E32dRoleBoundary,
     `K5WireContract,
+    `K6KernelCanonicalization,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
