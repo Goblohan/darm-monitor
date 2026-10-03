@@ -545,7 +545,16 @@ invocation for its request, continuing a transition the kernel admitted, or
 acting outside the governed workspace, none is without authority, and the build
 fails if a site appears, changes or goes unclassified. Recovery, the one path
 that acts after a crash, rolls a transition forward only on a signed attestation
-for that request, so a forged record in the log is rolled back. Writing these bridges down
+for that request, so a forged record in the log is rolled back. The claim also survives
+change. Each verdict is bound to a fingerprint of everything it depends on that
+static analysis of the package can see (the routes into its effect function,
+everything called along them, and the module code involved), so a property local
+to those cones holds of every version the build accepts
+(`E34AssuranceUnderChange.history_preserved`). A cone that missed a dependency
+would let a breaking change through (`E34AssuranceUnderChange.locality_necessary`),
+and a gate that is sound must sometimes ask for review of a harmless change
+(`E34AssuranceUnderChange.gate_incomplete`). That the gate's cones are local is
+shown by design and by attack, not proved. Writing these bridges down
 exactly found four discrepancies no earlier test had: a decoder that raised
 instead of rejecting, a rename destination admitted by the kernel and refused
 only at execution, the same gap in the broker model the code had been
@@ -576,7 +585,9 @@ carries no attestation. Beyond the filesystem, attribution and exactly-once
 require the remote state to carry the request's identity (Section 5.6). The implementation's agreement with the models
 is tested, not proved, except on the decision path, where the kernel is the model
 compiled and its replies are covered by theorems about the server code, trusting the Lean compiler, the JSON parser, the broker's decoding of the reply,
-and the freshness of its nonces. Cryptographic unforgeability and the
+and the freshness of its nonces. The effect-surface claim survives a change to
+the implementation only through a correct review at each acceptance, and only
+within what static analysis of the package can see. Cryptographic unforgeability and the
 secrecy of the signing key are assumed. Identity holds at verification time:
 a later foreign change is detected at the next verification, not prevented.
 Availability under bursts larger than the listen backlog is a stated limit,
