@@ -75,8 +75,8 @@ partial def serveLoop6 (stdin stdout : IO.FS.Stream) : IO Unit := do
     stdout.flush
   serveLoop6 stdin stdout
 
-def main : IO Unit := do
-  serveLoop6 (← IO.getStdin) (← IO.getStdout)
+-- main lives in K7DecisionServer, the root of darmkernel since kernel-v0.4.0;
+-- it serves both of this file's request forms and echoes a request nonce.
 
 namespace DARM.K6Server
 

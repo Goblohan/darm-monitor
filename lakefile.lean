@@ -81,6 +81,7 @@ lean_lib GRBS where
     `K5WireContract,
     `K6KernelCanonicalization,
     `K6DecisionServer,
+    `K7DecisionServer,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
@@ -143,4 +144,4 @@ lean_exe darmdemo where
 
 lean_exe darmkernel where
   srcDir := "GRBS"
-  root := `K6DecisionServer
+  root := `K7DecisionServer
