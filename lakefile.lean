@@ -82,6 +82,7 @@ lean_lib GRBS where
     `K6KernelCanonicalization,
     `K6DecisionServer,
     `K7DecisionServer,
+    `E34AssuranceUnderChange,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
