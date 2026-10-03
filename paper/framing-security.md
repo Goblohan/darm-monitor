@@ -60,8 +60,9 @@ Contributions:
    its one assumption about the broker checked at runtime (Section 5.4).
 5. **Guarantees tied to evidence.** Every guarantee names a claim, every claim
    cites its theorems and tests, both directions are checked on every build,
-   and ten mutations show each load-bearing check is guarded; the process
-   found checks no test asserted (Section 7).
+   and nineteen mutations show each load-bearing check is guarded, including
+   two that weaken the tool auditing the effect surface; the process found
+   checks no test asserted (Section 7).
 
 6. **A model finding that was a real gap.** Asking which condition makes
    renames attributable showed that moving only content the source holds still

@@ -20,5 +20,10 @@ echo "build ok: $(tail -1 /tmp/gate_grbs.txt)"
 if [ -f paper/check_citations.py ]; then
   python3 paper/check_citations.py > /tmp/gate_paper.txt 2>&1 || { echo "GATE FAILED: the paper cites theorems that do not exist"; grep MISSING /tmp/gate_paper.txt | head -10; exit 1; }
 fi
+GUARD=""; [ -d "$HOME/darm-guard/scripts" ] && GUARD="--guard $HOME/darm-guard"
+python3 paper/check_paper_figures.py $GUARD > /tmp/gate_figures.txt 2>&1 && fc=0 || fc=$?
+grep -v '^NOTE' /tmp/gate_figures.txt || true
+n=$(grep -c '^NOTE' /tmp/gate_figures.txt || true); [ "$n" -gt 0 ] && echo "($n other mentions in paper/ differ from the snapshot; see /tmp/gate_figures.txt)" || true
+[ $fc -eq 0 ] || { echo "GATE FAILED: a figure the paper states does not match Darm-Guard's"; exit 1; }
 python3 scripts/check_built.py || { echo "GATE FAILED: a GRBS module is unbuilt, a file contains sorry, or an axiom is declared"; exit 1; }
 echo "GATE PASSED: every GRBS root builds, and every theorem the paper cites exists"
