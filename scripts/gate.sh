@@ -20,4 +20,5 @@ echo "build ok: $(tail -1 /tmp/gate_grbs.txt)"
 if [ -f paper/check_citations.py ]; then
   python3 paper/check_citations.py > /tmp/gate_paper.txt 2>&1 || { echo "GATE FAILED: the paper cites theorems that do not exist"; grep MISSING /tmp/gate_paper.txt | head -10; exit 1; }
 fi
+python3 scripts/check_built.py || { echo "GATE FAILED: a GRBS module is unbuilt, a file contains sorry, or an axiom is declared"; exit 1; }
 echo "GATE PASSED: every GRBS root builds, and every theorem the paper cites exists"

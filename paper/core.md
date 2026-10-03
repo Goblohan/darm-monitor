@@ -508,12 +508,12 @@ under bursts, and race-free path resolution).
 
 Tests can pass for the wrong reason, so each load-bearing check is shown to be
 guarded by removing it. A mutation gate disables one check at a time in a
-throwaway copy of the broker and requires the full test suite to fail. Seventeen mutations, covering every dimension of the kernel's decision, intents,
+throwaway copy of the broker and requires the full test suite to fail. Nineteen mutations, covering every dimension of the kernel's decision, intents,
 premises, the attestation's path check, the log's freshness checks, the request
 link of Section 5.4, the rename's source check of Section 5.5, read freshness,
 the normal form of a rename's destination, the handling of a stop signal, the
-cross-check of canonicalization, recovery's attestation check, and the binding
-of a kernel reply to its request, are all caught. The gate found real gaps: a test
+cross-check of canonicalization, recovery's attestation check, the binding of a kernel reply to its request, and two weakenings of the effect
+inventory itself, are all caught. The gate found real gaps: a test
 named for credential expiry that never asserted it, a test of deny-by-default
 that passed because a different check refused, no test at all of the
 credential check, and a runtime check of the attestation's path tested only by
@@ -539,8 +539,7 @@ broker's decoding of the reply, which is checked against the proved decoder on
 every class of reply and by hash on execution, not proved; and that the broker never reuses a
 nonce. Everything after the decision rests on models and tests, and the build
 reports the ratio: one claim by construction, one proved, twenty-eight tested.
-That part is audited rather than proved, but exhaustively: every effect site in
-the broker, thirty-seven in all, is classified as executing the kernel's
+That part is audited rather than proved, but exhaustively: every effect site in the package, thirty-eight in all, is classified as executing the kernel's
 invocation for its request, continuing a transition the kernel admitted, or
 acting outside the governed workspace, none is without authority, and the build
 fails if a site appears, changes or goes unclassified. Recovery, the one path
