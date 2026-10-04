@@ -10,6 +10,12 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    # bash named explicitly runs every step with -eo pipefail, so `lake build | tee`
+    # and `lake lean | tee` fail when the build fails, not only when tee does
+    shell: bash
+
 jobs:
   build:
     runs-on: ubuntu-latest
