@@ -274,3 +274,9 @@ If that bridge cannot be represented, justified, and checked, the broader claim 
 **PerceptraAI Lab · Lagos**
 
 [https://github.com/Goblohan/darm-monitor](https://github.com/Goblohan/darm-monitor)
+
+## License
+
+Apache License 2.0: see [LICENSE](LICENSE) and [NOTICE](NOTICE). Contributions are accepted under the
+[Developer Certificate of Origin](CONTRIBUTING.md). The names DARM, DARM Guard and PerceptraAI are not
+licensed under it (Apache-2.0, section 6).
