@@ -12,7 +12,7 @@
 | Theorems the paper cites, each checked to exist | 83 |
 <!-- figures:end -->
 
-[DARM Guard](https://github.com/Goblohan/Darm-Guard) (the runtime) · [Module index](docs/MODULES.md) · [Paper draft](paper/core.md) · [Related work](paper/related.md) · [Cite](CITATION.cff)
+[DARM Guard](https://github.com/Goblohan/Darm-Guard) (the runtime) · [Limitations](LIMITATIONS.md) · [Module index](docs/MODULES.md) · [Paper draft](paper/core.md) · [Related work](paper/related.md) · [Cite](CITATION.cff)
 
 **Olusanya Gbolahan V**
 **PerceptraAI Lab**
