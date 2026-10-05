@@ -15,7 +15,7 @@
 [DARM Guard](https://github.com/Goblohan/Darm-Guard) (the runtime) · [Module index](docs/MODULES.md) · [Paper draft](paper/core.md) · [Related work](paper/related.md) · [Cite](CITATION.cff)
 
 **Olusanya Gbolahan V**
-**PerceptraAI Lab · Lagos**
+**PerceptraAI Lab**
 
 ---
 
@@ -275,7 +275,7 @@ If that bridge cannot be represented, justified, and checked, the broader claim 
 ---
 
 **Olusanya Gbolahan V**
-**PerceptraAI Lab · Lagos**
+**PerceptraAI Lab**
 
 [https://github.com/Goblohan/darm-monitor](https://github.com/Goblohan/darm-monitor)
 
