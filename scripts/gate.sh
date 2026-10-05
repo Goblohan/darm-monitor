@@ -25,5 +25,6 @@ python3 paper/check_paper_figures.py $GUARD > /tmp/gate_figures.txt 2>&1 && fc=0
 grep -v '^NOTE' /tmp/gate_figures.txt || true
 n=$(grep -c '^NOTE' /tmp/gate_figures.txt || true); [ "$n" -gt 0 ] && echo "($n other mentions in paper/ differ from the snapshot; see /tmp/gate_figures.txt)" || true
 [ $fc -eq 0 ] || { echo "GATE FAILED: a figure the paper states does not match Darm-Guard's"; exit 1; }
+python3 scripts/modules_index.py --check || { echo "GATE FAILED: docs/MODULES.md is out of date"; exit 1; }
 python3 scripts/check_built.py || { echo "GATE FAILED: a GRBS module is unbuilt, a file contains sorry, or an axiom is declared"; exit 1; }
 echo "GATE PASSED: every GRBS root builds, and every theorem the paper cites exists"
