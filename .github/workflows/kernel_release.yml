@@ -7,6 +7,11 @@ on:
 permissions:
   contents: write
 
+defaults:
+  run:
+    # bash named explicitly runs every step with -eo pipefail
+    shell: bash
+
 jobs:
   build-kernel:
     runs-on: ubuntu-latest

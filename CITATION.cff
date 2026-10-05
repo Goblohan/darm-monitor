@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use DARM, please cite it as below."
+title: "DARM: Deterministic Algebraic Reference Monitor. A machine-checked theory of bounded causal authority and admissible assurance transfer for autonomous systems"
+type: software
+authors:
+  - family-names: "Olusanya"
+    given-names: "Gbolahan V."
+    email: "gbolahan@perceptra.ai"
+    affiliation: "PerceptraAI Lab"
+repository-code: "https://github.com/Goblohan/darm-monitor"
+license: Apache-2.0
+keywords: ["assurance", "authorization", "reference monitor", "formal verification", "Lean 4", "AI agents"]
+references:
+  - type: software
+    title: "DARM Guard"
+    repository-code: "https://github.com/Goblohan/Darm-Guard"

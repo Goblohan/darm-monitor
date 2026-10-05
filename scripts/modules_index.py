@@ -61,7 +61,7 @@ def describe(src):
     else:
         text = paras[0]
     text = re.sub(r"^#+\s*", "", text)                     # a Markdown heading inside the comment
-    code = re.match(r"^[A-Za-z]*\d[\w-]*(?: [A-Z0-9 \u2014-]+)?:\s+(.+)$", text)   # "B9 RECOVERY CHECK: ...", "R3c: ..."
+    code = re.match(r"^[A-Za-z]*-?\d[\w-]*(?: [A-Z0-9 \u2014-]+)?:\s+(.+)$", text)   # "B9 RECOVERY CHECK: ...", "R3c: ..."
     if code:
         text = code.group(1)[:1].upper() + code.group(1)[1:]
     sentence = re.split(r"(?<=[.;])\s", text, maxsplit=1)[0]

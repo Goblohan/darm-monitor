@@ -181,19 +181,19 @@ How a module is checked: **gate** = built by `scripts/gate.sh` before every push
 
 | Module | Description | Theorems | Checked by |
 | --- | --- | --- | --- |
-| `DCEE10CoveredToolExpansion` | DCEE-10: Covered Agent Tool Expansion | 9 | gate |
-| `DCEE1ContractTransfer` | DCEE-1A: Contract Refinement vs DARM Transfer | 15 | gate |
+| `DCEE10CoveredToolExpansion` | Covered Agent Tool Expansion | 9 | gate |
+| `DCEE1ContractTransfer` | Contract Refinement vs DARM Transfer | 15 | gate |
 | `DCEE2SACMTransfer` | Minimal SACM-style claim representation for the comparison experiment. | 17 | gate |
 | `DCEE3AEBTransfer` | A minimal AEB-style consequential action representation. | 15 | gate |
-| `DCEE4CrossFormalismSynthesis` | DCEE-4: Cross-Formalism Convergence | 5 | gate |
-| `DCEE5ATransferPrimitiveEquivalence` | DCEE-5A: Transfer-Primitive Equivalence | 13 | gate |
-| `DCEE5BBackendIndependentSemanticTransfer` | DCEE-5B: Backend-Independent Semantic Transfer | 17 | gate |
-| `DCEE6AConcreteContractNormalization` | DCEE-6A: Concrete Contract Normalization | 10 | gate |
-| `DCEE6BBoundaryLocusVariation` | DCEE-6B: Boundary/Locus Variation | 7 | gate |
-| `DCEE6CBoundaryComposition` | DCEE-6C: Boundary Composition | 11 | gate |
-| `DCEE7CompositionalContractEquivalence` | DCEE-7: Compositional Contract Equivalence | 9 | gate |
-| `DCEE8TransferVsContractRefinement` | DCEE-8: Transfer Judgment vs Contract Refinement | 13 | gate |
-| `DCEE9AgentToolExpansion` | DCEE-9: Agent Tool Expansion | 9 | gate |
+| `DCEE4CrossFormalismSynthesis` | Cross-Formalism Convergence | 5 | gate |
+| `DCEE5ATransferPrimitiveEquivalence` | Transfer-Primitive Equivalence | 13 | gate |
+| `DCEE5BBackendIndependentSemanticTransfer` | Backend-Independent Semantic Transfer | 17 | gate |
+| `DCEE6AConcreteContractNormalization` | Concrete Contract Normalization | 10 | gate |
+| `DCEE6BBoundaryLocusVariation` | Boundary/Locus Variation | 7 | gate |
+| `DCEE6CBoundaryComposition` | Boundary Composition | 11 | gate |
+| `DCEE7CompositionalContractEquivalence` | Compositional Contract Equivalence | 9 | gate |
+| `DCEE8TransferVsContractRefinement` | Transfer Judgment vs Contract Refinement | 13 | gate |
+| `DCEE9AgentToolExpansion` | Agent Tool Expansion | 9 | gate |
 
 ### Core and other modules
 

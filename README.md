@@ -2,7 +2,17 @@
 
 **A machine-checked theory of bounded causal authority and admissible assurance transfer for autonomous systems.**
 
-190 Lean 4 modules · 36,000+ lines · 1,141 theorems · zero `sorry` · zero `sorryAx` · CI-green
+<!-- figures:start -->
+| | |
+| --- | --- |
+| Lean modules | 250: 158 in `GRBS/`, every one built by the gate; 92 in `DarmMonitor/`, built or elaborated by CI |
+| Theorems and lemmas | 1,629 |
+| Lines of Lean | 47,524 |
+| `sorry`, declared axioms | 0, 0 |
+| Theorems the paper cites, each checked to exist | 83 |
+<!-- figures:end -->
+
+[DARM Guard](https://github.com/Goblohan/Darm-Guard) (the runtime) · [Module index](docs/MODULES.md) · [Paper draft](paper/core.md) · [Related work](paper/related.md) · [Cite](CITATION.cff)
 
 **Olusanya Gbolahan V**
 **PerceptraAI Lab · Lagos**
@@ -112,6 +122,18 @@ All five share the same structure: every new element introduced by a transition 
 
 **Boundary-indexed certificates (v0.14).** Boundaries as first-class indices, composition rules (positive and negative), authorized evidence transport, factorized composition, certificate integration.
 
+### Phase 3 — From model to running code (GRBS/: K, B, E24–E34)
+
+The theory is connected to an implementation, [DARM Guard](https://github.com/Goblohan/Darm-Guard), through three lines of work.
+
+**The decision kernel (K1–K7).** K1 defines the kernel's decision function and proves its admission properties; K3 proves its correspondence to the earlier gate and ODATS results; K4 adds roles, and proves that payload cannot buy authority. K5 to K7 are theorems about the shipped server's own code: a reply decodes as an admission only if the kernel admitted (K5); the kernel canonicalizes the raw proposal and returns the invocation to execute (K6); and every reply carries the nonce of the request it answers (K7). The kernel binary is built by CI from a tagged commit and pinned by checksum in DARM Guard.
+
+**The broker models (B1–B9).** The broker's behaviour, modelled: provenance the agent cannot vouch for (B1), the complete broker (B3), evidence before effect (B4), reconciliation (B5), compare-and-swap writes and tamper detection (B6), at-most-once retries (B7b), the typed audit log (B8), and crash-safe renames (B9).
+
+**Effects and authorization (E24–E34).** Intents and their premises (E24 to E24d); execution identity and lineage (E27 to E30); remote effects (E31); the conditions under which an authorization transfers across a transformation, each shown necessary (E32 to E32d); attested channels (E33); and an assurance claim that survives implementation change (E34).
+
+How DARM Guard's runtime corresponds to these models, claim by claim, and which bridges are proved and which are tested, is in its [assurance graph](https://github.com/Goblohan/Darm-Guard/blob/main/assurance/claims.json).
+
 ### Key Negative Results
 
 The following are formalized as counterexamples, not gaps:
@@ -147,64 +169,41 @@ All results depend only on standard Lean 4 foundational axioms. No result depend
 
 ```
 darm-monitor/
-│
-├── DarmMonitor/              91 modules — verified governance core
-│   ├── Basic.lean                Authorization, capability confinement
-│   ├── Fixed64*.lean             Fixed-point proof tower
-│   ├── Boundary*.lean            Boundary-indexed guarantee system
-│   ├── Composition*.lean         Composition rules (positive + negative)
-│   ├── Assurance*.lean           Certificates and transport
-│   ├── Reachability*.lean        Authority reachability calculus
-│   ├── LLMToolCall.lean          Agent tool-authorization instantiation
-│   └── ...                       Minimality, interference, trajectory safety
-│
-├── GRBS/                     99 modules — assurance-transfer theory
-│   ├── GRBS.lean                 R1: Frame, Transfer, GRBS, Exploitability
-│   ├── R1bSufficiency.lean       Transfer ↔ GRBS biconditional
-│   ├── AGBypass.lean             Below-interface structural isolation
-│   ├── AGCompleteness.lean       PhysicalAG semantic recoverability
-│   ├── R3dBehavioralIsolation.lean  Behavioral AG limitation
-│   ├── R4a–R4f*.lean            Dimension-isolated transfer attacks
-│   ├── R5*.lean                  Assurance conservation synthesis
-│   ├── R6–R20*.lean              Extended transfer theory
-│   ├── DCEE*.lean                Prior-art comparison suite (11 files)
-│   ├── DARMCoreCalculus.lean     Assurance-transfer calculus
-│   └── SeL4*.lean                seL4 authority model and separation
-│
-├── c/                        C-ABI boundary layer
-├── camkes/                   seL4/CAmkES microkernel wiring
-├── empirical/                Empirical lab (v0.1–v0.12)
-├── .github/workflows/        Lean CI + C-ABI gate
-│   ├── lean_action_ci.yml        Full corpus elaboration + axiom audit
-│   └── ci.yml                    C-ABI boundary gate
-├── FRAMING.md                Governance boundary framing document
-└── lakefile.lean             Build configuration
+├── GRBS/               assurance transfer (R), effects and authorization (E), the decision kernel (K),
+│                       broker models (B), assume-guarantee (AG), runtime correspondence (IC),
+│                       prior-art comparison (DCEE), the core calculus, seL4 authority
+├── DarmMonitor/        the governance core: authorization, capability confinement, the fixed-point
+│                       tower, boundary-indexed guarantees, composition rules, certificates
+├── DarmMonitor.lean    the DarmMonitor library's root
+├── Main.lean           darmdemo: the native differential test
+├── c/                  the one hand-written native primitive, a fixed-point multiply, tested against Lean
+├── camkes/, include/, interfaces/, qemu-run.sh   seL4/CAmkES wiring
+├── empirical/          the empirical lab
+├── paper/              the paper draft and related work; every theorem it cites is checked
+├── archive/            modules set aside, each with its reason (archive/README.md)
+├── scripts/            gate.sh, stats.py, modules_index.py, check_built.py, readme_figures.py
+└── docs/MODULES.md     every module, described by its own header comment
 ```
 
-The lakefile registers four GRBS roots (`GRBS`, `SeL4GRBS`, `AGBypass`, `DARMCoreCalculus`). Research modules outside the integrated import closure are elaborated individually by the CI pipeline, which dynamically discovers and checks the complete corpus.
-
----
+Every module in `GRBS/` is a library root or imported by one, so the gate builds all of them. `DarmMonitor` is the default build target; CI elaborates its remaining modules one by one. `docs/MODULES.md` says how each module is checked.
 
 ## Reproducibility
 
 ```bash
-# Clone
 git clone https://github.com/Goblohan/darm-monitor.git
 cd darm-monitor
 
-# Full proof verification
-lake build
+./scripts/gate.sh               # builds every GRBS module; checks the paper's citations and figures,
+                                # the module index, and that no module is unbuilt or uses sorry
+lake build                      # the DarmMonitor library's default build
+python3 scripts/stats.py        # every figure above, at this commit
 
-# Build specific GRBS roots
-lake build GRBS
-lake build SeL4GRBS
-lake build AGBypass
-lake build DARMCoreCalculus
+lake build darmkernel           # the decision kernel binary that DARM Guard runs
+lake env lean DarmMonitor/BoundaryIndexedAssuranceCertificate.lean   # elaborate one module
 
-# Elaborate a specific module
-lake env lean DarmMonitor/BoundaryIndexedAssuranceCertificate.lean
-
-# Run the demonstration
+# the native differential test: the C multiply against the proved Lean definition
+"$(dirname "$(which lean)")/leanc" -c c/darm_native.c -o c/darm_native.o -O2
+ar rcs c/libdarm_native.a c/darm_native.o
 lake exe darmdemo
 
 # C-ABI boundary test
@@ -212,17 +211,19 @@ gcc -Iinclude tests/test_darm_shim.c -o tests/test_darm_shim
 ./tests/test_darm_shim
 ```
 
----
-
 ## Continuous Integration
 
-Every push triggers two automated gates:
+Every push runs these workflows; every step runs with `pipefail`, so a failing command fails its step.
 
-**Lean Action CI** — Integrated build, axiom audit (searches for `sorryAx`), axiom-trace count floor, complete DARM corpus elaboration, complete GRBS corpus elaboration, native library compilation, runtime differential testing.
+**GRBS library** runs `scripts/gate.sh`: every `GRBS` module built, every theorem the paper cites checked to exist, the paper's figures and this README's checked against the repository, the module index checked against the code, and no module left unbuilt.
 
-**DARM C-ABI Gate** — Builds and executes C-ABI boundary tests. Installs QEMU dependencies but does not currently execute a QEMU test; no QEMU execution claim is made.
+**Lean Action CI** builds the default target and fails on `sorryAx` in any axiom trace or on fewer than a floor of axiom traces; elaborates every module outside the default build, file by file; and runs the native differential test, failing on any divergence.
 
----
+**DARM C-ABI Gate** builds and executes the C-ABI boundary tests. It installs QEMU dependencies but does not currently execute a QEMU test; no QEMU execution claim is made.
+
+**Kernel Release** builds `darmkernel` on a `kernel-v*` tag and publishes it with its SHA-256, which DARM Guard pins.
+
+Until commit `0e14b75`, the workflows ran without `pipefail`, so a module that failed to compile in the complete-corpus step was printed but did not fail the run. One module had been failing that way since it was committed; it is archived with the reason in `archive/README.md`. Every other module compiled.
 
 ## Relationship to Existing Work
 
@@ -259,8 +260,11 @@ The formal results are conditional on their stated definitions, assumptions, and
 | `v0.9`–`v0.13.6` | Empirical lab + formal adequacy |
 | `v2.0.0` | Theoretical core complete |
 | `v2.1.0` | Runtime correspondence (IC1, R21, R22), TMC refinement (E23), R4e/R19b/R20 interop |
+| `kernel-v0.2.0` | Decision kernel with roles (K4), released for DARM Guard |
+| `kernel-v0.3.0` | The kernel canonicalizes the raw proposal (K6) |
+| `kernel-v0.4.0` | Every reply bound to its request by a nonce (K7) |
 
----
+Since `v2.1.0`, untagged on `main`: the kernel's wire contract and canonicalization (K5 to K7), the broker models (B4 to B9), effects and authorization (E24 to E34), and the gate's checks on every module, the paper and this README.
 
 ## Guiding Principle
 

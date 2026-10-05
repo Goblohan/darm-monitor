@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main ]
 
+defaults:
+  run:
+    # bash named explicitly runs every step with -eo pipefail
+    shell: bash
+
 jobs:
   abi-qemu-gate:
     name: Host C-ABI & QEMU Headless Gate
