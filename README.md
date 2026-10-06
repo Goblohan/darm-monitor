@@ -5,9 +5,9 @@
 <!-- figures:start -->
 | | |
 | --- | --- |
-| Lean modules | 250: 158 in `GRBS/`, every one built by the gate; 92 in `DarmMonitor/`, built or elaborated by CI |
-| Theorems and lemmas | 1,629 |
-| Lines of Lean | 47,524 |
+| Lean modules | 251: 159 in `GRBS/`, every one built by the gate; 92 in `DarmMonitor/`, built or elaborated by CI |
+| Theorems and lemmas | 1,637 |
+| Lines of Lean | 47,643 |
 | `sorry`, declared axioms | 0, 0 |
 | Theorems the paper cites, each checked to exist | 83 |
 <!-- figures:end -->

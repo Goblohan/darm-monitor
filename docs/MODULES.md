@@ -8,7 +8,7 @@ How a module is checked: **gate** = built by `scripts/gate.sh` before every push
 **default build** = built by `lake build` in CI; **darmdemo** = built and run by CI's runtime tier;
 **tier 3** = elaborated file by file by CI's complete-corpus tier.
 
-250 modules, 1629 theorems and lemmas.
+251 modules, 1637 theorems and lemmas.
 
 ## GRBS library
 
@@ -104,6 +104,7 @@ How a module is checked: **gate** = built by `scripts/gate.sh` before every push
 | `E33AttestedChannels` | Attested channels: discharging channel integrity beyond files | 11 | gate |
 | `E33bPrincipalVouching` | Principal vouching: attributing external inputs | 6 | gate |
 | `E34AssuranceUnderChange` | An assurance claim that remains valid as the implementation changes | 4 | gate |
+| `E35RepresentationAdequacy` | Representation adequacy for assurance preservation | 8 | gate |
 
 ### Assurance transfer (R)
 

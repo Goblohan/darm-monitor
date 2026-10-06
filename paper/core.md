@@ -551,7 +551,7 @@ everything called along them, and the module code involved), so a property local
 to those cones holds of every version the build accepts
 (`E34AssuranceUnderChange.history_preserved`). A cone that missed a dependency
 would let a breaking change through (`E34AssuranceUnderChange.locality_necessary`),
-and a gate that is sound must sometimes ask for review of a harmless change
+and this equality-based gate rejects a particular property-preserving change
 (`E34AssuranceUnderChange.gate_incomplete`). That the gate's cones are local is
 shown by design and by attack, not proved. Writing these bridges down
 exactly found four discrepancies no earlier test had: a decoder that raised
@@ -592,4 +592,3 @@ a later foreign change is detected at the next verification, not prevented.
 Availability under bursts larger than the listen backlog is a stated limit,
 not a guarantee; hard links lie outside the model; and one effect class, the
 filesystem, has been studied in depth.
-

@@ -36,8 +36,9 @@ These are formalized as counterexamples, not gaps:
 
 ## Assurance under change
 
-E34 proves that a property local to its reviewed cones holds of every version a gate accepts, and that no gate
-judging changes from code alone can be both sound and complete. Applied to DARM Guard, that claim rests on four
+E34 proves that a property local to its reviewed cones holds of every version its gate accepts. Its
+`gate_incomplete` theorem exhibits a property-preserving change rejected by that equality-based gate;
+it does not prove an impossibility theorem for all code-based gates. Applied to DARM Guard, preservation rests on four
 assumptions: each acceptance follows a correct review; the analysis sees every dependency that static analysis
 of the package can see (not monkeypatching from outside it, nor behaviour below Python); equal fingerprints mean
 equal code; and equal code behaves equally in the same environment. That DARM Guard's cones are local is shown by
