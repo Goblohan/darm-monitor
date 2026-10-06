@@ -19,4 +19,3 @@ One core, two framings.
   E26.6 found exactly this pattern in theorem docstrings).
 - **Disclosure.** Results of experiments against a specific third-party defense
   are withheld from this public repository until the relevant disclosure has
-  been made. Such passages are marked `[withheld pending disclosure]`.

@@ -16,8 +16,7 @@ well as the proposal, separates a principal's proposal from an attacker's
 identical one, so any intent system that leaves content unpinned faces a race.
 We establish execution identity by two complementary mechanisms, each catching
 an attack the other cannot, and compose the chain from authorized proposal to
-attested state into a single theorem. Reasoning from the model found a real gap in the deployed system, a rename that laundered foreign content into an attested state, and the model's condition became the fix. The decision path is the proved kernel, compiled, with theorems about the code that carries its verdict; what remains trusted is named and counted. [Results of a composition experiment with
-a deployed defense withheld pending disclosure.]
+attested state into a single theorem. Reasoning from the model found a real gap in the deployed system, a rename that laundered foreign content into an attested state, and the model's condition became the fix. The decision path is the proved kernel, compiled, with theorems about the code that carries its verdict; what remains trusted is named and counted.
 
 ## Introduction
 

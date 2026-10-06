@@ -487,9 +487,7 @@ input (`CompositionLayers.independent_backup`): a fault in another dimension, or
 in a shared input, passes the composition (`CompositionLayers.different_dimension_no_backup`,
 `CompositionLayers.shared_input_no_backup`).
 
-Experiment: composition with a deployed provenance-tracking defense, with
-faults injected into each layer and into a shared input, over 1,000 paired
-scenarios and a paired payload variant. [withheld pending disclosure]
+This public draft limits its empirical claims to the repository evidence cited here: the formal modules, generated figures, and DARM Guard gate results.
 
 ## 7. The reference implementation, and the evidence discipline
 
