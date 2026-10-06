@@ -134,6 +134,7 @@ lean_lib GRBS where
     `K7DecisionServer,
     `E34AssuranceUnderChange,
     `E35RepresentationAdequacy,
+    `E36CompositionalAdequacy,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,

@@ -62,6 +62,10 @@ design and by attack, not proved.
   paper's prose describes the theorem correctly; that is the reader's and the reviewer's to judge.
 - Theorem counts are declarations written in the source, not the constants Lean generates.
 
+## Representation adequacy
+
+E35 defines adequacy for one observation function and one property. E36 proves that adequacy composes across a finite chain of homogeneous observation transitions when each local preservation obligation is discharged, and that an initially adequate chain with a first loss exposes a failed local preservation obligation. These are property-specific results. They do not establish semantic equivalence, select or validate an observation function, search arbitrary propositions, or cover open-ended, heterogeneous, or physical-world pipelines.
+
 ## Out of scope
 
 Physical-world safety; the trustworthiness or intelligence of the agent; information-flow security; the semantic
