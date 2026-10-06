@@ -135,6 +135,7 @@ lean_lib GRBS where
     `E34AssuranceUnderChange,
     `E35RepresentationAdequacy,
     `E36CompositionalAdequacy,
+    `E37HeterogeneousWarrant,
     `B6EffectIntegrity,
     `B5EffectReconciliation,
     `B7IdempotencyKeys,
