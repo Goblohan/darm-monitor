@@ -496,13 +496,13 @@ scenarios and a paired payload variant. [withheld pending disclosure]
 The system has a reference implementation: a broker and a kernel that enforce
 the guarantees of Sections 1 to 5 on a real filesystem. Its central design
 choice is that every guarantee it states is tied, mechanically, to its
-evidence. The threat model lists 28 guarantees. Each names a claim in an
-assurance graph; each of the graph's 30 claims cites the theorems that prove
+evidence. The threat model lists 29 guarantees. Each names a claim in an
+assurance graph; each of the graph's 31 claims cites the theorems that prove
 it, at a pinned commit of the proof corpus, the runtime tests that exercise it,
 the implementation that enforces it, and the limit that bounds it. A checker
 verifies both directions on every build: a guarantee without a claim, a claim
 that no guarantee states, a cited theorem or function that does not exist, or a
-cited test that the build does not run, each fails it. Of the 30 claims, 26 have both a theorem and gated runtime evidence; the remaining 4 are named for
+cited test that the build does not run, each fails it. Of the 31 claims, 27 have both a theorem and gated runtime evidence; the remaining 4 are named for
 what they are, tested but not modelled (signatures, checkpoints, availability
 under bursts, and race-free path resolution).
 
@@ -538,8 +538,8 @@ derived instances, the server's input loop, Python's JSON decoder, and the
 broker's decoding of the reply, which is checked against the proved decoder on
 every class of reply and by hash on execution, not proved; and that the broker never reuses a
 nonce. Everything after the decision rests on models and tests, and the build
-reports the ratio: one claim by construction, one proved, twenty-eight tested.
-That part is audited rather than proved, but exhaustively: every effect site in the package, thirty-eight in all, is classified as executing the kernel's
+reports the ratio: one claim by construction, one proved, twenty-nine tested.
+That part is audited rather than proved, but exhaustively: every effect site in the package, fifty-three in all, is classified as executing the kernel's
 invocation for its request, continuing a transition the kernel admitted, or
 acting outside the governed workspace, none is without authority, and the build
 fails if a site appears, changes or goes unclassified. Recovery, the one path
