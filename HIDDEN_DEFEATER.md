@@ -62,3 +62,35 @@ If transfer is admissible, deceptive transfer is impossible in this model. Decep
 This gives the positive DARM role:
 
 > DARM does not merely detect hidden defeaters. It blocks deceptive transfer by requiring admissible warrant preservation.
+
+## Theorem table
+
+| Theorem | Informal meaning | Axiom status |
+|---|---|---|
+| `GRBS.HiddenDefeater.material_secret_exists` | In the card experiment, there exists a hidden material secret. | No axioms |
+| `GRBS.HiddenDefeater.material_secret_iff_hidden_reliance_collapse` | A material secret is exactly a hidden item whose disclosure participates in reliance collapse. | No axioms |
+| `GRBS.HiddenDefeater.not_material_secret_blocks_reliance_refutation` | If a hidden item is not material, disclosure cannot refute reliance constructively. | No axioms |
+| `GRBS.HiddenDefeater.only_format_test_not_nonmaterial` | The format-only hidden condition is not non-material. | No axioms |
+| `GRBS.HiddenDefeaterBoundary.deceptive_transfer_exists` | Confidence transfers from the visible slice while admissible transfer fails. | No axioms |
+| `GRBS.HiddenDefeaterBoundary.deceptive_transfer_iff_confidence_without_admissibility` | Deceptive transfer is exactly confidence transfer without admissible transfer. | No axioms |
+| `GRBS.HiddenDefeaterBoundary.admissible_transfer_blocks_deception` | If transfer is admissible, deceptive transfer is impossible. | No axioms |
+| `GRBS.HiddenDefeaterBoundary.source_warrant_without_target_warrant_with_confidence` | A source warrant and confidence transfer can coexist with target-warrant failure. | No axioms |
+| `GRBS.HiddenDefeaterBoundary.visible_claim_holds_but_target_warrant_fails` | The visible local claim can hold while target warrant fails. | No axioms |
+| `GRBS.HiddenDefeaterBoundary.local_truth_with_deceptive_transfer` | A locally true claim can coexist with deceptive transfer. | No axioms |
+
+## Compressed result
+
+The hidden-defeater witness separates four notions:
+
+1. local claim holding,
+2. confidence transfer,
+3. target warrant,
+4. admissible transfer.
+
+The core result is:
+
+> A visible claim can be locally true and still participate in deceptive transfer when confidence crosses a boundary without admissible warrant preservation.
+
+In this model, DARM's positive role is:
+
+> admissible transfer blocks deceptive transfer.
