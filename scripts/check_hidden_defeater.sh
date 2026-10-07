@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lake build +HiddenDefeater
+lake build +HiddenDefeaterBoundary
+
+lake env lean --stdin <<'LEAN'
+import HiddenDefeater
+import HiddenDefeaterBoundary
+
+#print axioms GRBS.HiddenDefeater.material_secret_exists
+#print axioms GRBS.HiddenDefeater.not_material_secret_blocks_reliance_refutation
+#print axioms GRBS.HiddenDefeater.only_format_test_not_nonmaterial
+#print axioms GRBS.HiddenDefeater.material_secret_iff_hidden_reliance_collapse
+#print axioms GRBS.HiddenDefeaterBoundary.deceptive_transfer_exists
+#print axioms GRBS.HiddenDefeaterBoundary.deceptive_transfer_iff_confidence_without_admissibility
+#print axioms GRBS.HiddenDefeaterBoundary.admissible_transfer_blocks_deception
+#print axioms GRBS.HiddenDefeaterBoundary.source_warrant_without_target_warrant_with_confidence
+#print axioms GRBS.HiddenDefeaterBoundary.visible_claim_holds_but_target_warrant_fails
+#print axioms GRBS.HiddenDefeaterBoundary.local_truth_with_deceptive_transfer
+LEAN
