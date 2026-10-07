@@ -94,3 +94,13 @@ The core result is:
 In this model, DARM's positive role is:
 
 > admissible transfer blocks deceptive transfer.
+
+## Reproducibility
+
+Run:
+
+    ./scripts/check_hidden_defeater.sh
+
+This builds HiddenDefeater and HiddenDefeaterBoundary, then checks that the core hidden-defeater theorems do not depend on any axioms.
+
+The same audit is enforced by GitHub Actions in .github/workflows/hidden-defeater.yml.
