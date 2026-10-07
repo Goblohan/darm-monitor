@@ -177,4 +177,19 @@ theorem only_format_test_not_nonmaterial :
   exact hNotMaterial only_format_test_is_material_secret
 
 
+
+/-
+  Definitional equivalence:
+
+  A material secret is exactly a hidden atom whose disclosure participates
+  in the collapse of reliance.
+-/
+theorem material_secret_iff_hidden_reliance_collapse
+    (Ip Ir : Info)
+    (a : Atom) :
+    materialSecret Ip Ir a ↔
+      hidden Ip Ir a ∧ relies Ip ∧ ¬ relies Ir := by
+  rfl
+
+
 end GRBS.HiddenDefeater
