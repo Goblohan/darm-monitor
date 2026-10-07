@@ -34,3 +34,16 @@ If an atom is hidden, reliance holds before disclosure, and the atom is not mate
 This tightens the criterion:
 
 > A hidden item is material exactly when its disclosure participates in defeating reliance.
+
+## Local truth without target warrant
+
+The boundary module proves:
+
+- `GRBS.HiddenDefeaterBoundary.visible_claim_holds_but_target_warrant_fails`
+- `GRBS.HiddenDefeaterBoundary.local_truth_with_deceptive_transfer`
+
+Interpretation:
+
+The visible/local claim can hold while the fuller target-boundary warrant fails. This makes the central point explicit:
+
+> Deception need not depend on a false visible claim. It can arise when a true local claim transfers confidence beyond its admissible warrant.

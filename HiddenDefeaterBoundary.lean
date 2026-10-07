@@ -106,4 +106,35 @@ theorem source_warrant_without_target_warrant_with_confidence :
     · exact full_has_no_target_warrant
     · exact confidence_transfers_from_visible
 
+
+/-
+  Not-mere-falsehood theorem:
+
+  The visible/local claim can hold while the target deployment warrant fails
+  under fuller information.
+
+  This separates:
+    local truth / local claim holding
+  from:
+    target warrant / authorized reliance.
+-/
+theorem visible_claim_holds_but_target_warrant_fails :
+    localClaimHolds visible ∧
+    ¬ targetWarrant Boundary.safetyDeployment full := by
+  constructor
+  · exact visible_contains_passed_test
+  · exact full_has_no_target_warrant
+
+/-
+  Stronger compression:
+
+  A true local claim can coexist with deceptive transfer.
+-/
+theorem local_truth_with_deceptive_transfer :
+    localClaimHolds visible ∧ deceptiveTransfer visible full := by
+  constructor
+  · exact visible_contains_passed_test
+  · exact deceptive_transfer_exists
+
+
 end GRBS.HiddenDefeaterBoundary
