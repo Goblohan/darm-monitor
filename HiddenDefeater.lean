@@ -145,4 +145,36 @@ theorem only_format_test_material_by_general_theorem :
     does_not_rely_on_full
 
 
+
+/-
+  Converse-shaped materiality criterion:
+
+  If an atom is hidden, reliance holds before disclosure, and the atom is
+  not a material secret, then disclosure cannot refute reliance.
+
+  Constructively, this gives `¬ ¬ relies Ir`, not `relies Ir`.
+  The stronger positive statement would require classical reasoning or
+  an explicit decidability assumption.
+-/
+theorem not_material_secret_blocks_reliance_refutation
+    (Ip Ir : Info)
+    (a : Atom)
+    (hHidden : hidden Ip Ir a)
+    (hBefore : relies Ip)
+    (hNotMaterial : ¬ materialSecret Ip Ir a) :
+    ¬ ¬ relies Ir := by
+  intro hAfter
+  apply hNotMaterial
+  exact ⟨hHidden, hBefore, hAfter⟩
+
+/-
+  In the concrete card experiment, since reliance actually fails after
+  full disclosure, the hidden item cannot be non-material.
+-/
+theorem only_format_test_not_nonmaterial :
+    ¬ ¬ materialSecret visible full Atom.onlyFormatTest := by
+  intro hNotMaterial
+  exact hNotMaterial only_format_test_is_material_secret
+
+
 end GRBS.HiddenDefeater
