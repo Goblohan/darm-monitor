@@ -47,3 +47,18 @@ Interpretation:
 The visible/local claim can hold while the fuller target-boundary warrant fails. This makes the central point explicit:
 
 > Deception need not depend on a false visible claim. It can arise when a true local claim transfers confidence beyond its admissible warrant.
+
+## Admissibility blocks deception
+
+The boundary module proves:
+
+- `GRBS.HiddenDefeaterBoundary.admissible_transfer_blocks_deception`
+- `GRBS.HiddenDefeaterBoundary.deceptive_transfer_iff_confidence_without_admissibility`
+
+Interpretation:
+
+If transfer is admissible, deceptive transfer is impossible in this model. Deceptive transfer is exactly confidence transfer without admissible warrant transfer.
+
+This gives the positive DARM role:
+
+> DARM does not merely detect hidden defeaters. It blocks deceptive transfer by requiring admissible warrant preservation.

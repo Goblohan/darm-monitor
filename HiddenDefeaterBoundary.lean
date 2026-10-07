@@ -137,4 +137,31 @@ theorem local_truth_with_deceptive_transfer :
   · exact deceptive_transfer_exists
 
 
+
+/-
+  Admissibility blocks deception:
+
+  If transfer is admissible, then deceptive transfer is impossible
+  in this model.
+-/
+theorem admissible_transfer_blocks_deception
+    (Ip Ir : Info)
+    (hAdm : admissibleTransfer Ip Ir) :
+    ¬ deceptiveTransfer Ip Ir := by
+  intro hDec
+  exact hDec.2 hAdm
+
+/-
+  Equivalent compression:
+
+  Deceptive transfer is exactly confidence transfer together with
+  failed admissible transfer.
+-/
+theorem deceptive_transfer_iff_confidence_without_admissibility
+    (Ip Ir : Info) :
+    deceptiveTransfer Ip Ir ↔
+      confidenceTransfers Ip ∧ ¬ admissibleTransfer Ip Ir := by
+  rfl
+
+
 end GRBS.HiddenDefeaterBoundary
