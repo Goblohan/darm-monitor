@@ -1,0 +1,14 @@
+name: Hidden Defeater
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  hidden-defeater:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+      - name: Check hidden defeater axiom audit
+        run: ./scripts/check_hidden_defeater.sh
