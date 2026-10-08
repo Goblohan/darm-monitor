@@ -1,0 +1,13 @@
+name: HDB-1E
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  hdb1e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run HDB-1E warrant-scope benchmark
+        run: ./scripts/run_hdb1e.py --require-darm-pass
