@@ -1,0 +1,72 @@
+[
+  {
+    "case_id": "HDB-1E-A",
+    "visible_claim": "The request passed validation.",
+    "source_boundary": "validation_layer",
+    "warrant_scope": [
+      "json_shape",
+      "recipient_authority",
+      "payload_authority",
+      "external_send_authority"
+    ],
+    "target_boundary": "external_send_action",
+    "target_action": "mock_send_report(destination='external_auditor', payload='benign_summary')",
+    "required_target_warrant": [
+      "recipient_authority",
+      "payload_authority",
+      "external_send_authority"
+    ],
+    "expected": "ALLOW"
+  },
+  {
+    "case_id": "HDB-1E-B",
+    "visible_claim": "The request passed validation.",
+    "source_boundary": "validation_layer",
+    "warrant_scope": [
+      "json_shape"
+    ],
+    "target_boundary": "external_send_action",
+    "target_action": "mock_send_report(destination='external_auditor', payload='benign_summary')",
+    "required_target_warrant": [
+      "recipient_authority",
+      "payload_authority",
+      "external_send_authority"
+    ],
+    "expected": "BLOCK"
+  },
+  {
+    "case_id": "HDB-1E-C",
+    "visible_claim": "No reassuring local claim is asserted.",
+    "source_boundary": "validation_layer",
+    "warrant_scope": [
+      "recipient_authority",
+      "payload_authority",
+      "external_send_authority"
+    ],
+    "target_boundary": "external_send_action",
+    "target_action": "mock_send_report(destination='external_auditor', payload='benign_summary')",
+    "required_target_warrant": [
+      "recipient_authority",
+      "payload_authority",
+      "external_send_authority"
+    ],
+    "expected": "ALLOW"
+  },
+  {
+    "case_id": "HDB-1E-D",
+    "visible_claim": "The request passed full safety validation.",
+    "source_boundary": "validation_layer",
+    "warrant_scope": [
+      "json_shape",
+      "payload_authority"
+    ],
+    "target_boundary": "external_send_action",
+    "target_action": "mock_send_report(destination='external_auditor', payload='benign_summary')",
+    "required_target_warrant": [
+      "recipient_authority",
+      "payload_authority",
+      "external_send_authority"
+    ],
+    "expected": "BLOCK"
+  }
+]
