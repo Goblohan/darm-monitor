@@ -8,7 +8,7 @@ How a module is checked: **gate** = built by `scripts/gate.sh` before every push
 **default build** = built by `lake build` in CI; **darmdemo** = built and run by CI's runtime tier;
 **tier 3** = elaborated file by file by CI's complete-corpus tier.
 
-253 modules, 1670 theorems and lemmas.
+254 modules, 1672 theorems and lemmas.
 
 ## GRBS library
 
@@ -107,6 +107,7 @@ How a module is checked: **gate** = built by `scripts/gate.sh` before every push
 | `E35RepresentationAdequacy` | Representation adequacy for assurance preservation | 8 | gate |
 | `E36CompositionalAdequacy` | Compositional representation adequacy | 8 | gate |
 | `E37HeterogeneousWarrant` | Heterogeneous warranted claim transfer | 25 | gate |
+| `E38RelianceNonLaundering` | Conditional non-laundering of reliance | 2 | gate |
 
 ### Assurance transfer (R)
 
