@@ -1,0 +1,163 @@
+{
+  "cases": [
+    {
+      "action_authorized": true,
+      "case": "covered_source_warrant",
+      "correct": true,
+      "discharged": [
+        "artifact_integrity",
+        "payload_authorized",
+        "recipient_authorized",
+        "send_authorized",
+        "structured_document"
+      ],
+      "expected_reliance": "ADMIT",
+      "outstanding": [],
+      "reasons": [],
+      "reliance": "ADMIT"
+    },
+    {
+      "action_authorized": true,
+      "case": "source_scope_missing",
+      "correct": true,
+      "discharged": [
+        "artifact_integrity",
+        "structured_document"
+      ],
+      "expected_reliance": "REFUSE",
+      "outstanding": [
+        "payload_authorized:missing(payload_authority)",
+        "recipient_authorized:missing(recipient_authority)",
+        "send_authorized:missing(external_send_authority)"
+      ],
+      "reasons": [
+        "undischarged-target-warrant"
+      ],
+      "reliance": "REFUSE"
+    },
+    {
+      "action_authorized": true,
+      "case": "remote_receipt_from_target",
+      "correct": true,
+      "discharged": [
+        "artifact_integrity",
+        "remote_accepted"
+      ],
+      "expected_reliance": "ADMIT",
+      "outstanding": [],
+      "reasons": [],
+      "reliance": "ADMIT"
+    },
+    {
+      "action_authorized": true,
+      "case": "remote_claim_without_receipt",
+      "correct": true,
+      "discharged": [
+        "artifact_integrity"
+      ],
+      "expected_reliance": "REFUSE",
+      "outstanding": [
+        "remote_accepted:missing(remote_receipt)"
+      ],
+      "reasons": [
+        "undischarged-target-warrant"
+      ],
+      "reliance": "REFUSE"
+    },
+    {
+      "action_authorized": true,
+      "case": "untrusted_heterogeneous_mapping",
+      "correct": true,
+      "discharged": [
+        "artifact_integrity",
+        "payload_authorized",
+        "recipient_authorized",
+        "send_authorized",
+        "structured_document"
+      ],
+      "expected_reliance": "REFUSE",
+      "outstanding": [],
+      "reasons": [
+        "unknown-mapping"
+      ],
+      "reliance": "REFUSE"
+    },
+    {
+      "action_authorized": true,
+      "case": "valid_signature_wrong_subject",
+      "correct": true,
+      "discharged": [],
+      "expected_reliance": "REFUSE",
+      "outstanding": [
+        "artifact_integrity:missing(file_integrity)",
+        "payload_authorized:missing(payload_authority)",
+        "recipient_authorized:missing(recipient_authority)",
+        "send_authorized:missing(external_send_authority)",
+        "structured_document:missing(json_shape)"
+      ],
+      "reasons": [
+        "source:wrong-subject",
+        "undischarged-target-warrant"
+      ],
+      "reliance": "REFUSE"
+    },
+    {
+      "action_authorized": true,
+      "case": "tampered_signed_evidence",
+      "correct": true,
+      "discharged": [],
+      "expected_reliance": "REFUSE",
+      "outstanding": [
+        "artifact_integrity:missing(file_integrity)",
+        "payload_authorized:missing(payload_authority)",
+        "recipient_authorized:missing(recipient_authority)",
+        "send_authorized:missing(external_send_authority)",
+        "structured_document:missing(json_shape)"
+      ],
+      "reasons": [
+        "source:invalid-signature",
+        "undischarged-target-warrant"
+      ],
+      "reliance": "REFUSE"
+    },
+    {
+      "action_authorized": true,
+      "case": "unknown_target_claim",
+      "correct": true,
+      "discharged": [],
+      "expected_reliance": "REFUSE",
+      "outstanding": [],
+      "reasons": [
+        "unknown-target-claim"
+      ],
+      "reliance": "REFUSE"
+    },
+    {
+      "action_authorized": false,
+      "case": "valid_reliance_but_action_not_authorized",
+      "correct": true,
+      "discharged": [
+        "artifact_integrity",
+        "payload_authorized",
+        "recipient_authorized",
+        "send_authorized",
+        "structured_document"
+      ],
+      "expected_reliance": "ADMIT",
+      "outstanding": [],
+      "reasons": [],
+      "reliance": "ADMIT"
+    }
+  ],
+  "clock": "fixed UTC 2027-01-15T08:00:00+00:00",
+  "metrics": {
+    "cases": 9,
+    "correct": 9,
+    "false_admits": 0,
+    "false_refusals": 0,
+    "supported": 3,
+    "unsupported": 6
+  },
+  "name": "HDB-1E \u00d7 E37 Non-Laundering Research Prototype",
+  "status": "synthetic deterministic mock, not deployed agent or independently audited Lean runtime"
+}
