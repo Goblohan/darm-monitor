@@ -73,7 +73,7 @@ def verify_guard_artifact(
 
     try:
         envelope = json.loads(raw_attestation, object_pairs_hook=_pairs_no_duplicate_keys)
-    except (UnicodeDecodeError, ValueError, TypeError):
+    except (UnicodeDecodeError, ValueError, TypeError, RecursionError):
         return GuardArtifactCheck(False, "malformed-or-ambiguous-attestation")
     if not isinstance(envelope, dict) or set(envelope) != {"v", "rid", "target", "digest", "kid", "sig"}:
         return GuardArtifactCheck(False, "invalid-attestation-schema")

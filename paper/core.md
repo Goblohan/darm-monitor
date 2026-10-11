@@ -537,7 +537,7 @@ broker's decoding of the reply, which is checked against the proved decoder on
 every class of reply and by hash on execution, not proved; and that the broker never reuses a
 nonce. Everything after the decision rests on models and tests, and the build
 reports the ratio: one claim by construction, one proved, twenty-nine tested.
-That part is audited rather than proved, but exhaustively: every effect site in the package, fifty-three in all, is classified as executing the kernel's
+That part is audited rather than proved, but exhaustively: every effect site in the package, fifty-six in all, is classified as executing the kernel's
 invocation for its request, continuing a transition the kernel admitted, or
 acting outside the governed workspace, none is without authority, and the build
 fails if a site appears, changes or goes unclassified. Recovery, the one path

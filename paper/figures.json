@@ -1,11 +1,11 @@
 {
- "darm_guard_commit": "ec142c5",
+ "darm_guard_commit": "8e4a045",
  "claims": 31,
  "complete": 27,
  "guarantees": 29,
  "construction": 1,
  "proved": 1,
  "tested": 29,
- "effect_sites": 53,
+ "effect_sites": 56,
  "mutations": 19
 }

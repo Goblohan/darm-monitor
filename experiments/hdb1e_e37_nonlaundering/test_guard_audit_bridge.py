@@ -137,13 +137,13 @@ class SignedSnapshotTests(unittest.TestCase):
         bodies[0]["decision"] = "reject"
         recalc = _jsonl(chain(bodies))
         self.assertEqual(self.audit(audit=recalc, checkpoints=cp).reason,
-                         "no-full-snapshot-checkpoint")
+                         "checkpoint-off-audit-history")
 
     def test_rejects_truncated_log(self):
         log, cp = self.snapshot()
         shortened = log.splitlines()[0] + b"\n"
         self.assertEqual(self.audit(audit=shortened, checkpoints=cp).reason,
-                         "no-full-snapshot-checkpoint")
+                         "invalid-checkpoint-schema")
 
     def test_rejects_missing_preparation(self):
         self.assertEqual(self.audit([self.outcome]).reason,

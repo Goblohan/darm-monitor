@@ -14,6 +14,7 @@ from typing import Any, Mapping
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from correspondence_core import admit_core, normalize_facts, normalize_obligations
 
 
 def canonical(value: Mapping[str, Any]) -> bytes:
@@ -134,9 +135,14 @@ def verify_envelope(envelope: Mapping[str, Any], policy: Policy,
     return frozenset(signed["claims"]), ()
 
 
-def decide(request: Mapping[str, Any], policy: Policy, now: int) -> Verdict:
+def decide(request: Mapping[str, Any], policy: Policy, now: int,
+           *, admission_core=admit_core) -> Verdict:
     """Fail closed, and keep action authority separate from reliance authority."""
+    if not isinstance(request, dict):
+        return Verdict(False, ("invalid-request",), (), (), False)
     action_authorized = request.get("action_authorized") is True
+    if type(now) is not int or now < 0:
+        return Verdict(False, ("invalid-trusted-clock",), (), (), action_authorized)
     if set(request) != {"source_evidence", "target_evidence", "subject_digest", "request_id",
                         "mapping_id", "source_boundary", "target_boundary",
                         "claim_id", "action_authorized"}:
@@ -181,5 +187,13 @@ def decide(request: Mapping[str, Any], policy: Policy, now: int) -> Verdict:
             discharged.append(target_claim)
     if outstanding:
         errors.append("undischarged-target-warrant")
-    return Verdict(not errors, tuple(sorted(set(errors))), tuple(discharged),
+    if not required:
+        errors.append("empty-target-contract")
+    # The hardening profile supplies the executable Lean decision here. The
+    # original research profile retains the Python core by default.
+    # External-check failures must REFUSE independently of the selected core.
+    admitted = (not errors and
+                admission_core(normalize_facts(source_claims, target_claims),
+                               normalize_obligations(required, policy.rules), (True,)) is True)
+    return Verdict(admitted, tuple(sorted(set(errors))), tuple(discharged),
                    tuple(outstanding), action_authorized)

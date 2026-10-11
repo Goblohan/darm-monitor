@@ -51,7 +51,9 @@ def _parse_jsonl(raw: bytes):
     rows = raw.splitlines()
     if not rows or len(rows) > _MAX_ENTRIES or any(not r.strip() for r in rows):
         raise ValueError("invalid record count")
-    data = [json.loads(r, object_pairs_hook=_unique) for r in rows]
+    def reject_constant(value):
+        raise ValueError("nonfinite-json-number")
+    data = [json.loads(r, object_pairs_hook=_unique, parse_constant=reject_constant) for r in rows]
     if any(not isinstance(x, dict) for x in data):
         raise ValueError("not an object")
     return data
@@ -108,10 +110,16 @@ def verify_snapshot(
     # Refuse malformed/invalid checkpoint entries rather than silently
     # ignoring a malicious or misdirected external-sink record.
     for cp in cps:
-        if (type(cp.get("v")) is not int or cp["v"] != 1
+        if (set(cp) != {"v", "genesis", "count", "head", "kid", "sig"}
+            or type(cp.get("v")) is not int or cp["v"] != 1
             or type(cp.get("count")) is not int or cp["count"] <= 0
+            or cp["count"] > len(events)
             or not _valid_hash(cp.get("genesis"))
-            or not _valid_hash(cp.get("head"))):
+            or not _valid_hash(cp.get("head"))
+            or not isinstance(cp.get("kid"), str) or len(cp["kid"]) != 16
+            or any(c not in "0123456789abcdef" for c in cp["kid"])
+            or not isinstance(cp.get("sig"), str) or len(cp["sig"]) != 128
+            or any(c not in "0123456789abcdef" for c in cp["sig"])):
             return AuditResult(False, "invalid-checkpoint-schema", len(events), prev)
         try:
             ok, _ = public_ring.verify_checkpoint(cp)
@@ -119,6 +127,9 @@ def verify_snapshot(
             ok = False
         if not ok:
             return AuditResult(False, "checkpoint-signature-invalid", len(events), prev)
+        if (cp["genesis"] != events[0]["entry_hash"] or
+                cp["head"] != events[cp["count"] - 1]["entry_hash"]):
+            return AuditResult(False, "checkpoint-off-audit-history", len(events), prev)
     full_cp = [c for c in cps if c["count"] == len(events)
                and c["genesis"] == events[0]["entry_hash"] and c["head"] == prev]
     if not full_cp:
