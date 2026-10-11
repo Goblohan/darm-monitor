@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: "Olusanya"
     given-names: "Gbolahan V."
-    email: "gbolahan@perceptra.ai"
+    email: "gbolahan.olusanya@perceptra-ai.com"
     affiliation: "PerceptraAI Lab"
 repository-code: "https://github.com/Goblohan/darm-monitor"
 license: Apache-2.0
