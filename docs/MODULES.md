@@ -8,7 +8,7 @@ How a module is checked: **gate** = built by `scripts/gate.sh` before every push
 **default build** = built by `lake build` in CI; **darmdemo** = built and run by CI's runtime tier;
 **tier 3** = elaborated file by file by CI's complete-corpus tier.
 
-250 modules, 1629 theorems and lemmas.
+252 modules, 1645 theorems and lemmas.
 
 ## GRBS library
 
@@ -31,6 +31,8 @@ How a module is checked: **gate** = built by `scripts/gate.sh` before every push
 
 | Module | Description | Theorems | Checked by |
 | --- | --- | --- | --- |
+| `B10AbortAfterDispatch` | Abort after dispatch: what the witness may record | 8 | gate |
+| `B10bAbortEvidence` | Abort after dispatch, with executor evidence | 8 | gate |
 | `B1BrokerModel` | DARM broker model (specification for DARM Guard v0.5) | 8 | gate |
 | `B2aDerivedProvenance` | Pattern-derived provenance (extends B1) | 7 | gate |
 | `B3BrokerModel` | The complete broker model (B2a registry + K4 kernel) | 8 | gate |
