@@ -1,0 +1,80 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "darmd",
+      "digest": {
+        "sha256": "a16e360e77a59a10f473d53a15cd1b059ea66ab2e2b73ea364bfa48dc4d19c21"
+      }
+    }
+  ],
+  "predicateType": "https://github.com/Goblohan/darm-monitor/blob/main/RELEASES.md#reproducible-build-v1",
+  "predicate": {
+    "release": "darmd 0.5.3",
+    "release_manifest_sha256": "73b1d5339af1a6a7a4265c34081428b0fe3e318ca68c438570cc795063af10e6",
+    "release_archive": {
+      "name": "darm-v053-final.tgz",
+      "sha256": "e927721534d7cc64a616efef09a9eecfaead250bed39f3f5028895e28c013bf1"
+    },
+    "source": {
+      "tree": "darmd-src/ inside the release archive",
+      "tree_digest": "7c455fb82961c877347b79f7a53a147bfb20d5bae08a951a250edbf9ae95da19",
+      "tree_digest_method": "find darmd-src -type f -not -path '*/target/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum",
+      "files": {
+        "darmd-src/Cargo.toml": "10304f699325672ce7943d46e028271b4bb58722a226368910a1577c16a7cb31",
+        "darmd-src/Cargo.lock": "fdc10fa2e4b8d18cd2ef567f24eb67afeb1e0517acfd1949a117d83a15acf021",
+        "darmd-src/.cargo/config.toml": "8f539612cb631e370d65165b5e0de5ce7be046875f5f4224119ab649de108239",
+        "darmd-src/src/main.rs": "5c72c5230f56c8f8d334ad09d8ebcd2fac3f9ff15c004ec039a7b799d6c0ed7b"
+      }
+    },
+    "toolchain": {
+      "distribution": "Ubuntu 24.04 (noble)",
+      "packages": {
+        "binutils": "2.42-4ubuntu2.10",
+        "cargo": "1.75.0+dfsg0ubuntu1-0ubuntu7.4",
+        "gcc": "4:13.2.0-7ubuntu1",
+        "libc6-dev": "2.39-0ubuntu8.9",
+        "libstd-rust-dev": "1.75.0+dfsg0ubuntu1-0ubuntu7.4",
+        "rustc": "1.75.0+dfsg0ubuntu1-0ubuntu7.4"
+      }
+    },
+    "build": {
+      "command": "cargo build --release --locked",
+      "run_as": "root, with Cargo home /root/.cargo: REQUIRED for reproduction. The binary embeds 7 downloaded-crate source paths under /root/.cargo/registry (from dependency panic messages), so a build by another user produces a different hash",
+      "working_directory": "any; tested at /home/gbolahan/darm-v053-rc/darmd-src and /tmp/p2a/darmd-src with identical output",
+      "rustflags": "from darmd-src/.cargo/config.toml: export the dynamic symbols darmd_after_precheck and darmd_point (Gate 7 test markers)"
+    },
+    "reproductions": [
+      {
+        "date": "2026-10-24",
+        "host": "WSL2 Ubuntu 24.04",
+        "note": "original release build",
+        "output_sha256": "a16e360e77a59a10f473d53a15cd1b059ea66ab2e2b73ea364bfa48dc4d19c21"
+      },
+      {
+        "date": "2026-10-26",
+        "host": "WSL2 Ubuntu 24.04",
+        "note": "clean rebuild, same path",
+        "output_sha256": "a16e360e77a59a10f473d53a15cd1b059ea66ab2e2b73ea364bfa48dc4d19c21"
+      },
+      {
+        "date": "2026-10-26",
+        "host": "WSL2 Ubuntu 24.04",
+        "note": "clean rebuild, different path",
+        "output_sha256": "a16e360e77a59a10f473d53a15cd1b059ea66ab2e2b73ea364bfa48dc4d19c21"
+      },
+      {
+        "date": "2026-10-26",
+        "host": "Hyper-V VM, Ubuntu 24.04.5, kernel 6.8.0-147-generic",
+        "note": "independent machine, fresh crate download",
+        "output_sha256": "a16e360e77a59a10f473d53a15cd1b059ea66ab2e2b73ea364bfa48dc4d19c21"
+      }
+    ],
+    "not_claimed": [
+      "builder isolation or a hermetic build environment",
+      "any SLSA build level",
+      "reproducibility with other toolchain versions or distributions",
+      "anything about the floor artifacts in darmd-src/floor, which were not rebuilt"
+    ]
+  }
+}
