@@ -31,3 +31,22 @@ require "leanprover-community" / mathlib @ git "v4.32.0"
 lean_exe darmdemo where
   root := `Main
   moreLinkArgs := #["-L./c", "-ldarm_native"]
+
+-- =============================================================================
+-- AGENTSANDBOX PROFILE
+-- =============================================================================
+
+lean_lib AgentSandbox where
+  roots := #[
+    `AgentSandbox.ActionSurface,
+    `AgentSandbox.TaskPolicy,
+    `AgentSandbox.Initialization,
+    `AgentSandbox.Conformance,
+    `AgentSandbox.AdapterInterface,
+    `AgentSandbox.FFI
+  ]
+  srcDir := "Profiles"
+
+lean_exe agentsandbox_demo where
+  root := `AgentSandbox.Demo
+  srcDir := "Profiles"
